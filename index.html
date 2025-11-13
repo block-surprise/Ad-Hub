@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>広告ジェネレーター</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --text: #222;
+      --muted: #666;
+      --accent: #4a6cff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      text-align: center;
+    }
+    header {
+      padding: 40px 20px;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    header p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    main {
+      padding: 60px 20px;
+    }
+    main h2 {
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+    .button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 14px 28px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    .button:hover {
+      background: #3a58d6;
+    }
+    footer {
+      padding: 20px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid #ddd;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>広告ジェネレーター</h1>
+    <p>だれでも簡単に広告をデザインして埋め込めるサイト</p>
+  </header>
+
+  <main>
+    <h2>ようこそ！</h2>
+    <p>ここではバナー広告やSNS広告を簡単に作成できます。</p>
+    <a href="create.html" class="button">広告をつくる</a>
+  </main>
+
+  <footer>
+    &copy; 2025 Ad Generator. All rights reserved.
+  </footer>
+</body>
+</html>
