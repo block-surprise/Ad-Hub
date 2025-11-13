@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Ad Hub | ヘルプとチュートリアル</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0f1115;
+      --text: #e8ebf0;
+      --muted: #9aa3b2;
+      --accent: #6f8cff;
+      --accent-dark: #5066e3;
+    }
+    body {
+      margin: 0;
+      font-family: "Inter", "Hiragino Sans", "Noto Sans JP", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      padding: 40px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+      color: #fff;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    header p {
+      margin: 8px 0 0;
+      font-size: 14px;
+      color: #f0f3ff;
+    }
+    main {
+      max-width: 960px;
+      margin: auto;
+      padding: 40px 20px;
+    }
+    section {
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-size: 24px;
+      margin-bottom: 16px;
+      color: var(--accent);
+      text-align: center;
+    }
+    ol {
+      background: #151922;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #222737;
+    }
+    ol li {
+      margin-bottom: 12px;
+    }
+    .code {
+      background: #151922;
+      border: 1px solid #222737;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: ui-monospace, monospace;
+      color: #cfe2ff;
+      white-space: pre-wrap;
+    }
+    footer {
+      background: #151922;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid #222737;
+    }
+    a.button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    a.button:hover {
+      background: var(--accent-dark);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ad Hub ヘルプ</h1>
+    <p>広告作成と埋め込みのチュートリアル</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>広告作成の流れ</h2>
+      <ol>
+        <li>サイズとテンプレートを選びます</li>
+        <li>テキストや画像を編集します</li>
+        <li>プレビューを確認して保存します</li>
+        <li>埋め込みコードをコピーしてサイトに貼ります</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>埋め込みコードの使い方</h2>
+      <p>完成した広告は以下のようなコードで埋め込めます。</p>
+      <div class="code">
+&lt;iframe src="https://example.com/ad/123"  
+        width="300" height="250"  
+        frameborder="0"&gt;&lt;/iframe&gt;
+      </div>
+      <p>このコードをコピーして、あなたのサイトのHTMLに貼り付けるだけで広告が表示されます。</p>
+    </section>
+
+    <div style="text-align:center;">
+      <a href="index.html" class="button">ホームへ戻る</a>
+      <a href="create.html" class="button">広告をつくる</a>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Ad Hub. All rights reserved.
+  </footer>
+</body>
+</html>
