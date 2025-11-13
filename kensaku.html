@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>広告ジェネレーター（試作）</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #151922;
+      --border: #222737;
+      --text: #e8ebf0;
+      --muted: #9aa3b2;
+      --accent: #7aa2ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #0d1017, #0f1115 60%);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Inter", "Hiragino Sans", "Noto Sans JP", "Segoe UI", sans-serif;
+    }
+    header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+      position: sticky; top: 0; background: rgba(15,17,21,0.85); backdrop-filter: blur(8px);
+    }
+    header .logo {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: radial-gradient(100% 100% at 0% 0%, #6f8cff, #5066e3);
+      box-shadow: 0 0 0 1px #4454a8 inset, 0 6px 20px rgba(96,120,255,0.35);
+    }
+    header h1 {
+      font-size: 16px; margin: 0; font-weight: 600; letter-spacing: 0.2px;
+    }
+    header .sub { color: var(--muted); font-size: 12px; margin-left: auto; }
+    main {
+      display: grid; grid-template-columns: 320px 1fr 360px;
+      gap: 20px; padding: 20px;
+    }
+    .panel {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px;
+    }
+    .panel h2 {
+      margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #cfd6e6;
+    }
+    .field { display: grid; gap: 6px; margin-bottom: 12px; }
+    .label { color: var(--muted); font-size: 12px; }
+    input[type="text"], input[type="number"], input[type="color"], select, textarea {
+      width: 100%; background: #11151e; border: 1px solid #1c2130; color: var(--text);
+      padding: 8px 10px; border-radius: 10px; outline: none;
+    }
+    input[type="file"] {
+      width: 100%;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 12px; border-radius: 10px; border: 1px solid #2a3146;
+      background: #121624; color: var(--text); cursor: pointer; user-select: none;
+    }
+    .btn.primary {
+      background: #182043; border-color: #24306a; color: #e9edff;
+      box-shadow: 0 6px 18px rgba(108,136,255,0.25) inset, 0 4px 20px rgba(94,120,255,0.2);
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .canvas-wrap {
+      display: grid; place-items: center; min-height: 420px; padding: 16px;
+      background: #0d1017; border-radius: 12px; border: 1px dashed #283049;
+    }
+    canvas { border-radius: 8px; background: #0b0e14; }
+    .hint { color: var(--muted); font-size: 12px; }
+    .code {
+      width: 100%; min-height: 120px; background: #0d1017; color: #cfe2ff;
+      border: 1px solid #24304a; border-radius: 10px; padding: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      white-space: pre-wrap;
+    }
+    .kicker { color: #cfd6e6; font-size: 13px; margin: 8px 0 12px; }
+    footer {
+      padding: 12px 20px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border);
+    }
+    .stack { display: grid; gap: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo" aria-hidden="true"></div>
+    <h1>広告ジェネレーター（試作）</h1>
+    <div class="sub">静かで詩的な余白を保ったUI</div>
+  </header>
+
+  <main>
+    <!-- 左：設定 -->
+    <section class="panel">
+      <h2>設定</h2>
+
+      <div class="row">
+        <div class="field">
+          <div class="label">幅（px）</div>
+          <input type="number" id="width" min="120" max="1200" step="10" value="300">
+        </div>
+        <div class="field">
+          <div class="label">高さ（px）</div>
+          <input type="number" id="height" min="120" max="1200" step="10" value="250">
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">背景色</div>
+        <input type="color" id="bgColor" value="#0b0e14">
+      </div>
+
+      <div class="field">
+        <div class="label">背景画像（任意）</div>
+        <input type="file" id="bgImage" accept="image/*">
+        <div class="hint">推奨：横長画像。キャンバスにフィットするように自動で調整します。</div>
+      </div>
+
+      <div class="field">
+        <div class="label">見出しテキスト</div>
+        <input type="text" id="headline" placeholder="静けさの中に、届くことば。">
+      </div>
+      <div class="row">
+        <div class="field">
+          <div class="label">見出しサイズ</div>
+          <input type="number" id="headlineSize" min="10" max="120" value="28">
+        </div>
+        <div class="field">
+          <div class="label">見出し色</div>
+          <input type="color" id="headlineColor" value="#e8ebf0">
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">説明テキスト（任意）</div>
+        <textarea id="body" rows="3" placeholder="余白と世界観を大切にした広告テンプレート。"></textarea>
+      </div>
+      <div class="row">
+        <div class="field">
+          <div class="label">説明サイズ</div>
+          <input type="number" id="bodySize" min="8" max="36" value="14">
+        </div>
+        <div class="field">
+          <div class="label">説明色</div>
+          <input type="color" id="bodyColor" value="#b8c2d6">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <div class="label">パディング</div>
+          <input type="number" id="padding" min="0" max="120" value="18">
+        </div>
+        <div class="field">
+          <div class="label">行間（見出し/説明）</div>
+          <input type="number" id="leading" min="0" max="60" value="6">
+        </div>
+      </div>
+
+      <div class="stack">
+        <button class="btn primary" id="renderBtn">プレビュー更新</button>
+        <div class="hint">変更後は「プレビュー更新」を押してください。</div>
+      </div>
+    </section>
+
+    <!-- 中央：キャンバス -->
+    <section class="panel">
+      <h2>プレビュー</h2>
+      <div class="canvas-wrap">
+        <canvas id="canvas" width="300" height="250" aria-label="広告プレビュー"></canvas>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" id="downloadBtn" disabled>PNGでダウンロード</button>
+        <button class="btn" id="copyImgEmbedBtn" disabled>img埋め込みをコピー</button>
+      </div>
+      <div class="hint" style="margin-top:8px;">
+        まずはPNG画像としての埋め込みを提供します。後でホスティングに切り替えればiframeにも対応可能です。
+      </div>
+    </section>
+
+    <!-- 右：埋め込みコード -->
+    <section class="panel">
+      <h2>埋め込みコード</h2>
+      <p class="kicker">生成された広告を、他サイトへ貼り付けるためのコードです。</p>
+      <textarea id="embedCode" class="code" readonly placeholder="ここに埋め込みコードが表示されます"></textarea>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" id="copyCodeBtn" disabled>コードをコピー</button>
+        <button class="btn" id="clearBtn">リセット</button>
+      </div>
+      <div class="hint" style="margin-top:8px;">
+        現在は <strong>data URL を使った img タグ</strong>を発行します。公開ホスティングに切り替える際は、画像をサーバーへ保存し、<code>&lt;iframe src="...">&lt;/iframe></code> を発行する構成に変更できます。
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    試作版・ローカルのみで動作。後で保存・共有・iframe対応を追加予定。
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const ui = {
+      width: document.getElementById('width'),
+      height: document.getElementById('height'),
+      bgColor: document.getElementById('bgColor'),
+      bgImage: document.getElementById('bgImage'),
+      headline: document.getElementById('headline'),
+      headlineSize: document.getElementById('headlineSize'),
+      headlineColor: document.getElementById('headlineColor'),
+      body: document.getElementById('body'),
+      bodySize: document.getElementById('bodySize'),
+      bodyColor: document.getElementById('bodyColor'),
+      padding: document.getElementById('padding'),
+      leading: document.getElementById('leading'),
+      renderBtn: document.getElementById('renderBtn'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      copyImgEmbedBtn: document.getElementById('copyImgEmbedBtn'),
+      embedCode: document.getElementById('embedCode'),
+      copyCodeBtn: document.getElementById('copyCodeBtn'),
+      clearBtn: document.getElementById('clearBtn')
+    };
+
+    let bgBitmap = null;
+
+    async function fileToBitmap(file) {
+      if (!file) return null;
+      const blobURL = URL.createObjectURL(file);
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = blobURL;
+      await img.decode().catch(() => new Promise((res, rej) => {
+        img.onload = res; img.onerror = rej;
+      }));
+      const bitmap = await createImageBitmap(img);
+      URL.revokeObjectURL(blobURL);
+      return bitmap;
+    }
+
+    function fitCover(ctx, bitmap, w, h) {
+      const iw = bitmap.width, ih = bitmap.height;
+      const scale = Math.max(w / iw, h / ih);
+      const dw = iw * scale, dh = ih * scale;
+      const dx = (w - dw) / 2, dy = (h - dh) / 2;
+      ctx.drawImage(bitmap, dx, dy, dw, dh);
+    }
+
+    function drawRoundedRect(ctx, x, y, w, h, r) {
+      const rr = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.arcTo(x+w, y, x+w, y+h, rr);
+      ctx.arcTo(x+w, y+h, x, y+h, rr);
+      ctx.arcTo(x, y+h, x, y, rr);
+      ctx.arcTo(x, y, x+w, y, rr);
+      ctx.closePath();
+    }
+
+    function render() {
+      const W = parseInt(ui.width.value, 10) || 300;
+      const H = parseInt(ui.height.value, 10) || 250;
+      canvas.width = W; canvas.height = H;
+
+      // 背景
+      ctx.save();
+      ctx.fillStyle = ui.bgColor.value || '#0b0e14';
+      ctx.fillRect(0, 0, W, H);
+      if (bgBitmap) {
+        fitCover(ctx, bgBitmap, W, H);
+        // うっすら暗く
+        ctx.fillStyle = 'rgba(10,12,18,0.35)';
+        ctx.fillRect(0, 0, W, H);
+      }
+      ctx.restore();
+
+      // コンテナ（余白）
+      const pad = Math.max(0, parseInt(ui.padding.value, 10) || 18);
+      const leading = Math.max(0, parseInt(ui.leading.value, 10) || 6);
+      const innerW = W - pad*2;
+
+      // タイトル
+      const headline = ui.headline.value.trim();
+      if (headline.length) {
+        const size = Math.max(8, parseInt(ui.headlineSize.value, 10) || 28);
+        ctx.font = `600 ${size}px/1.2 ${getFontStack()}`;
+        ctx.fillStyle = ui.headlineColor.value || '#e8ebf0';
+        drawTextWrap(ctx, headline, pad, pad + size, innerW);
+      }
+
+      // 説明
+      const body = ui.body.value.trim();
+      if (body.length) {
+        const bodySize = Math.max(8, parseInt(ui.bodySize.value, 10) || 14);
+        const headHeight = measureBlockHeight(ctx, headline, innerW);
+        const startY = pad + (headline.length ? headHeight + leading + bodySize : bodySize);
+        ctx.font = `400 ${bodySize}px/1.55 ${getFontStack()}`;
+        ctx.fillStyle = ui.bodyColor.value || '#b8c2d6';
+        drawTextWrap(ctx, body, pad, startY, innerW);
+      }
+
+      // 角丸枠の軽い縁取り（静かな存在感）
+      ctx.save();
+      drawRoundedRect(ctx, 0.5, 0.5, W-1, H-1, 8);
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+
+      // 操作
+      ui.downloadBtn.disabled = false;
+      ui.copyImgEmbedBtn.disabled = false;
+      updateEmbedCode(); // 毎回更新
+    }
+
+    function getFontStack() {
+      return `ui-sans-serif, -apple-system, "Inter", "Hiragino Sans", "Noto Sans JP", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`;
+    }
+
+    function drawTextWrap(ctx, text, x, baselineY, maxWidth) {
+      // 行分割（ざっくり）
+      const words = text.split(/(\s+)/);
+      const lines = [];
+      let line = '';
+      for (const w of words) {
+        const test = line + w;
+        const m = ctx.measureText(test);
+        if (m.width > maxWidth && line !== '') {
+          lines.push(line.trim());
+          line = w.trim();
+        } else {
+          line = test;
+        }
+      }
+      if (line.trim().length) lines.push(line.trim());
+
+      const metrics = ctx.measureText('M');
+      const lineHeight = (ctx.font.match(/\/([0-9.]+)/)?.[1] || 1.4) * metrics.actualBoundingBoxAscent;
+      let y = baselineY;
+      for (const ln of lines) {
+        ctx.fillText(ln, x, y);
+        y += lineHeight;
+      }
+    }
+
+    function measureBlockHeight(ctx, text, maxWidth) {
+      if (!text || !text.trim()) return 0;
+      const temp = document.createElement('canvas').getContext('2d');
+      temp.font = ctx.font;
+      const words = text.split(/(\s+)/);
+      const lines = [];
+      let line = '';
+      for (const w of words) {
+        const test = line + w;
+        const m = temp.measureText(test);
+        if (m.width > maxWidth && line !== '') {
+          lines.push(line.trim());
+          line = w.trim();
+        } else {
+          line = test;
+        }
+      }
+      if (line.trim().length) lines.push(line.trim());
+      const metrics = temp.measureText('M');
+      const lineHeight = (temp.font.match(/\/([0-9.]+)/)?.[1] || 1.4) * metrics.actualBoundingBoxAscent;
+      return lines.length * lineHeight;
+    }
+
+    // 埋め込みコード（img data URL）
+    function updateEmbedCode() {
+      const dataUrl = canvas.toDataURL('image/png');
+      const w = canvas.width, h = canvas.height;
+      const code =
+`<!-- PNG広告の簡易埋め込み（data URL） -->
+<img src="${dataUrl}" alt="Ad" width="${w}" height="${h}" style="display:inline-block;border-radius:8px;" />`;
+      ui.embedCode.value = code;
+      ui.copyCodeBtn.disabled = false;
+    }
+
+    // イベント
+    ui.renderBtn.addEventListener('click', render);
+
+    ui.bgImage.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      bgBitmap = await fileToBitmap(file);
+      render();
+    });
+
+    ui.downloadBtn.addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `ad_${canvas.width}x${canvas.height}.png`;
+      a.click();
+    });
+
+    ui.copyImgEmbedBtn.addEventListener('click', async () => {
+      const code =
+`<img src="${canvas.toDataURL('image/png')}" alt="Ad" width="${canvas.width}" height="${canvas.height}" style="display:inline-block;border-radius:8px;" />`;
+      try {
+        await navigator.clipboard.writeText(code);
+        toast('img埋め込みコードをコピーしました');
+      } catch {
+        ui.embedCode.select();
+        toast('コピーに失敗。コード欄を選択しました');
+      }
+    });
+
+    ui.copyCodeBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(ui.embedCode.value);
+        toast('埋め込みコードをコピーしました');
+      } catch {
+        ui.embedCode.select();
+        toast('コピーに失敗。コード欄を選択しました');
+      }
+    });
+
+    ui.clearBtn.addEventListener('click', () => {
+      ui.headline.value = '';
+      ui.body.value = '';
+      ui.bgImage.value = '';
+      bgBitmap = null;
+      render();
+    });
+
+    // 軽いトースト
+    function toast(msg) {
+      const el = document.createElement('div');
+      el.textContent = msg;
+      el.style.position = 'fixed';
+      el.style.left = '50%';
+      el.style.bottom = '18px';
+      el.style.transform = 'translateX(-50%)';
+      el.style.background = 'rgba(24,32,68,0.9)';
+      el.style.color = '#e9edff';
+      el.style.padding = '10px 14px';
+      el.style.border = '1px solid #24306a';
+      el.style.borderRadius = '10px';
+      el.style.boxShadow = '0 6px 18px rgba(108,136,255,0.25)';
+      el.style.zIndex = '9999';
+      document.body.appendChild(el);
+      setTimeout(() => { el.remove(); }, 2000);
+    }
+
+    // 初期レンダリング
+    render();
+  </script>
+</body>
+</html>
