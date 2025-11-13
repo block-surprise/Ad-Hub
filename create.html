@@ -374,7 +374,7 @@
       const w = canvas.width, h = canvas.height;
       const code =
 `<!-- PNG広告の簡易埋め込み（data URL） -->
-<img src="${dataUrl}" alt="Ad" width="${w}" height="${h}" style="display:inline-block;border-radius:8px;" />`;
+`<img src="https://ad-hub.f5.si/assets/generated/${userId}/${adId}.png" alt="${alt}" width="${w}" height="${h}" loading="lazy" decoding="async">`;
       ui.embedCode.value = code;
       ui.copyCodeBtn.disabled = false;
     }
@@ -449,6 +449,7 @@
   </script>
 </body>
 </html>
+
 
 
 
