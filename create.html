@@ -180,19 +180,20 @@
       </div>
     </section>
 
-    <!-- 右：埋め込みコード -->
-    <section class="panel">
-      <h2>埋め込みコード</h2>
-      <p class="kicker">生成された広告を、他サイトへ貼り付けるためのコードです。</p>
-      <textarea id="embedCode" class="code" readonly placeholder="ここに埋め込みコードが表示されます"></textarea>
-      <div class="row" style="margin-top:10px;">
-        <button class="btn" id="copyCodeBtn" disabled>コードをコピー</button>
-        <button class="btn" id="clearBtn">リセット</button>
-      </div>
-      <div class="hint" style="margin-top:8px;">
-        現在は <strong>data URL を使った img タグ</strong>を発行します。公開ホスティングに切り替える際は、画像をサーバーへ保存し、<code>&lt;iframe src="...">&lt;/iframe></code> を発行する構成に変更できます。
-      </div>
-    </section>
+<!-- 右：埋め込みコード -->
+<section class="panel">
+  <h2>埋め込みコード</h2>
+  <p class="kicker">生成された広告を、他サイトへ貼り付けるためのコードです。</p>
+  <textarea id="embedCode" class="code" readonly placeholder="ここに埋め込みコードが表示されます"></textarea>
+  <div class="row" style="margin-top:10px;">
+    <button class="btn" id="uploadBtn">アップロードして生成</button>
+    <button class="btn" id="copyCodeBtn" disabled>コードをコピー</button>
+    <button class="btn" id="clearBtn">リセット</button>
+  </div>
+  <div class="hint" style="margin-top:8px;">
+    画像をアップロードして、短いURLで埋め込みコードを生成します。
+  </div>
+</section>
   </main>
 
   <footer>
@@ -447,8 +448,38 @@
     // 初期レンダリング
     render();
   </script>
+  <script>
+    document.getElementById('uploadBtn').addEventListener('click', () => {
+  const userId = 'user123'; // 必要なら URL から取得
+  const adId = 'ad001';     // ランダム生成でもOK
+  const w = canvas.width;
+  const h = canvas.height;
+  const alt = headlineEl.value || 'Ad-Hub Ad';
+
+  canvas.toBlob(async (blob) => {
+    const formData = new FormData();
+    formData.append('file', blob, `${adId}.png`);
+
+    try {
+      const res = await fetch(`https://ad-hub.f5.si/api/upload?user=${userId}&ad=${adId}`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const { url } = await res.json();
+      embedCodeEl.value = `<img src="${url}" width="${w}" height="${h}" alt="${alt}">`;
+      copyCodeBtn.disabled = false;
+      toast('アップロード完了！埋め込みコードを更新しました');
+    } catch (err) {
+      toast('アップロードに失敗しました');
+    }
+  });
+});
+
+  </script>
 </body>
 </html>
+
 
 
 
