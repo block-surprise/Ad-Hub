@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>メモフォルダー</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Helvetica Neue', sans-serif;
+      background: #f8f8f8;
+      color: #333;
+    }
+    #home-view, #memo-view {
+      padding: 40px;
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .file-button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+    }
+    .file-wrapper {
+      position: relative;
+    }
+    .file-name-button {
+      width: 100%;
+      padding: 14px 20px;
+      font-size: 16px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .file-name-button:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .delete-button {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #999;
+      cursor: pointer;
+    }
+    .delete-button:hover {
+      color: #e00;
+    }
+    .delete-mode .delete-button {
+      display: block;
+    }
+    #memo-view {
+      display: none;
+    }
+    #memo-title {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+.memo-card {
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px; /* ← ここを広げる */
+}
+
+    .memo-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .memo-body {
+      font-size: 14px;
+      color: #555;
+    }
+    .back-button {
+      margin-bottom: 24px;
+      background: none;
+      border: none;
+      font-size: 16px;
+      color: #333;
+      cursor: pointer;
+    }
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #333;
+      color: #fff;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .fab-menu {
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: none;
+    }
+    .fab-menu button {
+      display: block;
+      width: 100%;
+      padding: 12px 20px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+    }
+    .modal-content input,
+    .modal-content textarea,
+    .modal-content select {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    .modal-actions button {
+      padding: 8px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="home-view">
+    <div class="header-row">
+      <h2>ファイル一覧</h2>
+    </div>
+    <div id="file-buttons" class="file-button-grid"></div>
+  </div>
+
+  <div id="memo-view">
+    <button class="back-button" onclick="backToHome()">← 戻る</button>
+    <h2 id="memo-title"></h2>
+    <div id="memo-list"></div>
+  </div>
+
+  <div class="fab" onclick="toggleFabMenu()">＋</div>
+  <div class="fab-menu" id="fab-menu">
+    <button onclick="openFileModal()">ファイル追加</button>
+    <button onclick="openMemoModal()">メモ追加</button>
+  </div>
+
+  <div id="file-modal" class="modal">
+    <div class="modal-content">
+      <input type="text" id="file-name" placeholder="ファイル名" />
+      <div class="modal-actions">
+        <button onclick="confirmFile()">追加</button>
+        <button onclick="closeFileModal()">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="memo-modal" class="modal">
+    <div class="modal-content">
+      <select id="memo-file-select"></select>
+      <input type="text" id="memo-title" placeholder="メモのタイトル" />
+      <textarea id="memo-body" rows="4" placeholder="詳細（任意）"></textarea>
+      <div class="modal-actions">
+        <button onclick="confirmMemo()">追加</button>
+        <button onclick="closeMemoModal()">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let files = JSON.parse(localStorage.getItem('files') || '[]');
+    let memos = JSON.parse(localStorage.getItem('memos') || '{}');
+    let currentFile = null;
+
+    function renderFileButtons() {
+      const container = document.getElementById('file-buttons');
+      container.innerHTML = '';
+      files.forEach((name, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'file-wrapper';
+
+        const btn = document.createElement('button');
+        btn.className = 'file-name-button';
+        btn.textContent = name;
+        btn.onclick = () => openMemoView(name);
+
+        const del = document.createElement('button');
+        del.className = 'delete-button';
+        del.textContent = '×';
+        del.onclick = (e) => {
+          e.stopPropagation();
+          deleteFile(index);
+        };
+
+        wrapper.appendChild(btn);
+        wrapper.appendChild(del);
+        container.appendChild(wrapper);
+      });
+    }
+
+    function openMemoView(fileName) {
+      currentFile = fileName;
+      document.getElementById('memo-title').textContent = fileName;
+      const list = document.getElementById('memo-list');list.innerHTML = (memos[fileName] || []).map((memo, index) => `
+  <div class="memo-card">
+    <div class="memo-title">${memo.title}</div>
+    ${memo.body ? `<div class="memo-body">${memo.body}</div>` : ''}
+    <button class="memo-delete" onclick="deleteMemo('${fileName}', ${index})">削除</button>
+  </div>
+`).join('');
+
+      document.getElementById('home-view').style.display = 'none';
+      document.getElementById('memo-view').style.display = 'block';
+    }
+
+    function backToHome() {
+      currentFile = null;
+      document.getElementById('memo-view').style.display = 'none';
+      document.getElementById('home-view').style.display = 'block';
+    }
+
+    function toggleFabMenu() {
+      const menu = document.getElementById('fab-menu');
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function closeFabMenu() {
+      document.getElementById('fab-menu').style.display = 'none';
+    }
+
+    function openFileModal() {
+      document.getElementById('file-name').value = '';
+      document.getElementById('file-modal').style.display = 'flex';
+      closeFabMenu();
+    }
+
+    function confirmFile() {
+      const name = document.getElementById('file-name').value.trim();
+      if (!name || files.includes(name)) return;
+      files.unshift(name);
+      localStorage.setItem('files', JSON.stringify(files));
+      renderFileButtons();
+      closeFileModal();
+    }
+
+    function openMemoModal() {
+      const select = document.getElementById('memo-file-select');
+      select.innerHTML = '';
+      files.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      });
+      document.querySelector('#memo-modal input#memo-title').value = '';
+      document.getElementById('memo-body').value = '';
+      document.getElementById('memo-modal').style.display = 'flex';
+      closeFabMenu();
+    }
+
+    function confirmMemo() {
+      const file = document.getElementById('memo-file-select').value;
+      const title = document.querySelector('#memo-modal input#memo-title').value.trim();
+      const body = document.getElementById('memo-body').value.trim();
+      if (!file || !title) return;
+      if (!memos[file]) memos[file] = [];
+      memos[file].unshift({ title, body });
+      localStorage.setItem('memos', JSON.stringify(memos));
+      if (file === currentFile) openMemoView(file);
+      renderFileButtons();
+      closeMemoModal();
+    }
+
+    function closeFileModal() {
+      document.getElementById('file-modal').style.display = 'none';
+    }
+
+    function closeMemoModal() {
+      document.getElementById('memo-modal').style.display = 'none';
+    }
+function deleteMemo(file, index) {
+  if (!memos[file]) return;
+  memos[file].splice(index, 1);
+  localStorage.setItem('memos', JSON.stringify(memos));
+  if (file === currentFile) openMemoView(file);
+}
+
+    function deleteFile(index) {
+      const name = files[index];
+      files.splice(index, 1);
+      delete memos[name];
+      localStorage.setItem('files', JSON.stringify(files));
+      localStorage.setItem('memos', JSON.stringify(memos));
+      renderFileButtons();
+      if (name === currentFile) {
+        currentFile = null;
+        backToHome();
+      }
+    }
+
+    renderFileButtons();
+  </script>
+</body>
+</html>
