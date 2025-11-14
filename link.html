@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>リンク管理サイト</title>
+<style>
+body { font-family: "Inter", sans-serif; background: #f9fafc; margin: 0; padding: 20px; }
+.container { max-width: 800px; margin: auto; }
+h1 { font-size: 24px; margin-bottom: 20px; }
+form, .search { margin-bottom: 20px; }
+input, textarea { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
+button { padding: 8px 14px; background: #0078d7; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+button:hover { background: #005a9e; }
+.link-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+.link-card a { font-weight: bold; color: #0078d7; text-decoration: none; }
+.link-card a:hover { text-decoration: underline; }
+.tag { display: inline-block; background: #eef3ff; color: #0078d7; font-size: 12px; padding: 2px 6px; border-radius: 4px; margin-right: 6px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>リンク管理サイト</h1>
+  
+  <!-- 検索バー -->
+  <div class="search">
+    <input type="text" id="search" placeholder="検索（タイトル・説明・タグ）">
+  </div>
+  
+  <!-- 入力フォーム -->
+  <form id="linkForm">
+    <input type="text" id="title" placeholder="サイト名" required>
+    <input type="url" id="url" placeholder="URL" required>
+    <textarea id="desc" placeholder="説明文"></textarea>
+    <input type="text" id="tags" placeholder="タグ（カンマ区切り）">
+    <button type="submit">リンクを追加</button>
+  </form>
+  
+  <!-- リンク一覧 -->
+  <div id="linkList"></div>
+</div>
+
+<script>
+const form = document.getElementById('linkForm');
+const list = document.getElementById('linkList');
+const searchInput = document.getElementById('search');
+
+// 保存されたリンクを読み込む
+let links = JSON.parse(localStorage.getItem('links')) || [];
+renderLinks(links);
+
+// フォーム送信時
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  
+  const title = document.getElementById('title').value;
+  const url = document.getElementById('url').value;
+  const desc = document.getElementById('desc').value;
+  const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t);
+
+  const link = { title, url, desc, tags };
+  
+  links.push(link);
+  localStorage.setItem('links', JSON.stringify(links));
+  
+  renderLinks(links);
+  form.reset();
+});
+
+// 検索機能
+searchInput.addEventListener('input', () => {
+  const keyword = searchInput.value.toLowerCase();
+  const filtered = links.filter(link =>
+    link.title.toLowerCase().includes(keyword) ||
+    link.desc.toLowerCase().includes(keyword) ||
+    link.tags.some(tag => tag.toLowerCase().includes(keyword))
+  );
+  renderLinks(filtered);
+});
+
+// リンク一覧を描画
+function renderLinks(data) {
+  list.innerHTML = '';
+  data.forEach(link => {
+    const card = document.createElement('div');
+    card.className = 'link-card';
+    card.innerHTML = `
+      <a href="${link.url}" target="_blank">${link.title}</a>
+      <p>${link.desc}</p>
+      ${link.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+    `;
+    list.appendChild(card);
+  });
+}
+</script>
+</body>
+</html>
