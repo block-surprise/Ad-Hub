@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Ad Hub | 広告をつくるハブ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0f1115;
+      --text: #e8ebf0;
+      --muted: #9aa3b2;
+      --accent: #6f8cff;
+      --accent-dark: #5066e3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", "Hiragino Sans", "Noto Sans JP", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      padding: 60px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+      color: #fff;
+    }
+    header h1 {
+      font-size: 42px;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    header p {
+      margin: 12px 0 0;
+      font-size: 16px;
+      color: #f0f3ff;
+    }
+    nav {
+      background: #151922;
+      padding: 12px 20px;
+      text-align: center;
+    }
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: 500;
+    }
+    nav a:hover {
+      color: var(--accent);
+    }
+    main {
+      padding: 60px 20px;
+      max-width: 960px;
+      margin: auto;
+    }
+    section {
+      margin-bottom: 60px;
+    }
+    h2 {
+      font-size: 26px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--accent);
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: #151922;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid #222737;
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      color: var(--accent);
+    }
+    .card p {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .cta {
+      text-align: center;
+      margin-top: 40px;
+    }
+    .button {
+      display: inline-block;
+      padding: 14px 28px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    .button:hover {
+      background: var(--accent-dark);
+    }
+    footer {
+      background: #151922;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px solid #222737;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ad Hub</h1>
+    <p>広告をつくり、共有し、埋め込むためのハブ</p>
+  </header>
+
+  <nav>
+    <a href="index">ホーム</a>
+    <a href="create">広告をつくる</a>
+    <a href="#features">特徴</a>
+    <a href="help">ヘルプ</a>
+  </nav>
+
+  <main>
+    <section id="intro">
+      <h2>ようこそ Ad Hub へ</h2>
+      <p style="text-align:center; max-width:720px; margin:auto;">
+        Ad Hubは、バナー広告やSNS広告を誰でも簡単に作成できるオンラインツールです。  
+        デザイン、共有、埋め込みまでワンストップでサポートします。
+      </p>
+      <div class="cta">
+        <a href="create.html" class="button">広告をつくる</a>
+      </div>
+    </section>
+
+    <section id="features">
+      <h2>特徴</h2>
+      <div class="features">
+        <div class="card">
+          <h3>簡単操作</h3>
+          <p>直感的なUIで、文字や画像を差し替えるだけで広告を完成できます。</p>
+        </div>
+        <div class="card">
+          <h3>埋め込みコード生成</h3>
+          <p>完成した広告はワンクリックで埋め込みコードをコピー可能。他サイトにすぐ貼り付けられます。</p>
+        </div>
+        <div class="card">
+          <h3>共有機能</h3>
+          <p>広告をURLで共有できるので、チームメンバーやクライアントとの確認もスムーズ。</p>
+        </div>
+        <div class="card">
+          <h3>世界観に合わせたデザイン</h3>
+          <p>余白や静けさを大切にしたテンプレートで、詩的な広告表現を実現します。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <h2>Ad Hubについて</h2>
+      <p style="text-align:center; max-width:720px; margin:auto;">
+        Ad Hubは、クリエイターやマーケターが「広告をもっと自由に」作れるように設計されたサービスです。  
+        無料で始められ、誰でもアクセス可能。あなたのアイデアを広告として世界に届けましょう。
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2025 Ad Hub. All rights reserved.
+  </footer>
+</body>
+</html>
