@@ -62,10 +62,9 @@
   text-align: center;
   padding: 48px 20px 32px;
   background: linear-gradient(to bottom, #f0f8ff, #ffffff);
-  min-height: 300px; /* 必要に応じて調整 */
+  max-width: 1000px;
+  margin: auto;
 }
-
-
     .hero h1 {
       font-size: 30px;
       margin-bottom: 12px;
@@ -161,6 +160,18 @@ section {
   color: #888;
   text-decoration: none;
   margin: 0 8px;
+}
+@media (max-width: 600px) {
+  .hero {
+    padding: 40px 16px 28px;
+    max-width: 100%;
+  }
+  .hero h1 {
+    font-size: 24px;
+  }
+  .hero p {
+    font-size: 14px;
+  }
 }
 
   </style>
