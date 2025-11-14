@@ -2,11 +2,17 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>リンク管理サイト</title>
+<title>LinkHub - あなたの世界をつなぐリンク集</title>
 <style>
-body { font-family: "Inter", sans-serif; background: #f9fafc; margin: 0; padding: 20px; }
-.container { max-width: 800px; margin: auto; }
-h1 { font-size: 24px; margin-bottom: 20px; }
+body { font-family: "Inter", sans-serif; background: #f9fafc; margin: 0; }
+header { background: #0078d7; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+header .logo { font-weight: bold; font-size: 20px; }
+header nav a { color: #fff; margin-left: 16px; text-decoration: none; }
+header nav a:hover { text-decoration: underline; }
+.hero { text-align: center; padding: 40px 20px; background: #eef3ff; }
+.hero h1 { font-size: 28px; margin-bottom: 10px; }
+.hero p { color: #555; margin-bottom: 20px; }
+.container { max-width: 800px; margin: auto; padding: 20px; }
 form, .search { margin-bottom: 20px; }
 input, textarea { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid #ccc; border-radius: 6px; }
 button { padding: 8px 14px; background: #0078d7; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
@@ -18,9 +24,22 @@ button:hover { background: #005a9e; }
 </style>
 </head>
 <body>
+<header>
+  <div class="logo">LinkHub</div>
+  <nav>
+    <a href="#">ホーム</a>
+    <a href="#">マイリンク</a>
+    <a href="#">人気リンク</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>あなたの世界をつなぐリンク集</h1>
+  <p>お気に入りのサイトを保存・検索・共有できるポータル</p>
+  <button onclick="document.getElementById('title').focus()">はじめる</button>
+</section>
+
 <div class="container">
-  <h1>リンク管理サイト</h1>
-  
   <!-- 検索バー -->
   <div class="search">
     <input type="text" id="search" placeholder="検索（タイトル・説明・タグ）">
