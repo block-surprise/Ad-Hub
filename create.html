@@ -87,8 +87,8 @@
 <body>
   <header>
     <div class="logo" aria-hidden="true"></div>
-    <h1>広告ジェネレーター（試作）</h1>
-    <div class="sub">静かで詩的な余白を保ったUI</div>
+    <h1>Ad-Hub</h1>
+    <div class="sub">あなたの作成した広告</div>
   </header>
 
   <main>
@@ -120,7 +120,7 @@
 
       <div class="field">
         <div class="label">見出しテキスト</div>
-        <input type="text" id="headline" placeholder="例)ad-hub">
+        <input type="text" id="headline" placeholder="静けさの中に、届くことば。">
       </div>
       <div class="row">
         <div class="field">
@@ -135,7 +135,7 @@
 
       <div class="field">
         <div class="label">説明テキスト（任意）</div>
-        <textarea id="body" rows="3" placeholder="例)広告の作成を手助けします"></textarea>
+        <textarea id="body" rows="3" placeholder="余白と世界観を大切にした広告テンプレート。"></textarea>
       </div>
       <div class="row">
         <div class="field">
@@ -180,24 +180,23 @@
       </div>
     </section>
 
-<!-- 右：埋め込みコード -->
-<section class="panel">
-  <h2>埋め込みコード</h2>
-  <p class="kicker">生成された広告を、他サイトへ貼り付けるためのコードです。</p>
-  <textarea id="embedCode" class="code" readonly placeholder="ここに埋め込みコードが表示されます"></textarea>
-  <div class="row" style="margin-top:10px;">
-    <button class="btn" id="uploadBtn">アップロードして生成</button>
-    <button class="btn" id="copyCodeBtn" disabled>コードをコピー</button>
-    <button class="btn" id="clearBtn">リセット</button>
-  </div>
-  <div class="hint" style="margin-top:8px;">
-    画像をアップロードして、短いURLで埋め込みコードを生成します。
-  </div>
-</section>
+    <!-- 右：埋め込みコード -->
+    <section class="panel">
+      <h2>埋め込みコード</h2>
+      <p class="kicker">生成された広告を、他サイトへ貼り付けるためのコードです。</p>
+      <textarea id="embedCode" class="code" readonly placeholder="ここに埋め込みコードが表示されます"></textarea>
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" id="copyCodeBtn" disabled>コードをコピー</button>
+        <button class="btn" id="clearBtn">リセット</button>
+      </div>
+      <div class="hint" style="margin-top:8px;">
+        現在は <strong>data URL を使った img タグ</strong>を発行します。公開ホスティングに切り替える際は、画像をサーバーへ保存し、<code>&lt;iframe src="...">&lt;/iframe></code> を発行する構成に変更できます。
+      </div>
+    </section>
   </main>
 
   <footer>
-   &copy; 2025 Ad Hub. All rights reserved.
+    試作版・ローカルのみで動作。後で保存・共有・iframe対応を追加予定。
   </footer>
 
   <script>
@@ -375,7 +374,7 @@
       const w = canvas.width, h = canvas.height;
       const code =
 `<!-- PNG広告の簡易埋め込み（data URL） -->
-`<img src="https://ad-hub.f5.si/assets/generated/${userId}/${adId}.png" alt="${alt}" width="${w}" height="${h}" loading="lazy" decoding="async">`;
+<img src="${dataUrl}" alt="Ad" width="${w}" height="${h}" style="display:inline-block;border-radius:8px;" />`;
       ui.embedCode.value = code;
       ui.copyCodeBtn.disabled = false;
     }
@@ -448,39 +447,5 @@
     // 初期レンダリング
     render();
   </script>
-  <script>
-    document.getElementById('uploadBtn').addEventListener('click', () => {
-  const userId = 'user123'; // 必要なら URL から取得
-  const adId = 'ad001';     // ランダム生成でもOK
-  const w = canvas.width;
-  const h = canvas.height;
-  const alt = headlineEl.value || 'Ad-Hub Ad';
-
-  canvas.toBlob(async (blob) => {
-    const formData = new FormData();
-    formData.append('file', blob, `${adId}.png`);
-
-    try {
-      const res = await fetch(`https://ad-hub.f5.si/api/upload?user=${userId}&ad=${adId}`, {
-        method: 'POST',
-        body: formData
-      });
-
-      const { url } = await res.json();
-      embedCodeEl.value = `<img src="${url}" width="${w}" height="${h}" alt="${alt}">`;
-      copyCodeBtn.disabled = false;
-      toast('アップロード完了！埋め込みコードを更新しました');
-    } catch (err) {
-      toast('アップロードに失敗しました');
-    }
-  });
-});
-
-  </script>
 </body>
 </html>
-
-
-
-
-
