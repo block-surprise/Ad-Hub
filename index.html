@@ -2,177 +2,169 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Ad Hub | 広告をつくるハブ</title>
+  <title>Ad-Hub | あなたの発信を支える案内所</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <style>
     :root {
-      --bg: #0f1115;
-      --text: #e8ebf0;
-      --muted: #9aa3b2;
-      --accent: #6f8cff;
-      --accent-dark: #5066e3;
+      --bg: #fefefe;
+      --fg: #111;
+      --muted: #6b7280;
+      --accent: #0078d7;
+      --ring: #e5e7eb;
+      --card: #ffffff;
     }
-    * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "Inter", "Hiragino Sans", "Noto Sans JP", sans-serif;
       background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
+      color: var(--fg);
+      font-family: "Inter", "Hiragino Sans", sans-serif;
     }
     header {
-      padding: 60px 20px;
-      text-align: center;
-      background: linear-gradient(135deg, var(--accent-dark), var(--accent));
-      color: #fff;
+      padding: 20px;
+      border-bottom: 1px solid var(--ring);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
     }
-    header h1 {
-      font-size: 42px;
-      margin: 0;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
-    header p {
-      margin: 12px 0 0;
-      font-size: 16px;
-      color: #f0f3ff;
+    .logo {
+      font-weight: bold;
+      font-size: 22px;
+      letter-spacing: 0.5px;
+      color: var(--accent);
     }
     nav {
-      background: #151922;
-      padding: 12px 20px;
-      text-align: center;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 8px;
     }
     nav a {
-      color: var(--text);
       text-decoration: none;
-      margin: 0 12px;
+      color: var(--accent);
       font-weight: 500;
+      cursor: pointer;
     }
-    nav a:hover {
-      color: var(--accent);
-    }
-    main {
-      padding: 60px 20px;
-      max-width: 960px;
-      margin: auto;
-    }
-    section {
-      margin-bottom: 60px;
-    }
-    h2 {
-      font-size: 26px;
-      margin-bottom: 20px;
+    .hero {
       text-align: center;
-      color: var(--accent);
+      padding: 48px 20px 32px;
+      background: linear-gradient(to bottom, #f0f8ff, #ffffff);
     }
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
+    .hero h1 {
+      font-size: 30px;
+      margin-bottom: 12px;
+      color: var(--fg);
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .section {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      display: none;
+    }
+    .section.active {
+      display: block;
     }
     .card {
-      background: #151922;
+      background: var(--card);
+      border: 1px solid var(--ring);
       border-radius: 12px;
       padding: 20px;
-      text-align: center;
-      border: 1px solid #222737;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
-    .card h3 {
-      margin: 0 0 10px;
-      font-size: 18px;
-      color: var(--accent);
+    .card h2 {
+      margin-top: 0;
+      font-size: 20px;
     }
     .card p {
+      color: var(--muted);
       font-size: 14px;
-      color: var(--muted);
     }
-    .cta {
-      text-align: center;
-      margin-top: 40px;
-    }
-    .button {
+    .card a {
       display: inline-block;
-      padding: 14px 28px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
+      margin-top: 8px;
+      color: var(--accent);
       text-decoration: none;
-      border-radius: 8px;
-      transition: background 0.3s;
+      font-weight: 500;
     }
-    .button:hover {
-      background: var(--accent-dark);
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 24px; }
+      .hero p { font-size: 14px; }
+      nav { gap: 12px; }
+      .card { padding: 16px; }
     }
-    footer {
-      background: #151922;
-      padding: 20px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
-      border-top: 1px solid #222737;
-    }
+    .footer {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--muted);
+  font-size: 12px;
+  border-top: 1px solid var(--ring);
+  background: var(--bg);
+}
+
   </style>
 </head>
 <body>
-  <header>
-    <h1>Ad Hub</h1>
-    <p>広告をつくり、共有し、埋め込むためのハブ</p>
-  </header>
 
+<header>
+  <div class="logo">Ad-Hub</div>
   <nav>
-    <a href="index">ホーム</a>
-    <a href="create">広告をつくる</a>
-    <a href="#features">特徴</a>
-    <a href="help">ヘルプ</a>
+    <a onclick="showSection('home')">ホーム</a>
+    <a onclick="showSection('links')">案内リンク</a>
+    <a onclick="showSection('ads')">広告ツール</a>
   </nav>
+</header>
 
-  <main>
-    <section id="intro">
-      <h2>ようこそ Ad Hub へ</h2>
-      <p style="text-align:center; max-width:720px; margin:auto;">
-        Ad Hubは、バナー広告やSNS広告を誰でも簡単に作成できるオンラインツールです。  
-        デザイン、共有、埋め込みまでワンストップでサポートします。
-      </p>
-      <div class="cta">
-        <a href="create.html" class="button">広告をつくる</a>
-      </div>
-    </section>
+<section class="hero" id="homeSection">
+  <h1>あなたの活動を広げる、静かな発信拠点</h1>
+  <p>Ad-Hubは、広告生成とリンク案内を備えた、あなたの活動を支えるツールです。<br>明るく、静かに、世界へとつながる場所。</p>
+</section>
 
-    <section id="features">
-      <h2>特徴</h2>
-      <div class="features">
-        <div class="card">
-          <h3>簡単操作</h3>
-          <p>直感的なUIで、文字や画像を差し替えるだけで広告を完成できます。</p>
-        </div>
-        <div class="card">
-          <h3>埋め込みコード生成</h3>
-          <p>完成した広告はワンクリックで埋め込みコードをコピー可能。他サイトにすぐ貼り付けられます。</p>
-        </div>
-        <div class="card">
-          <h3>共有機能</h3>
-          <p>広告をURLで共有できるので、チームメンバーやクライアントとの確認もスムーズ。</p>
-        </div>
-        <div class="card">
-          <h3>世界観に合わせたデザイン</h3>
-          <p>余白や静けさを大切にしたテンプレートで、詩的な広告表現を実現します。</p>
-        </div>
-      </div>
-    </section>
+<div class="section active" id="home">
+  <div class="card">
+    <h2>案内リンク</h2>
+    <p>お気に入りのサイトや作品ページをまとめて案内できます。</p>
+    <a href="links.html">リンク集へ →</a>
+  </div>
+  <div class="card">
+    <h2>広告ツール</h2>
+    <p>画像・動画・テキスト広告を生成して、他サイトに埋め込めます。</p>
+    <a href="ad-hub.html">広告ツールへ →</a>
+  </div>
+</div>
 
-    <section id="about">
-      <h2>Ad Hubについて</h2>
-      <p style="text-align:center; max-width:720px; margin:auto;">
-        Ad Hubは、クリエイターやマーケターが「広告をもっと自由に」作れるように設計されたサービスです。  
-        無料で始められ、誰でもアクセス可能。あなたのアイデアを広告として世界に届けましょう。
-      </p>
-    </section>
-  </main>
+<div class="section" id="links">
+  <div class="card">
+    <h2>案内リンクセクション</h2>
+    <p>ここにLinkHubの機能を組み込んでいきます。</p>
+    <a href="links.html">LinkHubへ →</a>
+  </div>
+</div>
 
-  <footer>
-    &copy; 2025 Ad Hub. All rights reserved.
-  </footer>
+<div class="section" id="ads">
+  <div class="card">
+    <h2>広告ツールセクション</h2>
+    <p>ここにAd-Hubの広告生成機能を組み込んでいきます。</p>
+    <a href="ad-hub.html">広告ツールへ →</a>
+  </div>
+</div>
+<footer class="footer">
+  <small>© Ad-Hub 2025</small>
+</footer>
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('homeSection').style.display = id === 'home' ? 'block' : 'none';
+}
+</script>
+
 </body>
 </html>
-
