@@ -132,7 +132,7 @@
 <!-- 右上ウィジェット -->
 <div class="top-widget">
   <div class="tw-dot" title="静かなモード"></div>
-  <div class="tw-label">surge copilot</div>
+  <div class="tw-label">surge AI</div>
   <button class="tw-btn" id="modeBtn" title="モード切替">calm</button>
   <button class="tw-btn" id="clearBtn" title="履歴をクリア">clear</button>
 </div>
@@ -140,7 +140,7 @@
 <!-- 右下ミニパネル -->
 <div class="dock" id="dock">
   <div class="dock-header">
-    <div class="dock-title">surge copilot</div>
+    <div class="dock-title">surge AI</div>
     <div class="dock-actions">
       <button class="icon-btn" id="expandBtn" title="拡張（Ctrl/Cmd+K）">⤢</button>
       <button class="icon-btn" id="hideBtn" title="閉じる（Esc）">✕</button>
@@ -158,7 +158,7 @@
 <div class="overlay" id="overlay">
   <div class="panel" role="dialog" aria-label="surge copilot">
     <div class="panel-header">
-      <div class="panel-title">Surge Copilot</div>
+      <div class="panel-title">Surge AI</div>
       <div class="dock-actions">
         <button class="icon-btn" id="collapseBtn" title="縮小">⤡</button>
       </div>
@@ -252,7 +252,7 @@ document.getElementById('clearBtn').onclick = () => {
   state.history = [];
   dockBody.innerHTML = '';
   panelBody.innerHTML = '';
-  addMsg(dockBody, "履歴を流しました。", 'ai');
+  addMsg(dockBody, "履歴", 'ai');
 };
 
 /* パネル expand/collapse */
