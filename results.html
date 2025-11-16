@@ -9,14 +9,15 @@
     body {
       margin: 0;
       font-family: 'Helvetica Neue', sans-serif;
-      background: #fff;
+      background: #f5f5f5;
       color: #222;
-      padding: 40px;
+      padding: 40px 20px;
     }
 
     h1 {
       font-size: 32px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
     }
 
     .gcse-searchresults-only {
@@ -25,10 +26,17 @@
   </style>
 </head>
 <body>
-  <h1>SURGE 検索結果</h1>
+  <h1>「<span id="search-word"></span>」の検索結果</h1>
   <div class="gcse-searchresults-only"></div>
 
   <!-- Googleカスタム検索スクリプト -->
   <script async src="https://cse.google.com/cse.js?cx=818be131768c247f3"></script>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get("q");
+    document.getElementById("search-word").textContent = query || "検索";
+    document.title = `SURGE - ${query}`;
+  </script>
 </body>
 </html>
