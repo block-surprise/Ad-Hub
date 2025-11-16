@@ -5,15 +5,6 @@
   <title>SURGE - 検索結果</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="https://blocksurprise.f5.si/favicon.png" type="image/png" sizes="16x16">
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-D6SC2D5KK4"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-D6SC2D5KK4');
-</script>
   <style>
     body {
       margin: 0;
@@ -39,22 +30,13 @@
   </style>
 </head>
 <body>
-  <!-- Google提供の検索ボックスをそのまま埋め込み -->
+  <!-- 検索ボックスをそのまま埋め込み -->
   <div class="gcse-searchbox-only"></div>
 
-  <!-- 検索語を表示 -->
-  <h1>「<span id="search-word"></span>」の検索結果</h1>
-
-  <!-- Google検索結果 -->
+  <!-- 検索結果 -->
   <div class="gcse-searchresults-only"></div>
-  <script async src="https://cse.google.com/cse.js?cx=818be131768c247f3"></script>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const query = params.get("q");
-    document.getElementById("search-word").textContent = query || "検索";
-    document.title = `SURGE - ${query}`;
-  </script>
+  <!-- Googleカスタム検索スクリプト -->
+  <script async src="https://cse.google.com/cse.js?cx=818be131768c247f3"></script>
 </body>
 </html>
-
