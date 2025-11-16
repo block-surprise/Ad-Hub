@@ -286,13 +286,11 @@ async function generateReply(prompt, mode = 'calm') {
   const fullPrompt = `${systemPrompt}\nユーザー: ${prompt}\nAI:`;
 
   try {
-    const res = await fetch("https://api-inference.huggingface.co/models/tiiuae/falcon-rw-1b", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ inputs: fullPrompt })
-    });
+const res = await fetch("/models/tiiuae/falcon-rw-1b", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ inputs: fullPrompt })
+});
 
     const data = await res.json();
 console.log("Hugging Face response:", data);
