@@ -305,6 +305,30 @@ async function generateReply(prompt, mode = 'calm') {
     return "メッセージが届きませんでした。もう一度試してみて。";
   }
 }
+async function handleSend(inputEl, targetEl) {
+  const text = (inputEl.value || '').trim();
+  if (!text) return;
+
+  // ユーザーの入力を表示
+  const userMsg = document.createElement('div');
+  userMsg.className = 'msg user';
+  userMsg.textContent = text;
+  targetEl.appendChild(userMsg);
+  inputEl.value = '';
+
+  // ローディング風の表示
+  const loading = document.createElement('div');
+  loading.className = 'msg ai';
+  loading.textContent = '波を感じています…';
+  targetEl.appendChild(loading);
+
+  try {
+    const reply = await generateReply(text);
+    loading.textContent = reply;
+  } catch (e) {
+    loading.textContent = '波が届きませんでした。もう一度試してみて。';
+  }
+}
 
 
 /* 初期メッセージ */
