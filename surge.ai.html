@@ -295,7 +295,7 @@ async function generateReply(prompt, mode = 'calm') {
     });
 
     const data = await res.json();
-
+console.log("Hugging Face response:", data);
     // 応答の整形
     const raw = data[0]?.generated_text || "";
     const reply = raw.split("AI:")[1]?.trim() || "……";
