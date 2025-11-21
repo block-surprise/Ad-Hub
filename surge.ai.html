@@ -45,7 +45,7 @@
 </div>
 
 <script>
-const WORKER_URL = "https://surgeai.proluce.workers.dev/"; // Cloudflare Workers のエンドポイント
+const WORKER_URL = "https://surgeai.proluce.workers.dev/";
 const log = document.getElementById("log");
 const inp = document.getElementById("inp");
 const sendBtn = document.getElementById("send");
@@ -56,20 +56,7 @@ function addMsg(text, role="ai"){
   el.className = `msg ${role}`;
   el.textContent = text;
   log.appendChild(el);
-  log.scrollTop = log.scrollHeight;
-  return el;
 }
-function addSkeleton(){
-  const el = document.createElement("div");
-  el.className = "msg ai";
-  el.innerHTML = `
-    <div class="skeleton" style="width:72%"></div>
-    <div class="skeleton" style="width:48%"></div>`;
-  log.appendChild(el);
-  log.scrollTop = log.scrollHeight;
-  return el;
-}
-function remove(el){ if(el && el.parentNode) el.parentNode.removeChild(el); }
 
 async function requestWorker(prompt){
   const system = "あなたは静かで詩的なAI。短く、やさしい言葉で返答する。";
@@ -79,44 +66,30 @@ async function requestWorker(prompt){
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ inputs: full })
   });
-  // “一回でまとめる”統一エラーハンドリング
-  if (!res.ok) {
-    let detail = "";
-    try { const j = await res.json(); detail = j.error || j.detail || ""; } catch {}
-    throw new Error(`HTTP ${res.status}${detail ? ` — ${detail}` : ""}`);
-  }
   const data = await res.json();
-  // HF 返却の一般形に対応
   const raw = Array.isArray(data)
     ? (data[0]?.generated_text || data[0]?.text || "")
     : (data.generated_text || data.text || "");
   const reply = raw.split("AI:")[1]?.trim() || raw.trim() || "……";
-  return reply || "……";
+  return reply;
 }
 
 async function send(){
-  const text = (inp.value || "").trim();
+  const text = inp.value.trim();
   if (!text) return;
   addMsg(text, "user");
   inp.value = "";
-  const skel = addSkeleton();
   try {
     const reply = await requestWorker(text);
-    remove(skel);
     addMsg(reply, "ai");
   } catch (e) {
-    remove(skel);
-    addMsg(
-      `通信に失敗しました。設定と接続を確認してください。\n` +
-      `- URL: ${WORKER_URL}\n- Workers の CORS/OPTIONS 対応\n- JSON ボディ { inputs }\n` +
-      `詳細: ${e.message}`, "ai"
-    );
+    addMsg("通信エラー: " + e.message, "ai");
   }
 }
 
 sendBtn.addEventListener("click", send);
 inp.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
-clearBtn.addEventListener("click", () => { log.innerHTML = ""; addMsg("履歴をクリアしました。", "ai"); });
+clearBtn.addEventListener("click", () => { log.innerHTML = ""; });
 </script>
 </body>
 </html>
