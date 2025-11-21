@@ -275,11 +275,12 @@ async function generateReply(prompt, mode = 'calm') {
   const fullPrompt = `${systemPrompt}\nユーザー: ${prompt}\nAI:`;
 
   try {
-    const res = await fetch("https://surge.ai.hf.space/run/predict", {
-      method: "POST",
-      body: JSON.stringify({ inputs: fullPrompt }),
-      headers: { "Content-Type": "application/json" }
-    });
+const res = await fetch("https://surgeai.workers.dev", {
+  method: "POST",
+  body: JSON.stringify({ inputs: fullPrompt }),
+  headers: { "Content-Type": "application/json" }
+});
+
 
     const data = await res.json();
     console.log("Hugging Face response:", data);
