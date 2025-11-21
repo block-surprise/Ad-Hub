@@ -13,8 +13,9 @@
     font-size:22px; margin:0;
   }
   #search { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
-  .file-button-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; padding:20px; }
+  .file-button-grid { display:flex; flex-direction:column; gap:8px; padding:20px; }
   .file-name-button { padding:14px; background:#fff; border:1px solid #ccc; border-radius:8px; cursor:pointer; font-size:16px; }
+  .file-name-button.dragging { opacity:0.5; }
   .memo-card { background:#f0f0f0; border-radius:8px; padding:16px; margin-bottom:16px; }
   .memo-title { font-weight:bold; margin-bottom:6px; }
   .memo-body { font-size:15px; color:#555; }
@@ -37,6 +38,11 @@
 <div class="header-row">
   <h2 class="gradient-title">メモフォルダープラス</h2>
   <input id="search" placeholder="検索..." oninput="searchAll()" />
+  <select id="sort-select" onchange="changeSort()">
+    <option value="date">作成日順</option>
+    <option value="title">タイトル順</option>
+    <option value="pinned">ピン留め優先</option>
+  </select>
 </div>
 
 <div id="home-view">
@@ -79,6 +85,7 @@
 let files = JSON.parse(localStorage.getItem('files') || '[]');
 let memos = JSON.parse(localStorage.getItem('memos') || '{}');
 let currentFile = null;
+let sortMode = "date";
 
 function renderFileButtons(){
   const container=document.getElementById('file-buttons');
@@ -87,6 +94,18 @@ function renderFileButtons(){
     const btn=document.createElement('button');
     btn.className='file-name-button';
     btn.textContent=name;
+    btn.draggable=true;
+    btn.ondragstart=(e)=>{e.dataTransfer.setData("index",index);btn.classList.add("dragging");};
+    btn.ondragend=()=>btn.classList.remove("dragging");
+    btn.ondragover=(e)=>e.preventDefault();
+    btn.ondrop=(e)=>{
+      const fromIndex=e.dataTransfer.getData("index");
+      const toIndex=index;
+      const moved=files.splice(fromIndex,1)[0];
+      files.splice(toIndex,0,moved);
+      localStorage.setItem('files',JSON.stringify(files));
+      renderFileButtons();
+    };
     btn.onclick=()=>openMemoView(name);
     container.appendChild(btn);
   });
@@ -97,7 +116,9 @@ function openMemoView(fileName){
   document.getElementById('memo-title').textContent=fileName;
   const list=document.getElementById('memo-list');
   let arr=(memos[fileName]||[]);
-  arr.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||b.createdAt-a.createdAt);
+  if(sortMode==="date"){arr.sort((a,b)=>b.createdAt-a.createdAt);}
+  else if(sortMode==="title"){arr.sort((a,b)=>a.title.localeCompare(b.title));}
+  else if(sortMode==="pinned"){arr.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||b.createdAt-a.createdAt);}
   list.innerHTML=arr.map((memo,index)=>`
     <div class="memo-card">
       <div class="memo-title">${memo.title}</div>
@@ -112,20 +133,42 @@ function openMemoView(fileName){
   document.getElementById('memo-view').style.display='block';
 }
 
+function changeSort(){sortMode=document.getElementById('sort-select').value;if(currentFile)openMemoView(currentFile);}
 function backToHome(){currentFile=null;document.getElementById('memo-view').style.display='none';document.getElementById('home-view').style.display='block';}
-function toggleFabMenu(){const menu=document.getElementById('fab-menu');menu.style.display=(getComputedStyle(menu).display==='none')?'block':'none';}
+function toggleFabMenu(){
+  const menu=document.getElementById('fab-menu');
+  menu.style.display=(getComputedStyle(menu).display==='none')?'block':'none';
+}
 function closeFabMenu(){document.getElementById('fab-menu').style.display='none';}
 
-function openFileModal(){document.getElementById('file-name').value='';document.getElementById('file-modal').style.display='flex';closeFabMenu();}
+function openFileModal(){
+  document.getElementById('file-name').value='';
+  document.getElementById('file-modal').style.display='flex';
+  closeFabMenu();
+}
 function closeFileModal(){document.getElementById('file-modal').style.display='none';}
-function confirmFile(){const name=document.getElementById('file-name').value.trim();if(!name||files.includes(name))return;files.unshift(name);localStorage.setItem('files',JSON.stringify(files));renderFileButtons();closeFileModal();}
+function confirmFile(){
+  const name=document.getElementById('file-name').value.trim();
+  if(!name||files.includes(name))return;
+  files.unshift(name);
+  localStorage.setItem('files',JSON.stringify(files));
+  renderFileButtons();
+  closeFileModal();
+}
 
 function openMemoModal(){
   if(files.length===0){alert('先にファイルを追加してください');return;}
-  const select=document.getElementById('memo-file-select');select.innerHTML='';
-  files.forEach(name=>{const opt=document.createElement('option');opt.value=name;opt.textContent=name;select.appendChild(opt);});
-  document.getElementById('memo-title-input').value='';document.getElementById('memo-body').value='';
-  document.getElementById('memo-modal').style.display='flex';closeFabMenu();
+  const select=document.getElementById('memo-file-select');
+  select.innerHTML='';
+  files.forEach(name=>{
+    const opt=document.createElement('option');
+    opt.value=name;opt.textContent=name;
+    select.appendChild(opt);
+  });
+  document.getElementById('memo-title-input').value='';
+  document.getElementById('memo-body').value='';
+  document.getElementById('memo-modal').style.display='flex';
+  closeFabMenu();
 }
 function closeMemoModal(){document.getElementById('memo-modal').style.display='none';}
 
@@ -143,7 +186,8 @@ function confirmMemo(){
 }
 
 function togglePin(file,index){
-    localStorage.setItem('memos',JSON.stringify(memos));
+  memos[file][index].pinned=!memos[file][index].pinned;
+  localStorage.setItem('memos',JSON.stringify(memos));
   if(file===currentFile)openMemoView(file);
 }
 
@@ -216,5 +260,3 @@ renderFileButtons();
 </script>
 </body>
 </html>
-
-  memos[file][index].pinned=!memos[file][index].pinned
