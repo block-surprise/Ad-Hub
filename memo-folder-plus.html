@@ -28,7 +28,7 @@
   .fab-menu button { display:block; width:100%; padding:12px; border:none; background:none; text-align:left; cursor:pointer; font-size:15px; }
   .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; }
   .modal-content { background:#fff; padding:20px; border-radius:12px; width:90%; max-width:400px; }
-  .modal-content input,.modal-content textarea,.modal-content select { width:100%; margin-bottom:12px; padding:10px; border:1px solid #ccc; border-radius:6px; }
+  .modal-content input,.modal-content textarea { width:100%; margin-bottom:12px; padding:10px; border:1px solid #ccc; border-radius:6px; }
 </style>
 </head>
 <body>
@@ -69,12 +69,6 @@
     <select id="memo-file-select"></select>
     <input type="text" id="memo-title-input" placeholder="メモのタイトル" />
     <textarea id="memo-body" rows="4" placeholder="詳細"></textarea>
-    <select id="memo-tag">
-      <option value="仕事">仕事</option>
-      <option value="勉強">勉強</option>
-      <option value="アイデア">アイデア</option>
-    </select>
-    <input type="color" id="memo-color" />
     <button onclick="confirmMemo()">追加</button>
     <button onclick="closeMemoModal()">キャンセル</button>
   </div>
@@ -104,11 +98,11 @@ function openMemoView(fileName){
   let arr=(memos[fileName]||[]);
   arr.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||b.createdAt-a.createdAt);
   list.innerHTML=arr.map((memo,index)=>`
-    <div class="memo-card" style="background:${memo.color||'#f0f0f0'}">
-      <div class="memo-title">${memo.title} ${memo.tag?`<span>[${memo.tag}]</span>`:''}</div>
+    <div class="memo-card">
+      <div class="memo-title">${memo.title}</div>
       ${memo.body?`<div class="memo-body">${memo.body}</div>`:''}
       <div class="memo-meta">${new Date(memo.createdAt).toLocaleString()}</div>
-      <button onclick="togglePin('${fileName}',${index})">📌</button>
+      <button onclick="togglePin('${fileName}',${index})">${memo.pinned?'📌解除':'📌固定'}</button>
       <button onclick="editMemo('${fileName}',${index})">編集</button>
       <button onclick="deleteMemo('${fileName}',${index})">削除</button>
     </div>`).join('');
@@ -137,11 +131,9 @@ function confirmMemo(){
   const file=document.getElementById('memo-file-select').value;
   const title=document.getElementById('memo-title-input').value.trim();
   const body=document.getElementById('memo-body').value.trim();
-  const tag=document.getElementById('memo-tag').value;
-  const color=document.getElementById('memo-color').value;
-    if(!file||!title)return;
+  if(!file||!title)return;
   if(!memos[file])memos[file]=[];
-  memos[file].unshift({title,body,tag,color,createdAt:Date.now(),pinned:false});
+  memos[file].unshift({title,body,createdAt:Date.now(),pinned:false});
   localStorage.setItem('memos',JSON.stringify(memos));
   if(file===currentFile)openMemoView(file);
   renderFileButtons();
@@ -159,16 +151,12 @@ function editMemo(file,index){
   document.getElementById('memo-file-select').value=file;
   document.getElementById('memo-title-input').value=memo.title;
   document.getElementById('memo-body').value=memo.body;
-  document.getElementById('memo-tag').value=memo.tag||"";
-  document.getElementById('memo-color').value=memo.color||"#f0f0f0";
   document.getElementById('memo-modal').style.display='flex';
   // 保存時は上書き
   confirmMemo=function(){
     const title=document.getElementById('memo-title-input').value.trim();
     const body=document.getElementById('memo-body').value.trim();
-    const tag=document.getElementById('memo-tag').value;
-    const color=document.getElementById('memo-color').value;
-    memos[file][index]={title,body,tag,color,createdAt:memo.createdAt,pinned:memo.pinned};
+    memos[file][index]={title,body,createdAt:memo.createdAt,pinned:memo.pinned};
     localStorage.setItem('memos',JSON.stringify(memos));
     openMemoView(file);
     closeMemoModal();
@@ -208,8 +196,8 @@ function searchAll(){
   });
   const list=document.getElementById('memo-list');
   list.innerHTML=results.map(r=>`
-    <div class="memo-card" style="background:${r.memo.color||'#f0f0f0'}">
-      <div class="memo-title">${r.memo.title} [${r.memo.tag||''}]</div>
+    <div class="memo-card">
+      <div class="memo-title">${r.memo.title}</div>
       ${r.memo.body?`<div class="memo-body">${r.memo.body}</div>`:''}
       <div class="memo-meta">${new Date(r.memo.createdAt).toLocaleString()} (${r.file})</div>
     </div>`).join('');
@@ -219,3 +207,4 @@ renderFileButtons();
 </script>
 </body>
 </html>
+
