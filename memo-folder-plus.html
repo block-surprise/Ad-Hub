@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>メモフォルダープラス</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Helvetica Neue', sans-serif;
+    background: #f8f8f8;
+    color: #333;
+    transition: background 0.3s, color 0.3s;
+  }
+  body.dark {
+    background: #222;
+    color: #eee;
+  }
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+  }
+  h2.gradient-title {
+    background: linear-gradient(90deg, #2458b8, #ff4081);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 24px;
+    margin: 0;
+  }
+  #search {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+  .file-button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    padding: 20px;
+  }
+  .file-name-button {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  .memo-card {
+    background: #f0f0f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .memo-title { font-weight: bold; margin-bottom: 6px; }
+  .memo-body { font-size: 14px; color: #555; }
+  .memo-meta { font-size: 12px; color: #999; margin-top: 6px; }
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: linear-gradient(135deg, #2458b8, #ff4081);
+    color: #fff;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .fab-menu {
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: none;
+  }
+  .fab-menu button {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header-row">
+  <h2 class="gradient-title">メモフォルダープラス</h2>
+  <input id="search" placeholder="検索..." oninput="searchAll()" />
+  <button onclick="toggleDark()">🌙</button>
+</div>
+
+<div id="home-view">
+  <div id="file-buttons" class="file-button-grid"></div>
+</div>
+
+<div id="memo-view" style="display:none; padding:20px;">
+  <button onclick="backToHome()">← 戻る</button>
+  <h2 id="memo-title"></h2>
+  <div id="memo-list"></div>
+</div>
+
+<div class="fab" onclick="toggleFabMenu()">＋</div>
+<div class="fab-menu" id="fab-menu">
+  <button onclick="openFileModal()">ファイル追加</button>
+  <button onclick="openMemoModal()">メモ追加</button>
+  <button onclick="exportData()">エクスポート</button>
+  <input type="file" onchange="importData(this.files[0])" />
+</div>
+
+<!-- ファイル追加モーダル -->
+<div id="file-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <input type="text" id="file-name" placeholder="ファイル名" />
+    <button onclick="confirmFile()">追加</button>
+    <button onclick="closeFileModal()">キャンセル</button>
+  </div>
+</div>
+
+<!-- メモ追加モーダル -->
+<div id="memo-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <select id="memo-file-select"></select>
+    <input type="text" id="memo-title-input" placeholder="メモのタイトル" />
+    <textarea id="memo-body" rows="4" placeholder="詳細"></textarea>
+    <select id="memo-tag">
+      <option value="仕事">仕事</option>
+      <option value="勉強">勉強</option>
+      <option value="アイデア">アイデア</option>
+    </select>
+    <input type="color" id="memo-color" />
+    <button onclick="confirmMemo()">追加</button>
+    <button onclick="closeMemoModal()">キャンセル</button>
+  </div>
+</div>
+
+<script>
+let files = JSON.parse(localStorage.getItem('files') || '[]');
+let memos = JSON.parse(localStorage.getItem('memos') || '{}');
+let currentFile = null;
+
+function renderFileButtons() {
+  const container = document.getElementById('file-buttons');
+  container.innerHTML = '';
+  files.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'file-name-button';
+    btn.textContent = name;
+    btn.onclick = () => openMemoView(name);
+    container.appendChild(btn);
+  });
+}
+
+function openMemoView(fileName) {
+  currentFile = fileName;
+  document.getElementById('memo-title').textContent = fileName;
+  const list = document.getElementById('memo-list');
+  let arr = memos[fileName] || [];
+  arr.sort((a,b)=> (b.pinned?1:0) - (a.pinned?1:0) || b.createdAt - a.createdAt);
+  list.innerHTML = arr.map((memo, index) => `
+    <div class="memo-card" style="background:${memo.color||'#f0f0f0'}">
+      <div class="memo-title">${memo.title} ${memo.tag?`<span>[${memo.tag}]</span>`:''}</div>
+      ${memo.body?`<div class="memo-body">${memo.body}</div>`:''}
+      <div class="memo-meta">${new Date(memo.createdAt).toLocaleString()}</div>
+      <button onclick="togglePin('${fileName}',${index})">📌</button>
+      <button onclick="editMemo('${fileName}',${index})">編集</button>
+      <button onclick="deleteMemo('${fileName}',${index})">削除</button>
+    </div>`).join('');
+  document.getElementById('home-view').style.display = 'none';
+  document.getElementById('memo-view').style.display = 'block';
+}
+
+function backToHome(){document.getElementById('memo-view').style.display='none';document.getElementById('home-view').style.display='block';}
+
+function toggleFabMenu(){const menu=document.getElementById('fab-menu');menu.style.display=menu.style.display==='none'?'block':'none';}
+function closeFabMenu(){document.getElementById('fab-menu').style.display='none';}
+
+function openFileModal(){document.getElementById('file-name').value='';document.getElementById('file-modal').style.display='block';closeFabMenu();}
+function confirmFile(){const name=document.getElementById('file-name').value.trim();if(!name||files.includes(name))return;files.unshift(name);localStorage.setItem('files',JSON.stringify(files));renderFileButtons();closeFileModal();}
+function closeFileModal(){document.getElementById('file-modal').style.display='none';}
+
+function openMemoModal(){
+  const select=document.getElementById('memo-file-select');select.innerHTML='';
+  files.forEach(name=>{const opt=document.createElement('option');opt.value=name;opt.textContent=name;select.appendChild(opt);});
+  document.getElementById('memo-title-input').value='';document.getElementById('memo-body').value='';
+  document.getElementById('memo-modal').style.display='block';closeFabMenu();
+}
+function confirmMemo(){
+  const file=document.getElementById('memo-file-select').value;
+  const title=document.getElementById('memo-title-input').value.trim();
+function confirmMemo(){
+  const file=document.getElementById('memo-file-select').value;
+  const title=document.getElementById('memo-title-input').value.trim();
+  const body=document.getElementById('memo-body').value.trim();
+  const tag=document.getElementById('memo-tag').value;
+  const color=document.getElementById('memo-color').value;
+  if(!file||!title) return;
+  if(!memos[file]) memos[file]=[];
+  memos[file].unshift({title,body,tag,color,createdAt:Date.now(),pinned:false});
+  localStorage.setItem('memos',JSON.stringify(memos));
+  if(file===currentFile) openMemoView(file);
+  renderFileButtons();
+  closeMemoModal();
+}
+function closeMemoModal(){document.getElementById('memo-modal').style.display='none';}
+
+function deleteMemo(file,index){
+  if(!memos[file]) return;
+  memos[file].splice(index,1);
+  localStorage.setItem('memos',JSON.stringify(memos));
+  if(file===currentFile) openMemoView(file);
+}
+
+function togglePin(file,index){
+  memos[file][index].pinned=!memos[file][index].pinned;
+  localStorage.setItem('memos',JSON.stringify(memos));
+  if(file===currentFile) openMemoView(file);
+}
+
+function editMemo(file,index){
+  const memo=memos[file][index];
+  document.getElementById('memo-file-select').value=file;
+  document.getElementById('memo-title-input').value=memo.title;
+  document.getElementById('memo-body').value=memo.body;
+  document.getElementById('memo-tag').value=memo.tag||"";
+  document.getElementById('memo-color').value=memo.color||"#f0f0f0";
+  document.getElementById('memo-modal').style.display='block';
+  // 保存時は上書き
+  confirmMemo=function(){
+    const title=document.getElementById('memo-title-input').value.trim();
+    const body=document.getElementById('memo-body').value.trim();
+    const tag=document.getElementById('memo-tag').value;
+    const color=document.getElementById('memo-color').value;
+    memos[file][index]={title,body,tag,color,createdAt:memo.createdAt,pinned:memo.pinned};
+    localStorage.setItem('memos',JSON.stringify(memos));
+    openMemoView(file);
+    closeMemoModal();
+    // confirmMemo を元に戻す
+    confirmMemo=originalConfirmMemo;
+  }
+}
+const originalConfirmMemo=confirmMemo;
+
+function searchAll(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const results=[];
+  files.forEach(file=>{
+    (memos[file]||[]).forEach(memo=>{
+      if(file.toLowerCase().includes(q)||
+         memo.title.toLowerCase().includes(q)||
+         memo.body.toLowerCase().includes(q)){
+        results.push({file,memo});
+      }
+    });
+  });
+  const list=document.getElementById('memo-list');
+  list.innerHTML=results.map(r=>`
+    <div class="memo-card" style="background:${r.memo.color||'#f0f0f0'}">
+      <div class="memo-title">${r.memo.title} [${r.memo.tag||''}]</div>
+      ${r.memo.body?`<div class="memo-body">${r.memo.body}</div>`:''}
+      <div class="memo-meta">${new Date(r.memo.createdAt).toLocaleString()} (${r.file})</div>
+    </div>`).join('');
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify({files,memos})],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="memo-folder.json";a.click();
+}
+
+function importData(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const data=JSON.parse(e.target.result);
+    files=data.files;memos=data.memos;
+    localStorage.setItem('files',JSON.stringify(files));
+    localStorage.setItem('memos',JSON.stringify(memos));
+    renderFileButtons();
+  };
+  reader.readAsText(file);
+}
+
+function toggleDark(){document.body.classList.toggle("dark");}
+
+renderFileButtons();
+</script>
+</body>
+</html>
