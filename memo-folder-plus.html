@@ -36,7 +36,6 @@
 <div class="header-row">
   <h2 class="gradient-title">メモフォルダープラス</h2>
   <input id="search" placeholder="検索..." oninput="searchAll()" />
-  <button onclick="toggleDark()">🌙</button>
 </div>
 
 <div id="home-view">
@@ -142,4 +141,102 @@ function confirmMemo(){
   const body=document.getElementById('memo-body').value.trim();
   const tag=document.getElementById('memo-tag').value;
   const color=document.getElementById('memo-color').value;
-  if(!file||
+  if(!file||!title)return;
+  if(!memos[file])memos[file]=[];
+  memos[file].unshift({title,body,tag,color,createdAt:Date.now(),pinned:false});
+  localStorage.setItem('memos',JSON.stringify(memos));
+  if(file===currentFile)openMemoView(file);
+  renderFileButtons();
+  closeMemoModal();
+}
+
+function togglePin(file,index){
+  memos[file][index].pinned=!memos[file][index].pinned;
+  localStorage.setItem('memos',JSON.stringify(memos));
+  if(file===currentFile)openMemoView(file);
+}
+
+function editMemo(file,index){
+  const memo=memos[file][index];
+  document.getElementById('memo-file-select').value=file;
+  document.getElementById('memo-title-input').value=memo.title;
+  document.getElementById('memo-body').value=memo.body;
+  document.getElementById('memo-tag').value=memo.tag||"";
+  document.getElementById('memo-color').value=memo.color||"#f0f0f0";
+  document.getElementById('memo-modal').style.display='flex';
+  // 保存時は上書き
+  confirmMemo=function(){
+    const title=document.getElementById('memo-title-input').value.trim();
+    const body=document.getElementById('memo-body').value.trim();
+    const tag=document.getElementById('memo-tag').value;
+    const color=document.getElementById('memo-color').value;
+    memos[file][index]={title,body,tag,color,createdAt:memo.createdAt,pinned:memo.pinned};
+    localStorage.setItem('memos',JSON.stringify(memos));
+    openMemoView(file);
+    closeMemoModal();
+    confirmMemo=originalConfirmMemo;
+  }
+}
+const originalConfirmMemo=confirmMemo;
+
+function deleteMemo(file,index){
+  if(!memos[file])return;
+  memos[file].splice(index,1);
+  localStorage.setItem('memos',JSON.stringify(memos));
+  if(file===currentFile)openMemoView(file);
+}
+
+function deleteFile(index){
+  const name=files[index];
+  files.splice(index,1);
+  delete memos[name];
+  localStorage.setItem('files',JSON.stringify(files));
+  localStorage.setItem('memos',JSON.stringify(memos));
+  renderFileButtons();
+  if(name===currentFile){currentFile=null;backToHome();}
+}
+
+function searchAll(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const results=[];
+  files.forEach(file=>{
+    (memos[file]||[]).forEach(memo=>{
+      if(file.toLowerCase().includes(q)||
+         memo.title.toLowerCase().includes(q)||
+         memo.body.toLowerCase().includes(q)){
+        results.push({file,memo});
+      }
+    });
+  });
+  const list=document.getElementById('memo-list');
+  list.innerHTML=results.map(r=>`
+    <div class="memo-card" style="background:${r.memo.color||'#f0f0f0'}">
+      <div class="memo-title">${r.memo.title} [${r.memo.tag||''}]</div>
+      ${r.memo.body?`<div class="memo-body">${r.memo.body}</div>`:''}
+      <div class="memo-meta">${new Date(r.memo.createdAt).toLocaleString()} (${r.file})</div>
+    </div>`).join('');
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify({files,memos})],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="memo-folder.json";a.click();
+}
+
+function importData(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const data=JSON.parse(e.target.result);
+    files=data.files;memos=data.memos;
+    localStorage.setItem('files',JSON.stringify(files));
+    localStorage.setItem('memos',JSON.stringify(memos));
+    renderFileButtons();
+  };
+  reader.readAsText(file);
+}
+
+renderFileButtons();
+</script>
+</body>
+</html>
