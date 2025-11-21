@@ -52,8 +52,6 @@
 <div class="fab-menu" id="fab-menu">
   <button onclick="openFileModal()">ファイル追加</button>
   <button onclick="openMemoModal()">メモ追加</button>
-  <button onclick="exportData()">エクスポート</button>
-  <input type="file" onchange="importData(this.files[0])" />
 </div>
 
 <!-- ファイル追加モーダル -->
@@ -141,7 +139,7 @@ function confirmMemo(){
   const body=document.getElementById('memo-body').value.trim();
   const tag=document.getElementById('memo-tag').value;
   const color=document.getElementById('memo-color').value;
-  if(!file||!title)return;
+    if(!file||!title)return;
   if(!memos[file])memos[file]=[];
   memos[file].unshift({title,body,tag,color,createdAt:Date.now(),pinned:false});
   localStorage.setItem('memos',JSON.stringify(memos));
@@ -215,25 +213,6 @@ function searchAll(){
       ${r.memo.body?`<div class="memo-body">${r.memo.body}</div>`:''}
       <div class="memo-meta">${new Date(r.memo.createdAt).toLocaleString()} (${r.file})</div>
     </div>`).join('');
-}
-
-function exportData(){
-  const blob=new Blob([JSON.stringify({files,memos})],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download="memo-folder.json";a.click();
-}
-
-function importData(file){
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const data=JSON.parse(e.target.result);
-    files=data.files;memos=data.memos;
-    localStorage.setItem('files',JSON.stringify(files));
-    localStorage.setItem('memos',JSON.stringify(memos));
-    renderFileButtons();
-  };
-  reader.readAsText(file);
 }
 
 renderFileButtons();
