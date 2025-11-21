@@ -135,5 +135,78 @@
   }
   function closeFabMenu() { document.getElementById('fab-menu').style.display = 'none'; }
 
-  function openFileModal() {
-    document.getElementById('file-name').value
+    function openFileModal() {
+      document.getElementById('file-name').value = '';
+      document.getElementById('file-modal').style.display = 'flex';
+      closeFabMenu();
+    }
+
+    function confirmFile() {
+      const name = document.getElementById('file-name').value.trim();
+      if (!name || files.includes(name)) return;
+      files.unshift(name);
+      localStorage.setItem('files', JSON.stringify(files));
+      renderFileButtons();
+      closeFileModal();
+    }
+
+    function closeFileModal() {
+      document.getElementById('file-modal').style.display = 'none';
+    }
+
+    function openMemoModal() {
+      const select = document.getElementById('memo-file-select');
+      select.innerHTML = '';
+      files.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      });
+      document.querySelector('#memo-modal input#memo-title').value = '';
+      document.getElementById('memo-body').value = '';
+      document.getElementById('memo-modal').style.display = 'flex';
+      closeFabMenu();
+    }
+
+    function confirmMemo() {
+      const file = document.getElementById('memo-file-select').value;
+      const title = document.querySelector('#memo-modal input#memo-title').value.trim();
+      const body = document.getElementById('memo-body').value.trim();
+      if (!file || !title) return;
+      if (!memos[file]) memos[file] = [];
+      memos[file].unshift({ title, body });
+      localStorage.setItem('memos', JSON.stringify(memos));
+      if (file === currentFile) openMemoView(file);
+      renderFileButtons();
+      closeMemoModal();
+    }
+
+    function closeMemoModal() {
+      document.getElementById('memo-modal').style.display = 'none';
+    }
+
+    function deleteMemo(file, index) {
+      if (!memos[file]) return;
+      memos[file].splice(index, 1);
+      localStorage.setItem('memos', JSON.stringify(memos));
+      if (file === currentFile) openMemoView(file);
+    }
+
+    function deleteFile(index) {
+      const name = files[index];
+      files.splice(index, 1);
+      delete memos[name];
+      localStorage.setItem('files', JSON.stringify(files));
+      localStorage.setItem('memos', JSON.stringify(memos));
+      renderFileButtons();
+      if (name === currentFile) {
+        currentFile = null;
+        backToHome();
+      }
+    }
+
+    renderFileButtons();
+  </script>
+</body>
+</html>
