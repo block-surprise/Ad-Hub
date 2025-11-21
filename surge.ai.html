@@ -2,305 +2,67 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SURGE AI</title>
+<title>SURGE AI Search</title>
 <style>
-  :root {
-    --bg: #f7f7f7;
-    --panel: #ffffff;
-    --ink: #262626;
-    --mute: #777;
-    --accent: #2d6cdf;
-    --ring: rgba(45,108,223,0.2);
-    --shadow: 0 8px 30px rgba(0,0,0,0.08);
-  }
-  html, body {
-    margin: 0;
-    height: 100%;
-    background: var(--bg);
-    font-family: system-ui, -apple-system, "Helvetica Neue", Arial;
-    color: var(--ink);
-  }
-
-  /* 右上ウィジェット */
-  .top-widget {
-    position: fixed; top: 18px; right: 22px;
-    display: flex; gap: 10px; align-items: center;
-    font-size: 13px; color: var(--mute);
-    user-select: none;
-  }
-  .tw-btn {
-    padding: 6px 10px; border-radius: 10px;
-    background: var(--panel); box-shadow: var(--shadow);
-    border: 1px solid #eee; cursor: pointer;
-    transition: transform .08s ease, box-shadow .2s ease;
-  }
-  .tw-btn:hover { transform: translateY(-1px); }
-  .tw-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: #9ac3ff; box-shadow: 0 0 0 6px var(--ring);
-  }
-  .tw-label { letter-spacing: .02em; }
-
-  /* 右下ドック */
-  .dock {
-    position: fixed; right: 22px; bottom: 22px;
-    width: 340px; max-width: calc(100% - 44px);
-    background: var(--panel); box-shadow: var(--shadow);
-    border: 1px solid #eee; border-radius: 16px;
-    overflow: hidden;
-  }
-  .dock-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 14px; border-bottom: 1px solid #f0f0f0;
-  }
-  .dock-title { font-size: 14px; color: var(--mute); }
-  .dock-actions { display: flex; gap: 8px; }
-  .icon-btn { border: 1px solid #eee; background: #fff; border-radius: 10px; padding: 6px 8px; cursor: pointer; }
-  .icon-btn:hover { background: #f8f8f8; }
-
-  .dock-body {
-    max-height: 280px; overflow: auto; padding: 12px 14px;
-  }
-  .msg {
-    margin: 8px 0; display: inline-block; max-width: 80%;
-    padding: 8px 10px; border-radius: 12px; line-height: 1.5;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06); white-space: pre-wrap;
-  }
-  .msg.user { background: #f1f5ff; }
-  .msg.ai { background: #f9f9f9; margin-left: auto; display: block; }
-
-  .dock-input {
-    display: grid; grid-template-columns: 1fr auto; gap: 8px;
-    border-top: 1px solid #f0f0f0; padding: 10px 12px;
-  }
-  .input {
-    width: 100%; padding: 10px 12px; border: 1px solid #e6e6e6;
-    border-radius: 12px; outline: none; font-size: 14px;
-  }
-  .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
-  .send {
-    padding: 10px 14px; border-radius: 12px; border: 1px solid #dfe8ff;
-    background: #eaf2ff; color: #2458b8; cursor: pointer; font-weight: 600;
-  }
-  .send:hover { background: #e3eeff; }
-
-  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
-  .chip {
-    font-size: 12px; color: #336; background: #eef3ff;
-    border: 1px solid #dfe8ff; border-radius: 999px;
-    padding: 6px 10px; cursor: pointer;
-  }
-
-  /* フルスクリーンパネル */
-  .overlay {
-    position: fixed; inset: 0; display: none; background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(6px);
-  }
-  .panel {
-    position: absolute; inset: 60px;
-    background: var(--panel); border: 1px solid #eee; border-radius: 18px;
-    box-shadow: var(--shadow); display: grid; grid-template-rows: auto 1fr auto;
-  }
-  .panel-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px; border-bottom: 1px solid #f0f0f0;
-  }
-  .panel-title { font-weight: 600; letter-spacing: .02em; }
-  .panel-body { padding: 16px; overflow: auto; }
-  .panel-footer { padding: 12px 16px; border-top: 1px solid #f0f0f0; display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-  .hint { font-size: 12px; color: var(--mute); margin-top: 6px; }
-
-  .skeleton {
-    height: 12px; width: 60%; background: linear-gradient(90deg,#eee,#f7f7f7,#eee);
-    background-size: 200% 100%; animation: pulse 1.2s infinite;
-    border-radius: 8px; margin: 6px 0;
-  }
-  @keyframes pulse { 0%{background-position:0% 0} 50%{background-position:100% 0} 100%{background-position:0% 0} }
-
-  @media (max-width: 720px) {
-    .panel { inset: 20px; }
-    .dock { width: calc(100% - 44px); }
-  }
+  body { font-family: system-ui; background: #f7f7f7; margin: 0; padding: 20px; }
+  .search-box { display: flex; gap: 8px; }
+  input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+  button { padding: 10px 16px; border: none; border-radius: 8px; background: #2d6cdf; color: #fff; cursor: pointer; }
+  button:hover { background: #2458b8; }
+  .results { margin-top: 20px; }
+  .result { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .result h3 { margin: 0 0 6px; font-size: 16px; }
+  .result p { margin: 0; color: #555; font-size: 14px; }
 </style>
 </head>
 <body>
 
-<!-- 右上ウィジェット -->
-<div class="top-widget">
-  <div class="tw-dot" title="静かなモード"></div>
-  <div class="tw-label">surge AI</div>
-  <button class="tw-btn" id="modeBtn" title="モード切替">calm</button>
-  <button class="tw-btn" id="clearBtn" title="履歴をクリア">clear</button>
+<h1>SURGE AI 検索</h1>
+<div class="search-box">
+  <input id="query" placeholder="調べたいことを入力…" />
+  <button onclick="doSearch()">検索</button>
 </div>
 
-<!-- 右下ドック -->
-<div class="dock" id="dock">
-  <div class="dock-header">
-    <div class="dock-title">surge AI</div>
-    <div class="dock-actions">
-      <button class="icon-btn" id="expandBtn" title="拡張">⤢</button>
-      <button class="icon-btn" id="hideBtn" title="閉じる">✕</button>
-    </div>
-  </div>
-  <div class="dock-body" id="dockBody"><div class="msg ai">こんにちは。いま、何を整えたい？</div></div>
-  <div class="dock-input">
-    <input class="input" id="dockInput" placeholder="質問や意図を書く…">
-    <button class="send" id="dockSend">送信</button>
-    <div class="chips" id="chips"></div>
-  </div>
-</div>
-
-<!-- フルスクリーンパネル -->
-<div class="overlay" id="overlay">
-  <div class="panel">
-    <div class="panel-header">
-      <div class="panel-title">Surge AI</div>
-      <div class="dock-actions">
-        <button class="icon-btn" id="collapseBtn" title="縮小">⤡</button>
-      </div>
-    </div>
-    <div class="panel-body" id="panelBody"></div>
-    <div class="panel-footer">
-       <input class="input" id="panelInput" placeholder="いま考えていることを、そのまま…">
-      <button class="send" id="panelSend">送信</button>
-    </div>
-    <div class="hint">ショートカット：Ctrl/Cmd+Kで開く、Escで閉じる、Enterで送信</div>
-  </div>
-</div>
+<div class="results" id="results"></div>
 
 <script>
-/* 状態管理 */
-const state = {
-  mode: 'calm',
-  history: [],
-  suggestions: [
-    "UIの余白を保ったまま情報量を増やすには？",
-    "右上に“気配”だけを置くには何が良い？",
-    "検索UIの初動で静けさを壊さない導線は？",
-    "SURGEの色の温度を下げて落ち着かせたい",
-  ]
-};
+async function doSearch() {
+  const q = document.getElementById('query').value.trim();
+  if (!q) return;
 
-/* 要素参照 */
-const dockBody = document.getElementById('dockBody');
-const dockInput = document.getElementById('dockInput');
-const dockSend = document.getElementById('dockSend');
-const chipsEl = document.getElementById('chips');
-const overlay = document.getElementById('overlay');
-const panelBody = document.getElementById('panelBody');
-const panelInput = document.getElementById('panelInput');
-const panelSend = document.getElementById('panelSend');
-
-/* メッセージ追加 */
-function addMsg(targetEl, text, role='ai') {
-  const el = document.createElement('div');
-  el.className = `msg ${role}`;
-  el.textContent = text;
-  targetEl.appendChild(el);
-  targetEl.scrollTop = targetEl.scrollHeight;
-}
-
-/* 提案チップ描画 */
-function renderChips() {
-  chipsEl.innerHTML = '';
-  state.suggestions.forEach(s => {
-    const chip = document.createElement('button');
-    chip.className = 'chip';
-    chip.textContent = s;
-    chip.onclick = () => {
-      dockInput.value = s;
-      dockInput.focus();
-    };
-    chipsEl.appendChild(chip);
-  });
-}
-renderChips();
-
-/* ショートカット */
-document.addEventListener('keydown', (e) => {
-  const cmdOrCtrl = e.metaKey || e.ctrlKey;
-  if (cmdOrCtrl && e.key.toLowerCase() === 'k') {
-    e.preventDefault();
-    overlay.style.display = 'block';
-    panelInput.focus();
-  }
-  if (e.key === 'Escape') {
-    overlay.style.display = 'none';
-    dockInput.blur(); panelInput.blur();
-  }
-});
-
-/* ウィジェット操作 */
-document.getElementById('modeBtn').onclick = () => {
-  const next = { calm: 'focus', focus: 'playful', playful: 'calm' }[state.mode];
-  state.mode = next;
-  document.getElementById('modeBtn').textContent = next;
-};
-document.getElementById('clearBtn').onclick = () => {
-  state.history = [];
-  dockBody.innerHTML = '';
-  panelBody.innerHTML = '';
-  addMsg(dockBody, "履歴をクリアしました", 'ai');
-};
-
-/* パネル操作 */
-document.getElementById('expandBtn').onclick = () => { overlay.style.display = 'block'; panelInput.focus(); };
-document.getElementById('collapseBtn').onclick = () => { overlay.style.display = 'none'; dockInput.focus(); };
-document.getElementById('hideBtn').onclick = () => { document.getElementById('dock').style.display = 'none'; };
-
-/* 送信ハンドラ */
-dockSend.onclick = () => handleSend(dockInput, dockBody);
-panelSend.onclick = () => handleSend(panelInput, panelBody);
-
-dockInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') handleSend(dockInput, dockBody);
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    dockInput.value = state.suggestions[0];
-  }
-});
-panelInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') handleSend(panelInput, panelBody);
-});
-
-/* AI応答生成 */
-async function generateReply(prompt, mode = 'calm') {
-  const systemPrompt = {
-    calm: "あなたは静かで詩的なAIです。短く、やさしい言葉で返答してください。",
-    focus: "あなたは簡潔で明瞭なAIです。要点を短く伝えてください。",
-    playful: "あなたは少し遊び心のあるAIです。やさしく、軽やかに返答してください。"
-  }[mode];
-
-  const fullPrompt = `${systemPrompt}\nユーザー: ${prompt}\nAI:`;
+  const resultsEl = document.getElementById('results');
+  resultsEl.innerHTML = "<p>検索中…</p>";
 
   try {
-const res = await fetch("https://surgeai.proluce.workers.dev", {
-  method: "POST",
-  body: JSON.stringify({ inputs: fullPrompt }),
-  headers: { "Content-Type": "application/json" }
-});
-
+    // Workers経由でCopilotに検索リクエストを送る
+    const res = await fetch("https://surgeai.proluce.workers.dev/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inputs: `検索: ${q}` })
+    });
 
     const data = await res.json();
-    console.log("Hugging Face response:", data);
 
-    const raw = data[0]?.generated_text || "";
-    const reply = raw.split("AI:")[1]?.trim() || "……";
-    return reply;
-  } catch (e) {
-    return "メッセージが届きませんでした。もう一度試してみて。";
+    // Copilotが返す検索統合結果を表示
+    resultsEl.innerHTML = "";
+    if (Array.isArray(data)) {
+      data.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "result";
+        div.innerHTML = `<h3>${item.title || "結果"}</h3><p>${item.text || item.generated_text || ""}</p>`;
+        resultsEl.appendChild(div);
+      });
+    } else {
+      const div = document.createElement("div");
+      div.className = "result";
+      div.innerHTML = `<h3>結果</h3><p>${data.generated_text || data.text || JSON.stringify(data)}</p>`;
+      resultsEl.appendChild(div);
+    }
+  } catch (err) {
+    resultsEl.innerHTML = `<p style="color:red">エラー: ${err.message}</p>`;
   }
 }
-
-async function handleSend(inputEl, targetEl) {
-  const text = (inputEl.value || '').trim();
-  if (!text) return;
-  addMsg(targetEl, text, 'user');
-  inputEl.value = '';
-  const reply = await generateReply(text, state.mode);
-  addMsg(targetEl, reply, 'ai');
-}
 </script>
+
 </body>
 </html>
