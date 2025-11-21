@@ -1,68 +1,122 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>SURGE AI Search</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SURGE AI — Chat</title>
 <style>
-  body { font-family: system-ui; background: #f7f7f7; margin: 0; padding: 20px; }
-  .search-box { display: flex; gap: 8px; }
-  input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
-  button { padding: 10px 16px; border: none; border-radius: 8px; background: #2d6cdf; color: #fff; cursor: pointer; }
-  button:hover { background: #2458b8; }
-  .results { margin-top: 20px; }
-  .result { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-  .result h3 { margin: 0 0 6px; font-size: 16px; }
-  .result p { margin: 0; color: #555; font-size: 14px; }
+  :root {
+    --bg:#f7f7f7; --panel:#fff; --ink:#222; --mute:#777; --accent:#2458b8;
+    --ring:rgba(36,88,184,.18); --shadow:0 8px 30px rgba(0,0,0,.08);
+  }
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Helvetica Neue",Arial;}
+  .wrap{max-width:720px;margin:40px auto;padding:0 20px;}
+  .card{background:var(--panel);border:1px solid #eee;border-radius:16px;box-shadow:var(--shadow);overflow:hidden;}
+  .head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #f0f0f0;}
+  .title{font-size:15px;color:var(--mute);}
+  .body{min-height:300px;max-height:55vh;overflow:auto;padding:14px 16px;}
+  .msg{margin:8px 0;display:inline-block;max-width:80%;padding:10px 12px;border-radius:12px;line-height:1.55;white-space:pre-wrap;box-shadow:0 2px 6px rgba(0,0,0,.06);}
+  .msg.user{background:#eef3ff;}
+  .msg.ai{background:#f9f9f9;margin-left:auto;display:block;}
+  .bar{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px;border-top:1px solid #f0f0f0;background:#fcfcfc;}
+  .input{width:100%;padding:12px;border:1px solid #e6e6e6;border-radius:12px;outline:none;font-size:15px;background:#fff;}
+  .input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--ring);}
+  .btn{padding:12px 16px;border-radius:12px;border:1px solid #dfe8ff;background:#eaf2ff;color:var(--accent);font-weight:600;cursor:pointer;}
+  .btn:hover{background:#e3eeff;}
+  .skeleton{height:12px;width:66%;background:linear-gradient(90deg,#eee,#f7f7f7,#eee);background-size:200% 100%;animation:pulse 1.2s infinite;border-radius:8px;margin:6px 0;}
+  @keyframes pulse{0%{background-position:0 0}50%{background-position:100% 0}100%{background-position:0 0}}
+  .note{color:#999;font-size:12px;margin-top:10px;text-align:right;padding:0 4px;}
 </style>
 </head>
 <body>
-
-<h1>SURGE AI 検索</h1>
-<div class="search-box">
-  <input id="query" placeholder="調べたいことを入力…" />
-  <button onclick="doSearch()">検索</button>
+<div class="wrap">
+  <div class="card">
+    <div class="head">
+      <div class="title">Surge AI — 静かなチャット</div>
+      <button class="btn" id="clear">履歴クリア</button>
+    </div>
+    <div class="body" id="log"></div>
+    <div class="bar">
+      <input class="input" id="inp" placeholder="いま考えていることを、そのまま…" />
+      <button class="btn" id="send">送信</button>
+    </div>
+  </div>
+  <div class="note">フロントにはトークンを置かず、Workers 経由で応答します。</div>
 </div>
 
-<div class="results" id="results"></div>
-
 <script>
-async function doSearch() {
-  const q = document.getElementById('query').value.trim();
-  if (!q) return;
+const WORKER_URL = "https://surgeai.proluce.workers.dev/"; // Cloudflare Workers のエンドポイント
+const log = document.getElementById("log");
+const inp = document.getElementById("inp");
+const sendBtn = document.getElementById("send");
+const clearBtn = document.getElementById("clear");
 
-  const resultsEl = document.getElementById('results');
-  resultsEl.innerHTML = "<p>検索中…</p>";
+function addMsg(text, role="ai"){
+  const el = document.createElement("div");
+  el.className = `msg ${role}`;
+  el.textContent = text;
+  log.appendChild(el);
+  log.scrollTop = log.scrollHeight;
+  return el;
+}
+function addSkeleton(){
+  const el = document.createElement("div");
+  el.className = "msg ai";
+  el.innerHTML = `
+    <div class="skeleton" style="width:72%"></div>
+    <div class="skeleton" style="width:48%"></div>`;
+  log.appendChild(el);
+  log.scrollTop = log.scrollHeight;
+  return el;
+}
+function remove(el){ if(el && el.parentNode) el.parentNode.removeChild(el); }
 
+async function requestWorker(prompt){
+  const system = "あなたは静かで詩的なAI。短く、やさしい言葉で返答する。";
+  const full = `${system}\nユーザー: ${prompt}\nAI:`;
+  const res = await fetch(WORKER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ inputs: full })
+  });
+  // “一回でまとめる”統一エラーハンドリング
+  if (!res.ok) {
+    let detail = "";
+    try { const j = await res.json(); detail = j.error || j.detail || ""; } catch {}
+    throw new Error(`HTTP ${res.status}${detail ? ` — ${detail}` : ""}`);
+  }
+  const data = await res.json();
+  // HF 返却の一般形に対応
+  const raw = Array.isArray(data)
+    ? (data[0]?.generated_text || data[0]?.text || "")
+    : (data.generated_text || data.text || "");
+  const reply = raw.split("AI:")[1]?.trim() || raw.trim() || "……";
+  return reply || "……";
+}
+
+async function send(){
+  const text = (inp.value || "").trim();
+  if (!text) return;
+  addMsg(text, "user");
+  inp.value = "";
+  const skel = addSkeleton();
   try {
-    // Workers経由でCopilotに検索リクエストを送る
-    const res = await fetch("https://surgeai.proluce.workers.dev/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inputs: `検索: ${q}` })
-    });
-
-    const data = await res.json();
-
-    // Copilotが返す検索統合結果を表示
-    resultsEl.innerHTML = "";
-    if (Array.isArray(data)) {
-      data.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "result";
-        div.innerHTML = `<h3>${item.title || "結果"}</h3><p>${item.text || item.generated_text || ""}</p>`;
-        resultsEl.appendChild(div);
-      });
-    } else {
-      const div = document.createElement("div");
-      div.className = "result";
-      div.innerHTML = `<h3>結果</h3><p>${data.generated_text || data.text || JSON.stringify(data)}</p>`;
-      resultsEl.appendChild(div);
-    }
-  } catch (err) {
-    resultsEl.innerHTML = `<p style="color:red">エラー: ${err.message}</p>`;
+    const reply = await requestWorker(text);
+    remove(skel);
+    addMsg(reply, "ai");
+  } catch (e) {
+    remove(skel);
+    addMsg(
+      `通信に失敗しました。設定と接続を確認してください。\n` +
+      `- URL: ${WORKER_URL}\n- Workers の CORS/OPTIONS 対応\n- JSON ボディ { inputs }\n` +
+      `詳細: ${e.message}`, "ai"
+    );
   }
 }
-</script>
 
+sendBtn.addEventListener("click", send);
+inp.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+clearBtn.addEventListener("click", () => { log.innerHTML = ""; addMsg("履歴をクリアしました。", "ai"); });
+</script>
 </body>
 </html>
