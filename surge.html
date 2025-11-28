@@ -98,5 +98,26 @@
 
     <!-- 詩的な一文 -->
     <p>SURGEは、静けさの中にある発見を探す場所です。</p>
+
+    <script>
+  window.addEventListener('load', function () {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    if (q) {
+      const interval = setInterval(() => {
+        const input = document.querySelector('input.gsc-input');
+        if (input) {
+          input.value = q;
+          const button = document.querySelector('button.gsc-search-button');
+          if (button) {
+            button.click();
+            clearInterval(interval);
+          }
+        }
+      }, 100);
+    }
+  });
+</script>
+
 </body>
 </html>
