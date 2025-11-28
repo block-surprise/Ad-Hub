@@ -79,27 +79,40 @@
 </head>
 <body>
 <body>
-  <!-- 検索結果だけ表示する -->
+  <!-- 自作の検索欄 -->
+  <form id="searchForm" style="max-width:640px; margin:0 auto 30px;">
+    <input type="search" id="searchInput" placeholder="検索語を入力…" style="width:100%; padding:14px 20px; font-size:18px; border-radius:32px; border:1px solid #ccc; box-shadow:0 2px 6px rgba(0,0,0,0.1); outline:none;">
+  </form>
+
+  <!-- 検索結果 -->
   <div class="gcse-searchresults-only" id="searchresults-only"></div>
 
-  <!-- Google CSEスクリプト -->
+  <!-- Google CSE API -->
   <script>
     window.__gcse = {
       callback: function() {
         const params = new URLSearchParams(location.search);
         const q = params.get('q');
-        if (q && window.google && google.search && google.search.cse) {
-          const element = google.search.cse.element.getElement("searchresults-only");
-          if (element) {
-            element.execute(q);
-          }
+        const input = document.getElementById('searchInput');
+        if (q) input.value = q;
+
+        const element = google.search.cse.element.getElement("searchresults-only");
+        if (element && q) {
+          element.execute(q);
         }
+
+        // フォーム送信で再検索
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+          e.preventDefault();
+          const newQuery = input.value.trim();
+          if (newQuery) {
+            element.execute(newQuery);
+            history.replaceState(null, "", "?q=" + encodeURIComponent(newQuery));
+          }
+        });
       }
     };
   </script>
   <script async src="https://cse.google.com/cse.js?cx=818be131768c247f3"></script>
-</body>
-
-
 </body>
 </html>
