@@ -55,21 +55,28 @@
 }
 
 .gs-title {
+  display: block;
   font-size: 20px;
-  color: #1a0dab;
-  text-decoration: none;
   font-weight: 600;
+  color: #2c3e50 !important; /* 深いグレーで落ち着いた印象 */
+  line-height: 1.6;
+  margin-bottom: 6px;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
+
 .gs-title:hover {
+  color: #1abc9c !important; /* 淡い青緑でアクセント */
   text-decoration: underline;
 }
 
-.gsc-url-top, .gsc-url-bottom {
-  color: #6a9e6a;
+
+.gsc-url-top,
+.gsc-url-bottom,
+.gs-visibleUrl {
+  color: #888 !important;
   font-size: 13px;
-  margin-bottom: 6px;
-  display: block;
-  opacity: 0.75;
+  opacity: 0.8;
 }
 
 .gs-snippet {
