@@ -84,24 +84,20 @@
   <script async src="https://cse.google.com/cse.js?cx=818be131768c247f3"></script>
 
   <!-- 検索語をURLから読み取って自動検索 -->
-  <script>
-    window.addEventListener('load', function () {
+<script>
+  window.__gcse = {
+    callback: function() {
       const params = new URLSearchParams(location.search);
       const q = params.get('q');
-      if (q) {
-        const interval = setInterval(() => {
-          const input = document.querySelector('input.gsc-input');
-          if (input) {
-            input.value = q;
-            const button = document.querySelector('button.gsc-search-button');
-            if (button) {
-              button.click();
-              clearInterval(interval);
-            }
-          }
-        }, 100);
+      if (q && window.google && google.search && google.search.cse) {
+        const element = google.search.cse.element.getElement("searchresults-only");
+        if (element) {
+          element.execute(q);
+        }
       }
-    });
-  </script>
+    }
+  };
+</script>
+
 </body>
 </html>
