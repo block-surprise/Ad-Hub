@@ -78,26 +78,28 @@
   </style>
 </head>
 <body>
-  <div class="gcse-searchbox-only"></div>
-  <div class="gcse-searchresults-only"></div>
+<body>
+  <!-- 検索結果だけ表示する -->
+  <div class="gcse-searchresults-only" id="searchresults-only"></div>
 
-  <script async src="https://cse.google.com/cse.js?cx=818be131768c247f3"></script>
-
-  <!-- 検索語をURLから読み取って自動検索 -->
-<script>
-  window.__gcse = {
-    callback: function() {
-      const params = new URLSearchParams(location.search);
-      const q = params.get('q');
-      if (q && window.google && google.search && google.search.cse) {
-        const element = google.search.cse.element.getElement("searchresults-only");
-        if (element) {
-          element.execute(q);
+  <!-- Google CSEスクリプト -->
+  <script>
+    window.__gcse = {
+      callback: function() {
+        const params = new URLSearchParams(location.search);
+        const q = params.get('q');
+        if (q && window.google && google.search && google.search.cse) {
+          const element = google.search.cse.element.getElement("searchresults-only");
+          if (element) {
+            element.execute(q);
+          }
         }
       }
-    }
-  };
-</script>
+    };
+  </script>
+  <script async src="https://cse.google.com/cse.js?cx=818be131768c247f3"></script>
+</body>
+
 
 </body>
 </html>
