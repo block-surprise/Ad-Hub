@@ -38,19 +38,16 @@
 
 /* 検索結果全体 */
 .gsc-control-cse {
-  background: transparent;
-  border: none;
-  font-family: "Helvetica Neue", "Noto Sans JP", sans-serif;
-  padding: 0;
+  background: transparent !important;
+  border: none !important;
 }
 
 .gsc-webResult.gsc-result {
-  background: #f5f5f5; /* ← ページ背景と同じ色に統一！ */
-  border: none;
-  padding: 24px 0;
-  margin: 0;
-  border-bottom: 1px solid #ddd;
+  background: #f5f5f5 !important;
+  border: none !important;
+  box-shadow: none !important;
 }
+
 
 .gsc-webResult.gsc-result:hover {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
@@ -114,6 +111,9 @@
   margin-left: 50px; /* ← ここで左にずらす量を調整 */
 }
 .gsc-results .gcsc-more-maybe-branding-root {
+  display: none !important;
+}
+.gcsc-find-more-on-google-magnifier {
   display: none !important;
 }
 
