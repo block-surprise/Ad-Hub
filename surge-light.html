@@ -127,15 +127,25 @@
       padding:1rem;
     }
 .modal {
+  width: min(94vw, 720px);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  max-height: 90vh; /* 画面の90%までに制限 */
+  max-height: 90vh; /* ← ここがポイント！ */
 }
 
 .modal-body {
-  overflow-y: auto;
+  padding: 1rem 1.2rem;
+  display: grid;
+  gap: 1.2rem;
+  overflow-y: auto; /* ← スクロール可能に！ */
   flex: 1 1 auto;
 }
+
 
     .modal-header{
       padding:1rem 1.2rem;
