@@ -4,20 +4,15 @@
   <meta charset="UTF-8">
   <title>SURGE - 検索結果</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <!-- タブ用（ブラウザのアドレスバーやタブに表示） -->
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
-
-<!-- 検索結果用（Googleが推奨する48×48以上） -->
-<link rel="icon" type="image/png" sizes="48x48" href="/favicon2.png">
-        <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-D6SC2D5KK4"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-D6SC2D5KK4');
-</script>
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon2.png">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-D6SC2D5KK4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-D6SC2D5KK4');
+  </script>
   <style>
     body {
       margin: 0;
@@ -40,16 +35,73 @@
     .gcse-searchresults-only {
       margin-top: 20px;
     }
+
+    /* Google風スタイル */
+    .gsc-control-cse {
+      background: #fff;
+      border: none;
+      padding: 0;
+      font-family: "Helvetica Neue", sans-serif;
+    }
+
+    .gsc-webResult.gsc-result {
+      border-bottom: 1px solid #eee;
+      padding: 16px 0;
+      margin: 0;
+    }
+
+    .gs-title {
+      font-size: 18px;
+      color: #1a0dab;
+      text-decoration: none;
+    }
+
+    .gs-title:hover {
+      text-decoration: underline;
+    }
+
+    .gsc-url-top, .gsc-url-bottom {
+      color: #006621;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .gs-snippet {
+      color: #545454;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .gsc-adBlock, .gs-image, .gs-promotion {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
-  <!-- 検索ボックスをそのまま埋め込み -->
   <div class="gcse-searchbox-only"></div>
-
-  <!-- 検索結果 -->
   <div class="gcse-searchresults-only"></div>
 
-  <!-- Googleカスタム検索スクリプト -->
   <script async src="https://cse.google.com/cse.js?cx=818be131768c247f3"></script>
+
+  <!-- 検索語をURLから読み取って自動検索 -->
+  <script>
+    window.addEventListener('load', function () {
+      const params = new URLSearchParams(location.search);
+      const q = params.get('q');
+      if (q) {
+        const interval = setInterval(() => {
+          const input = document.querySelector('input.gsc-input');
+          if (input) {
+            input.value = q;
+            const button = document.querySelector('button.gsc-search-button');
+            if (button) {
+              button.click();
+              clearInterval(interval);
+            }
+          }
+        }, 100);
+      }
+    });
+  </script>
 </body>
 </html>
