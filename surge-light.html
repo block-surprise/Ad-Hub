@@ -246,300 +246,291 @@
   </div>
 
   <script>
-    // -------- defaults --------
-    const DEFAULT_ENGINES = [
-      { id:"google",   name:"Google",    url:"https://www.google.com/search?q={query}" },
-      { id:"bing",     name:"Bing",      url:"https://www.bing.com/search?q={query}" },
-      { id:"yahoojp",  name:"Yahoo! Japan", url:"https://search.yahoo.co.jp/search?p={query}" },
-      { id:"wikipedia",name:"Wikipedia（日本語）", url:"https://ja.wikipedia.org/wiki/Special:Search?search={query}" },
-      { id:"kotobank", name:"コトバンク", url:"https://kotobank.jp/word/{query}" },
-      { id:"weblio",   name:"Weblio",    url:"https://www.weblio.jp/content/{query}" },
-      { id:"youtube",  name:"YouTube",   url:"https://www.youtube.com/results?search_query={query}" },
-      { id:"surge",    name:"SURGE",     url:"results?q={query}" }
-    ];
+ document.addEventListener('DOMContentLoaded', () => {
+  // -------- defaults --------
+  const DEFAULT_ENGINES = [
+    { id:"google",   name:"Google",    url:"https://www.google.com/search?q={query}" },
+    { id:"bing",     name:"Bing",      url:"https://www.bing.com/search?q={query}" },
+    { id:"yahoojp",  name:"Yahoo! Japan", url:"https://search.yahoo.co.jp/search?p={query}" },
+    { id:"wikipedia",name:"Wikipedia（日本語）", url:"https://ja.wikipedia.org/wiki/Special:Search?search={query}" },
+    { id:"kotobank", name:"コトバンク", url:"https://kotobank.jp/word/{query}" },
+    { id:"weblio",   name:"Weblio",    url:"https://www.weblio.jp/content/{query}" },
+    { id:"youtube",  name:"YouTube",   url:"https://www.youtube.com/results?search_query={query}" },
+    { id:"surge",    name:"SURGE",     url:"results?q={query}" }
+  ];
 
-    const STORAGE_KEYS = {
-      settings: "surgeLightSettings",
-      history:  "searchHistory"
+  const STORAGE_KEYS = {
+    settings: "surgeLightSettings",
+    history:  "searchHistory"
+  };
+
+  let settings = loadSettings();
+  let engines = composeEngines(settings);
+
+  const queryInput = document.getElementById('query');
+  const engineSelect = document.getElementById('engine');
+  const historyContainer = document.getElementById('history');
+  const historySection = document.getElementById('historySection');
+  const modal = document.getElementById('settingsModal');
+
+  applySettingsToUI();
+  renderEngineSelect();
+  renderHistory();
+  attachEvents();
+  setTimeout(() => queryInput.focus(), 50);
+
+  // -------- settings --------
+  function defaultSettings() {
+    return {
+      enabledEngines: DEFAULT_ENGINES.map(e => e.id),
+      defaultEngineId: "google",
+      historyLimit: 10,
+      animateInput: true,
+      customEngines: []
     };
+  }
 
-    // -------- state --------
-    let settings = loadSettings();
-    let engines = composeEngines(settings);
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.settings);
+      const parsed = raw ? JSON.parse(raw) : defaultSettings();
+      if (!Array.isArray(parsed.enabledEngines)) parsed.enabledEngines = defaultSettings().enabledEngines;
+      if (!parsed.defaultEngineId) parsed.defaultEngineId = "google";
+      if (!parsed.historyLimit) parsed.historyLimit = 10;
+      if (typeof parsed.animateInput !== "boolean") parsed.animateInput = true;
+      if (!Array.isArray(parsed.customEngines)) parsed.customEngines = [];
+      return parsed;
+    } catch (e) {
+      return defaultSettings();
+    }
+  }
 
-    // -------- init --------
-    const queryInput = document.getElementById('query');
-    const engineSelect = document.getElementById('engine');
-    const historyContainer = document.getElementById('history');
-    const historySection = document.getElementById('historySection');
-
-    applySettingsToUI();
+  function saveSettings() {
+    localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(settings));
+    engines = composeEngines(settings);
     renderEngineSelect();
+    applySettingsToUI();
+    renderCustomEngineList();
+  }
+
+  function resetSettings() {
+    settings = defaultSettings();
+    saveSettings();
+    renderEngineToggleList();
+    renderDefaultEngineSelect();
     renderHistory();
-    attachEvents();
+  }
 
-    // focus input on load
-    setTimeout(()=>queryInput.focus(), 50);
+  function composeEngines(s) {
+    return [...DEFAULT_ENGINES, ...s.customEngines];
+  }
 
-    // -------- functions: settings --------
-    function defaultSettings(){
-      return {
-        enabledEngines: DEFAULT_ENGINES.map(e=>e.id),
-        defaultEngineId: "google",
-        historyLimit: 10,
-        animateInput: true,
-        customEngines: []
-      };
-    }
+  function applySettingsToUI() {
+    if (settings.animateInput) queryInput.classList.add('animated');
+    else queryInput.classList.remove('animated');
+    renderDefaultEngineSelect();
+  }
 
-    function loadSettings(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEYS.settings);
-        const parsed = raw ? JSON.parse(raw) : defaultSettings();
-        // sanitize
-        if(!Array.isArray(parsed.enabledEngines)) parsed.enabledEngines = defaultSettings().enabledEngines;
-        if(!parsed.defaultEngineId) parsed.defaultEngineId = "google";
-        if(!parsed.historyLimit) parsed.historyLimit = 10;
-        if(typeof parsed.animateInput !== "boolean") parsed.animateInput = true;
-        if(!Array.isArray(parsed.customEngines)) parsed.customEngines = [];
-        return parsed;
-      }catch(e){
-        return defaultSettings();
-      }
-    }
+  // -------- engine UI --------
+  function renderEngineSelect() {
+    const list = engines.filter(e => settings.enabledEngines.includes(e.id));
+    engineSelect.innerHTML = "";
+    list.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.id;
+      opt.textContent = e.name;
+      engineSelect.appendChild(opt);
+    });
+    const defaultExists = list.find(e => e.id === settings.defaultEngineId);
+    engineSelect.value = defaultExists ? settings.defaultEngineId : (list[0]?.id || "");
+  }
 
-    function saveSettings(){
-      localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(settings));
-      engines = composeEngines(settings);
-      renderEngineSelect();
-      applySettingsToUI();
-      renderCustomEngineList();
-    }
-
-    function resetSettings(){
-      settings = defaultSettings();
-      saveSettings();
-      renderEngineToggleList();
-      renderDefaultEngineSelect();
-      renderHistory();
-    }
-
-    function composeEngines(s){
-      return [...DEFAULT_ENGINES, ...s.customEngines];
-    }
-
-    function applySettingsToUI(){
-      // input animation
-      if(settings.animateInput) queryInput.classList.add('animated');
-      else queryInput.classList.remove('animated');
-
-      // default engine selection
-      renderDefaultEngineSelect();
-    }
-
-    // -------- functions: engines UI --------
-    function renderEngineSelect(){
-      const list = engines.filter(e => settings.enabledEngines.includes(e.id));
-      engineSelect.innerHTML = "";
-      list.forEach(e=>{
-        const opt = document.createElement('option');
-        opt.value = e.id;
-        opt.textContent = e.name;
-        engineSelect.appendChild(opt);
-      });
-      // ensure default exists; fallback first enabled
-      const defaultExists = list.find(e=>e.id===settings.defaultEngineId);
-      engineSelect.value = defaultExists ? settings.defaultEngineId : (list[0]?.id || "");
-    }
-
-    function renderEngineToggleList(){
-      const wrap = document.getElementById('engineToggleList');
-      wrap.innerHTML = "";
-      engines.forEach(e=>{
-        const div = document.createElement('div');
-        div.className = "engine-item";
-        const cb = document.createElement('input');
-        cb.type = "checkbox";
-        cb.checked = settings.enabledEngines.includes(e.id);
-        cb.addEventListener('change', ()=>{
-          const set = new Set(settings.enabledEngines);
-          if(cb.checked) set.add(e.id); else set.delete(e.id);
-          settings.enabledEngines = Array.from(set);
-          // keep default valid
-          if(!settings.enabledEngines.includes(settings.defaultEngineId)){
-            settings.defaultEngineId = settings.enabledEngines[0] || "";
-          }
-          saveSettings();
-        });
-        const label = document.createElement('label');
-        label.textContent = e.name;
-        div.append(cb, label);
-        wrap.appendChild(div);
-      });
-    }
-
-    function renderDefaultEngineSelect(){
-      const sel = document.getElementById('defaultEngineSelect');
-      sel.innerHTML = "";
-      engines.filter(e=>settings.enabledEngines.includes(e.id)).forEach(e=>{
-        const opt = document.createElement('option');
-        opt.value = e.id;
-        opt.textContent = e.name;
-        sel.appendChild(opt);
-      });
-      sel.value = settings.defaultEngineId;
-      sel.onchange = () => {
-        settings.defaultEngineId = sel.value;
-        saveSettings();
-        engineSelect.value = settings.defaultEngineId;
-      };
-    }
-
-    // -------- functions: history --------
-    function getHistory(){
-      try{
-        return JSON.parse(localStorage.getItem(STORAGE_KEYS.history)) || [];
-      }catch(e){ return []; }
-    }
-    function setHistory(list){
-      localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(list));
-    }
-    function addHistory(q){
-      if(!q) return;
-      const limit = Math.max(1, Number(settings.historyLimit) || 10);
-      let list = getHistory();
-      // dedupe / move to front
-      list = [q, ...list.filter(x=>x!==q)];
-      if(list.length > limit) list = list.slice(0, limit);
-      setHistory(list);
-      renderHistory();
-    }
-    function renderHistory(){
-      const list = getHistory();
-      historyContainer.innerHTML = "";
-      historySection.style.display = list.length ? "block" : "none";
-      list.forEach(q=>{
-        const chip = document.createElement('button');
-        chip.type = "button";
-        chip.className = "history-item";
-        chip.textContent = q;
-        chip.addEventListener('click', ()=>{
-          queryInput.value = q;
-          performSearch();
-        });
-        historyContainer.appendChild(chip);
-      });
-    }
-
-    // -------- search --------
-    function performSearch(){
-      const engineId = engineSelect.value;
-      const query = queryInput.value.trim();
-      if(!query || !engineId) return;
-      addHistory(query);
-      const engine = engines.find(e=>e.id===engineId);
-      const url = (engine?.url || "").replace("{query}", encodeURIComponent(query));
-      // open new tab
-      window.open(url, "_blank");
-    }
-
-    // -------- modal controls --------
-    const modal = document.getElementById('settingsModal');
-    function openModal(){
-      renderEngineToggleList();
-      renderDefaultEngineSelect();
-      renderCustomEngineList();
-      // set history limit radios
-      document.querySelectorAll('input[name="historyLimit"]').forEach(r=>{
-        r.checked = Number(r.value) === Number(settings.historyLimit);
-        r.onchange = () => { settings.historyLimit = Number(r.value); saveSettings(); };
-      });
-      // animation toggle
-      const anim = document.getElementById('animateInputToggle');
-      anim.checked = !!settings.animateInput;
-      anim.onchange = () => { settings.animateInput = anim.checked; saveSettings(); };
-      modal.style.display = "flex";
-    }
-    function closeModal(){ modal.style.display = "none"; }
-
-    // custom engines
-    function renderCustomEngineList(){
-      const list = document.getElementById('customEngineList');
-      list.innerHTML = "";
-      if(!settings.customEngines.length){
-        list.innerHTML = '<span class="small">（追加された検索先はまだありません）</span>';
-        return;
-      }
-      settings.customEngines.forEach((e, idx)=>{
-        const row = document.createElement('div');
-        row.className = "row";
-        row.innerHTML = `
-          <span>${e.name}</span>
-          <span class="small">${e.url}</span>
-        `;
-        const del = document.createElement('button');
-        del.className = "btn";
-        del.textContent = "削除";
-        del.onclick = ()=>{
-          // remove from enabled if present
-          settings.enabledEngines = settings.enabledEngines.filter(id => id !== e.id);
-          settings.customEngines.splice(idx,1);
-          saveSettings();
-          renderEngineToggleList();
-          renderDefaultEngineSelect();
-        };
-        row.appendChild(del);
-        list.appendChild(row);
-      });
-    }
-
-    function addCustomEngine(){
-      const name = document.getElementById('customName').value.trim();
-      const url  = document.getElementById('customUrl').value.trim();
-      if(!name || !url || !url.includes("{query}")){
-        alert("名前とURLテンプレート（{query} を含む）を入力してください。");
-        return;
-      }
-      const id = "custom_" + slugify(name) + "_" + Math.random().toString(36).slice(2,6);
-      settings.customEngines.push({ id, name, url });
-      settings.enabledEngines.push(id);
-      // default stays unless empty
-      saveSettings();
-      document.getElementById('customName').value = "";
-      document.getElementById('customUrl').value = "";
-      renderEngineToggleList();
-      renderDefaultEngineSelect();
-    }
-    function slugify(s){ return s.toLowerCase().replace(/[^\w]+/g,'-').replace(/^-+|-+$/g,''); }
-
-    // -------- events --------
-    function attachEvents(){
-      // Enter to search
-      queryInput.addEventListener('keydown', (e)=>{
-        if(e.key === "Enter"){ performSearch(); }
-      });
-      // optional: '/' to focus
-      window.addEventListener('keydown',(e)=>{
-        if(e.key === "/" && document.activeElement !== queryInput){
-          e.preventDefault(); queryInput.focus();
+  function renderEngineToggleList() {
+    const wrap = document.getElementById('engineToggleList');
+    wrap.innerHTML = "";
+    engines.forEach(e => {
+      const div = document.createElement('div');
+      div.className = "engine-item";
+      const cb = document.createElement('input');
+      cb.type = "checkbox";
+      cb.checked = settings.enabledEngines.includes(e.id);
+      cb.addEventListener('change', () => {
+        const set = new Set(settings.enabledEngines);
+        if (cb.checked) set.add(e.id); else set.delete(e.id);
+        settings.enabledEngines = Array.from(set);
+        if (!settings.enabledEngines.includes(settings.defaultEngineId)) {
+          settings.defaultEngineId = settings.enabledEngines[0] || "";
         }
+        saveSettings();
       });
-      // topbar settings
-      document.getElementById('openSettings').onclick = openModal;
-      document.getElementById('closeSettings').onclick = closeModal;
+      const label = document.createElement('label');
+      label.textContent = e.name;
+      div.append(cb, label);
+      wrap.appendChild(div);
+    });
+  }
 
-      // modal actions
-      document.getElementById('saveSettings').onclick = ()=>{ saveSettings(); closeModal(); };
-      document.getElementById('resetSettings').onclick = ()=>{ resetSettings(); };
-      document.getElementById('clearHistory').onclick = ()=>{
-        localStorage.removeItem(STORAGE_KEYS.history);
-        renderHistory();
-      };
-      document.getElementById('addCustomEngine').onclick = addCustomEngine;
+  function renderDefaultEngineSelect() {
+    const sel = document.getElementById('defaultEngineSelect');
+    sel.innerHTML = "";
+    engines.filter(e => settings.enabledEngines.includes(e.id)).forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.id;
+      opt.textContent = e.name;
+      sel.appendChild(opt);
+    });
+    sel.value = settings.defaultEngineId;
+    sel.onchange = () => {
+      settings.defaultEngineId = sel.value;
+      saveSettings();
+      engineSelect.value = settings.defaultEngineId;
+    };
+  }
 
-      // close modal by backdrop click
-      modal.addEventListener('click',(e)=>{ if(e.target === modal) closeModal(); });
+  // -------- history --------
+  function getHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.history)) || [];
+    } catch (e) { return []; }
+  }
+
+  function setHistory(list) {
+    localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(list));
+  }
+
+  function addHistory(q) {
+    if (!q) return;
+    const limit = Math.max(1, Number(settings.historyLimit) || 10);
+    let list = getHistory();
+    list = [q, ...list.filter(x => x !== q)];
+    if (list.length > limit) list = list.slice(0, limit);
+    setHistory(list);
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const list = getHistory();
+    historyContainer.innerHTML = "";
+    historySection.style.display = list.length ? "block" : "none";
+    list.forEach(q => {
+      const chip = document.createElement('button');
+      chip.type = "button";
+      chip.className = "history-item";
+      chip.textContent = q;
+      chip.addEventListener('click', () => {
+        queryInput.value = q;
+        performSearch();
+      });
+      historyContainer.appendChild(chip);
+    });
+  }
+
+  // -------- search --------
+  function performSearch() {
+    const engineId = engineSelect.value;
+    const query = queryInput.value.trim();
+    if (!query || !engineId) return;
+    addHistory(query);
+    const engine = engines.find(e => e.id === engineId);
+    const url = (engine?.url || "").replace("{query}", encodeURIComponent(query));
+    window.open(url, "_blank");
+  }
+
+  // -------- modal --------
+  function openModal() {
+    renderEngineToggleList();
+    renderDefaultEngineSelect();
+    renderCustomEngineList();
+    document.querySelectorAll('input[name="historyLimit"]').forEach(r => {
+      r.checked = Number(r.value) === Number(settings.historyLimit);
+      r.onchange = () => { settings.historyLimit = Number(r.value); saveSettings(); };
+    });
+    const anim = document.getElementById('animateInputToggle');
+    anim.checked = !!settings.animateInput;
+    anim.onchange = () => { settings.animateInput = anim.checked; saveSettings(); };
+    modal.style.display = "flex";
+  }
+
+  function closeModal() {
+    modal.style.display = "none";
+  }
+
+  function renderCustomEngineList() {
+    const list = document.getElementById('customEngineList');
+    list.innerHTML = "";
+    if (!settings.customEngines.length) {
+      list.innerHTML = '<span class="small">（追加された検索先はまだありません）</span>';
+      return;
     }
+    settings.customEngines.forEach((e, idx) => {
+      const row = document.createElement('div');
+      row.className = "row";
+      row.innerHTML = `<span>${e.name}</span><span class="small">${e.url}</span>`;
+      const del = document.createElement('button');
+      del.className = "btn";
+      del.textContent = "削除";
+      del.onclick = () => {
+        settings.enabledEngines = settings.enabledEngines.filter(id => id !== e.id);
+        settings.customEngines.splice(idx, 1);
+        saveSettings();
+        renderEngineToggleList();
+        renderDefaultEngineSelect();
+      };
+      row.appendChild(del);
+      list.appendChild(row);
+    });
+  }
+
+  function addCustomEngine() {
+    const name = document.getElementById('customName').value.trim();
+    const url = document.getElementById('customUrl').value.trim();
+    if (!name || !url || !url.includes("{query}")) {
+      alert("名前とURLテンプレート（{query} を含む）を入力してください。");
+      return;
+    }
+    const id = "custom_" + slugify(name) + "_" + Math.random().toString(36).slice(2, 6);
+    settings.customEngines.push({ id, name, url });
+    settings.enabledEngines.push(id);
+    saveSettings();
+    document.getElementById('customName').value = "";
+    document.getElementById('customUrl').value = "";
+    renderEngineToggleList();
+    renderDefaultEngineSelect();
+  }
+
+  function slugify(s) {
+    return s.toLowerCase().replace(/[^\w]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
+  // -------- events --------
+  function attachEvents() {
+    queryInput.addEventListener('keydown', (e) => {
+      if (e.key === "Enter") performSearch();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === "/" && document.activeElement !== queryInput) {
+        e.preventDefault();
+        queryInput.focus();
+      }
+    });
+
+    document.getElementById('openSettings').onclick = openModal;
+    document.getElementById('closeSettings').onclick = closeModal;
+    document.getElementById('saveSettings').onclick = () => { saveSettings(); closeModal(); };
+    document.getElementById('resetSettings').onclick = () => { resetSettings(); };
+    document.getElementById('clearHistory').onclick = () => {
+      localStorage.removeItem(STORAGE_KEYS.history);
+      renderHistory();
+    };
+    document.getElementById('addCustomEngine').onclick = addCustomEngine;
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+});
+
   </script>
 </body>
 </html>
