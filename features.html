@@ -180,7 +180,7 @@ body {
     <i class="fas fa-moon"></i>
     <h2>ダークモード</h2>
     <p>夜の作業も、目にやさしく静かに。</p>
-    <a href="/settings#theme">切り替える</a>
+    <a href="javascript:void(0)" id="toggleThemeBtn">切り替える</a>
   </div>
   <div class="feature-card">
     <i class="fas fa-gear"></i>
@@ -193,6 +193,25 @@ body {
 <footer>
   © 2025 Ad-Hub. 静けさと創造性を大切に。
 </footer>
+<script>
+  // 既存の applySettings() のあとに追加
+  const toggleThemeBtn = document.getElementById('toggleThemeBtn');
+  if (toggleThemeBtn) {
+    toggleThemeBtn.addEventListener('click', () => {
+      const isDark = document.body.classList.contains('dark');
+      if (isDark) {
+        document.body.classList.remove('dark');
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.body.classList.add('dark');
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+  }
+</script>
 
 </body>
+  
 </html>
