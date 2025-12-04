@@ -13,15 +13,22 @@
   
 
 <!-- 検索結果用（Googleが推奨する48×48以上） -->
-<link rel="icon" type="image/png" sizes="48x48" href="/favicon2.png">
-      <script type="application/ld+json">
-    {
-    "@context" : "https://schema.org",
-    "@type" : "WebPage",
-    "name" : "ad-hub",
-    "url" : "https://ad-hub.f5.si/memo-folder"
-    }
-  </script>
+<!-- 構造化データ（JSON-LD） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "メモフォルダー",
+  "url": "https://ad-hub.f5.si/memo-folder",
+  "description": "メモをフォルダーにまとめて管理できる便利なWebアプリです。",
+  "inLanguage": "ja",
+  "publisher": {
+    "@type": "Organization",
+    "name": "ad-hub",
+    "url": "https://ad-hub.f5.si"
+  }
+}
+</script>
   
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-D6SC2D5KK4"></script>
@@ -359,5 +366,6 @@ if (theme === 'dark') {
   </script>
 </body>
 </html>
+
 
 
