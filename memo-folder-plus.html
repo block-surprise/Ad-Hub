@@ -43,49 +43,155 @@
 </script>
 
 <style>
+ <style>
     :root {
-  --bg: #f9fbff;
-  --text: #111;
-  --card: #fff;
-  --padding: 32px;
-}
-body.dark {
-  --bg: #0f172a;
-  --text: #f1f5f9;
-  --card: #1e293b;
-}
-body {
-  margin: 0;
-  font-family: var(--font, "Inter", "Hiragino Sans", sans-serif);
-  background: var(--bg);
-  color: var(--text);
-}
-
-  .header-row { display:flex; justify-content:space-between; align-items:center; padding:20px; }
-  h2.gradient-title {
-    background:linear-gradient(90deg,#2458b8,#ff4081);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    font-size:22px; margin:0;
-  }
-  #search { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
-  .file-button-grid { display:flex; flex-direction:column; gap:8px; padding:20px; }
-  .file-name-button { padding:14px; background:#fff; border:1px solid #ccc; border-radius:8px; cursor:pointer; font-size:16px; }
-  .file-name-button.dragging { opacity:0.5; }
-  .memo-card { background:#f0f0f0; border-radius:8px; padding:16px; margin-bottom:16px; }
-  .memo-title { font-weight:bold; margin-bottom:6px; }
-  .memo-body { font-size:15px; color:#555; }
-  .memo-meta { font-size:12px; color:#999; margin-top:6px; }
-  .fab { position:fixed; bottom:24px; right:24px;
-    background:linear-gradient(135deg,#2458b8,#ff4081); color:#fff;
-    border-radius:50%; width:56px; height:56px; font-size:28px;
-    display:flex; align-items:center; justify-content:center; cursor:pointer;
-  }
-  .fab-menu { position:fixed; bottom:90px; right:24px; background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.1); display:none; }
-  .fab-menu button { display:block; width:100%; padding:12px; border:none; background:none; text-align:left; cursor:pointer; font-size:15px; }
-  .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; }
-  .modal-content { background:#fff; padding:24px; border-radius:12px; width:95%; max-width:700px; }
-  .modal-content input,.modal-content textarea { width:100%; margin-bottom:12px; padding:10px; border:1px solid #ccc; border-radius:6px; }
-  .modal-content textarea { height:200px; font-size:16px; }
+      --bg: #f9fbff;
+      --text: #111;
+      --card: #fff;
+      --muted: #666;
+      --border: #ccc;
+      --padding: 32px;
+    }
+    body.dark {
+      --bg: #0f172a;
+      --text: #f1f5f9;
+      --card: #1e293b;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+    body {
+      margin: 0;
+      font-family: "Inter", "Hiragino Sans", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+    h2.gradient-title {
+      background: linear-gradient(90deg, #2458b8, #ff4081);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 22px;
+      margin: 0;
+    }
+    #search {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      background: var(--card);
+      color: var(--text);
+    }
+    .file-button-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 20px;
+    }
+    .file-name-button {
+      padding: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .file-name-button.dragging {
+      opacity: 0.5;
+    }
+    .memo-card {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+    .memo-title {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .memo-body {
+      font-size: 15px;
+      color: var(--muted);
+    }
+    .memo-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: linear-gradient(135deg, #2458b8, #ff4081);
+      color: #fff;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .fab-menu {
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      background: var(--card);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+    .fab-menu button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      font-size: 15px;
+      color: var(--text);
+    }
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: var(--card);
+      padding: 24px;
+      border-radius: 12px;
+      width: 95%;
+      max-width: 700px;
+    }
+    .modal-content input,
+    .modal-content textarea {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .modal-content textarea {
+      height: 200px;
+      font-size: 16px;
+    }
+  </style>
 </style>
 </head>
 <body>
