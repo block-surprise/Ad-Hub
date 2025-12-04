@@ -232,46 +232,49 @@
         if (document.getElementById('live-preview').checked) generateQR();
       }));
 
-    function generateQR() {
-      const text = document.getElementById('qr-text').value || ' ';
-      const size = parseInt(document.getElementById('qr-size').value);
-      const margin = parseInt(document.getElementById('qr-margin').value);
-      const dark = document.getElementById('qr-dark').value;
-      const light = document.getElementById('qr-light').value;
-      const transparent = document.getElementById('qr-transparent').checked;
+function generateQR() {
+  const text = document.getElementById('qr-text').value || ' ';
+  const size = parseInt(document.getElementById('qr-size').value);
+  const margin = parseInt(document.getElementById('qr-margin').value);
+  const dark = document.getElementById('qr-dark').value;
+  const light = document.getElementById('qr-light').value;
+  const transparent = document.getElementById('qr-transparent').checked;
 
-      const qr = qrcode(0, 'H');
-      qr.addData(text);
-      qr.make();
+  const qr = qrcode(0, 'H');
+  qr.addData(text);
+  qr.make();
 
-      const cellSize = Math.floor(size / qr.getModuleCount());
-      const qrSize = cellSize * qr.getModuleCount();
-      canvas.width = canvas.height = qrSize + margin * 2 * cellSize;
+  const cellSize = Math.floor(size / qr.getModuleCount());
+  const qrSize = cellSize * qr.getModuleCount();
+  canvas.width = canvas.height = qrSize + margin * 2 * cellSize;
 
-      ctx.fillStyle = transparent ? 'rgba(0,0,0,0)' : light;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = transparent ? 'rgba(0,0,0,0)' : light;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      for (let r = 0; r < qr.getModuleCount(); r++) {
-        for (let c = 0; c < qr.getModuleCount(); c++) {
-          if (qr.isDark(r, c)) {
-            ctx.fillStyle = dark;
-            ctx.fillRect(
-              margin * cellSize + c * cellSize,
-              margin * cellSize + r * cellSize,
-              cellSize, cellSize
-            );
-          }
-        }
-      }
-
-      if (iconImage) {
-        const iconScale = parseInt(document.getElementById('icon-size').value) / 100;
-        const iconSize = qrSize * iconScale;
-        const x = (canvas.width - iconSize) / 2;
-        const y = (canvas.height - iconSize) / 2;
-        ctx.drawImage(iconImage, x, y, iconSize, iconSize);
+  for (let r = 0; r < qr.getModuleCount(); r++) {
+    for (let c = 0; c < qr.getModuleCount(); c++) {
+      if (qr.isDark(r, c)) {
+        ctx.fillStyle = dark;
+        ctx.fillRect(
+          margin * cellSize + c * cellSize,
+          margin * cellSize + r * cellSize,
+          cellSize, cellSize
+        );
       }
     }
+  }
+
+  if (iconImage) {
+    const iconScale = parseInt(document.getElementById('icon-size').value) / 100;
+    const iconSize = qrSize * iconScale;
+    const x = (canvas.width - iconSize) / 2;
+    const y = (canvas.height - iconSize) / 2;
+    ctx.drawImage(iconImage, x, y, iconSize, iconSize);
+  }
+
+  // ✅ ここで履歴に保存！
+  saveToHistory({ text, dark, light });
+}
 
     function downloadPNG() {
       const link = document.createElement('a');
@@ -346,6 +349,18 @@
     }
 
     generateQR();
+    
+    function saveToHistory(data) {
+  const history = JSON.parse(localStorage.getItem('qr-history') || '[]');
+  history.unshift({
+    text: data.text,
+    dark: data.dark,
+    light: data.light,
+    created: Date.now()
+  });
+  localStorage.setItem('qr-history', JSON.stringify(history.slice(0, 50))); // 最大50件
+}
+
   </script>
 </body>
 </html>
