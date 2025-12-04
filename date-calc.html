@@ -28,7 +28,13 @@
     }
     h1 {
       font-size: 1.6rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .description {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      opacity: 0.85;
+      margin-bottom: 1.5rem;
     }
     .card {
       background: var(--card);
@@ -57,6 +63,11 @@
       cursor: pointer;
       border-radius: 4px;
     }
+    .hint {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
     .result {
       margin-top: 2rem;
       font-size: 1.1rem;
@@ -78,6 +89,10 @@
 <body>
   <div class="card">
     <h1>日付計算ツール</h1>
+    <p class="description">
+      日付にまつわるちょっとした「知りたい」を、すぐに解決できるシンプルなツールです。<br>
+      「○日後はいつ？」「この2つの日付の間は何日？」そんな疑問に、正確にお答えします。
+    </p>
 
     <label>モード選択:
       <select id="mode">
@@ -85,6 +100,7 @@
         <option value="diff">日数差を計算</option>
       </select>
     </label>
+    <p class="hint">日付を足すか、差を調べるかを選んでください。</p>
 
     <div id="input-add">
       <label>開始日:
@@ -111,8 +127,7 @@
     <div class="ad">（ここに広告が入ります）</div>
   </div>
 
-<footer>© 2025 Ad-Hub</footer>
-
+  <footer>© 2025 Ad-Hub<br><span style="font-size:0.75em;">時の流れに、そっと寄り添う。</span></footer>
 
   <script>
     const modeSelect = document.getElementById('mode');
