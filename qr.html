@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>QRコード生成（詳細設定付き）</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      padding: 2rem;
+    }
+    h1 { font-size: 20px; }
+    .row { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 4px; }
+    input, select, button {
+      padding: 8px;
+      font: inherit;
+      margin-right: 8px;
+    }
+    canvas {
+      margin-top: 1rem;
+      border: 1px solid #ccc;
+    }
+    .details {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .icon-preview {
+      max-width: 64px;
+      max-height: 64px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>QRコード生成（詳細設定付き）</h1>
+
+  <div class="row">
+    <label>テキストまたはURL</label>
+    <input type="text" id="qr-text" value="https://ad-hub.f5.si/" size="40" />
+    <button onclick="generateQR()">生成</button>
+  </div>
+
+  <div class="details">
+    <h2>詳細設定</h2>
+
+    <div class="row">
+      <label>サイズ / 余白 / 背景透過</label>
+      <select id="qr-size">
+        <option value="256">256px</option>
+        <option value="384">384px</option>
+        <option value="512" selected>512px</option>
+      </select>
+      <input type="number" id="qr-margin" value="2" min="0" max="16" />
+      <label><input type="checkbox" id="qr-transparent" /> 背景透過</label>
+    </div>
+
+    <div class="row">
+      <label>前景色 / 背景色</label>
+      <input type="color" id="qr-dark" value="#000000" />
+      <input type="color" id="qr-light" value="#ffffff" />
+    </div>
+
+    <div class="row">
+      <label>中央アイコン画像</label>
+      <input type="file" id="qr-icon" accept="image/*" />
+      <input type="range" id="icon-size" min="10" max="50" value="20" />
+      <span id="icon-size-label">20%</span>
+      <br />
+      <img id="icon-preview" class="icon-preview" />
+    </div>
+
+    <div class="row">
+      <label><input type="checkbox" id="live-preview" checked /> ライブプレビュー</label>
+    </div>
+
+    <div class="row">
+      <button onclick="downloadPNG()">PNGで保存</button>
+      <button onclick="downloadSVG()">SVGで保存</button>
+    </div>
+  </div>
+
+  <canvas id="qr-canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('qr-canvas');
+    const ctx = canvas.getContext('2d');
+    const iconInput = document.getElementById('qr-icon');
+    const iconPreview = document.getElementById('icon-preview');
+    let iconImage = null;
+
+    iconInput.addEventListener('change', () => {
+      const file = iconInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        iconImage = new Image();
+        iconImage.onload = () => generateQR();
+        iconImage.src = reader.result;
+        iconPreview.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('icon-size').addEventListener('input', e => {
+      document.getElementById('icon-size-label').textContent = e.target.value + '%';
+      if (document.getElementById('live-preview').checked) generateQR();
+    });
+
+    document.querySelectorAll('#qr-text, #qr-size, #qr-margin, #qr-dark, #qr-light, #qr-transparent')
+      .forEach(el => el.addEventListener('input', () => {
+        if (document.getElementById('live-preview').checked) generateQR();
+      }));
+
+    function generateQR() {
+      const text = document.getElementById('qr-text').value || ' ';
+      const size = parseInt(document.getElementById('qr-size').value);
+      const margin = parseInt(document.getElementById('qr-margin').value);
+      const dark = document.getElementById('qr-dark').value;
+      const light = document.getElementById('qr-light').value;
+      const transparent = document.getElementById('qr-transparent').checked;
+
+      const qr = qrcode(0, 'H');
+      qr.addData(text);
+      qr.make();
+
+      const cellSize = Math.floor(size / qr.getModuleCount());
+      const qrSize = cellSize * qr.getModuleCount();
+      canvas.width = canvas.height = qrSize + margin * 2 * cellSize;
+
+      ctx.fillStyle = transparent ? 'rgba(0,0,0,0)' : light;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let r = 0; r < qr.getModuleCount(); r++) {
+        for (let c = 0; c < qr.getModuleCount(); c++) {
+          if (qr.isDark(r, c)) {
+            ctx.fillStyle = dark;
+            ctx.fillRect(
+              margin * cellSize + c * cellSize,
+              margin * cellSize + r * cellSize,
+              cellSize, cellSize
+            );
+          }
+        }
+      }
+
+      if (iconImage) {
+        const iconScale = parseInt(document.getElementById('icon-size').value) / 100;
+        const iconSize = qrSize * iconScale;
+        const x = (canvas.width - iconSize) / 2;
+        const y = (canvas.height - iconSize) / 2;
+        ctx.drawImage(iconImage, x, y, iconSize, iconSize);
+      }
+    }
+
+    function downloadPNG() {
+      const link = document.createElement('a');
+      link.download = 'qr.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function downloadSVG() {
+      alert('SVG保存はこのバージョンでは未対応です（別ライブラリが必要です）');
+    }
+
+    generateQR();
+  </script>
+</body>
+</html>
