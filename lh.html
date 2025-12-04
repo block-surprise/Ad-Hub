@@ -370,20 +370,26 @@ function renderLinks(data) {
 
 // セクション切り替え
 function showSection(section) {
-  document.getElementById('home').classList.add('hidden');
-  document.getElementById('homeSection').classList.add('hidden');
-  document.getElementById('myLinksSection').classList.add('hidden');
-  document.getElementById('popularSection').classList.add('hidden');
-  
+  const home = document.getElementById('home');
+  const homeSection = document.getElementById('homeSection');
+  const myLinks = document.getElementById('myLinksSection');
+  const popular = document.getElementById('popularSection');
+
+  if (home) home.classList.add('hidden');
+  if (homeSection) homeSection.classList.add('hidden');
+  if (myLinks) myLinks.classList.add('hidden');
+  if (popular) popular.classList.add('hidden');
+
   if (section === 'home') {
-    document.getElementById('home').classList.remove('hidden');
-    document.getElementById('homeSection').classList.remove('hidden');
+    if (home) home.classList.remove('hidden');
+    if (homeSection) homeSection.classList.remove('hidden');
   } else if (section === 'myLinks') {
-    document.getElementById('myLinksSection').classList.remove('hidden');
+    if (myLinks) myLinks.classList.remove('hidden');
   } else if (section === 'popular') {
-    document.getElementById('popularSection').classList.remove('hidden');
+    if (popular) popular.classList.remove('hidden');
   }
 }
+
 </script>
 </body>
 </html>
