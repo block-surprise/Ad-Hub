@@ -64,6 +64,8 @@ if (theme === 'dark') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>メモフォルダー</title>
 
+ 
+
   <style>
     :root {
       --bg: #f8f8f8;
@@ -71,6 +73,7 @@ if (theme === 'dark') {
       --card: #fff;
       --muted: #666;
       --border: #ccc;
+      --padding: 32px;
     }
     :root.dark {
       --bg: #0f172a;
@@ -79,27 +82,18 @@ if (theme === 'dark') {
       --muted: #94a3b8;
       --border: #334155;
     }
+
     body {
       margin: 0;
-      font-family: sans-serif;
+      font-family: var(--font, 'Helvetica Neue', sans-serif);
       background: var(--bg);
       color: var(--text);
     }
-    .header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
-    }
-    .file-button-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      padding: 16px;
-    }
-    .file-wrapper {
-      position: relative;
-    }
+
+    .header-row { display: flex; justify-content: space-between; align-items: center; padding: 16px; }
+    .file-button-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; padding: 16px; }
+    .file-wrapper { position: relative; }
+
     .file-name-button {
       width: 100%;
       padding: 12px;
@@ -109,16 +103,13 @@ if (theme === 'dark') {
       color: var(--text);
       cursor: pointer;
     }
+
     .delete-button {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-size: 16px;
-      cursor: pointer;
+      position: absolute; top: 6px; right: 6px;
+      background: none; border: none; color: var(--muted);
+      font-size: 16px; cursor: pointer;
     }
+
     .memo-card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -126,88 +117,46 @@ if (theme === 'dark') {
       padding: 12px;
       margin-bottom: 16px;
     }
-    .memo-body {
-      color: var(--muted);
-    }
+    .memo-body { color: var(--muted); }
+
     .fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--text);
-      color: var(--bg);
-      border-radius: 50%;
-      width: 48px;
-      height: 48px;
-      font-size: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--text); color: var(--bg);
+      border-radius: 50%; width: 48px; height: 48px; font-size: 24px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
     }
     .fab-menu {
-      position: fixed;
-      bottom: 80px;
-      right: 24px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      display: none;
+      position: fixed; bottom: 80px; right: 24px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 6px; display: none;
     }
     .fab-menu button {
-      display: block;
-      width: 100%;
-      padding: 10px 16px;
-      background: none;
-      border: none;
-      color: var(--text);
-      text-align: left;
-      cursor: pointer;
+      display: block; width: 100%; padding: 10px 16px;
+      background: none; border: none; color: var(--text);
+      text-align: left; cursor: pointer;
     }
+
     .modal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); display: none;
+      align-items: center; justify-content: center;
     }
     .modal-content {
-      background: var(--card);
-      padding: 20px;
-      border-radius: 8px;
-      width: 90%;
-      max-width: 400px;
-      color: var(--text);
+      background: var(--card); color: var(--text);
+      padding: 20px; border-radius: 8px; width: 90%; max-width: 400px;
     }
-    .modal-content input,
-    .modal-content textarea,
-    .modal-content select {
-      width: 100%;
-      margin-bottom: 12px;
-      padding: 8px;
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-    }
-    .theme-toggle {
-      margin-left: 16px;
-      cursor: pointer;
+    .modal-content input, .modal-content textarea, .modal-content select {
+      width: 100%; margin-bottom: 12px; padding: 8px;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 4px;
     }
   </style>
-
-  <script>
-    const theme = localStorage.getItem('theme');
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    }
-  </script>
 </head>
 <body>
 
   <div class="header-row">
     <h2>ファイル一覧</h2>
+    <button onclick="toggleTheme()" title="テーマ切替">🌗</button>
   </div>
 
   <div id="home-view">
@@ -238,17 +187,44 @@ if (theme === 'dark') {
     <div class="modal-content">
       <select id="memo-file-select"></select>
       <input type="text" id="memo-title-input" placeholder="メモのタイトル" />
-      <textarea id="memo-body" rows="4" placeholder="詳細"></textarea>
+      <textarea id="memo-body" rows="4" placeholder="詳細（任意）"></textarea>
       <button onclick="confirmMemo()">追加</button>
       <button onclick="closeMemoModal()">キャンセル</button>
     </div>
   </div>
 
- <script>
+  <script>
+    // ---------- 状態 ----------
     let files = JSON.parse(localStorage.getItem('files') || '[]');
     let memos = JSON.parse(localStorage.getItem('memos') || '{}');
     let currentFile = null;
 
+    // ---------- UI操作 ----------
+    function toggleTheme() {
+      const root = document.documentElement;
+      const isDark = root.classList.contains('dark');
+      if (isDark) {
+        root.classList.remove('dark');
+        localStorage.removeItem('theme');
+      } else {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    function toggleFabMenu() {
+      const menu = document.getElementById('fab-menu');
+      if (!menu) return;
+      const display = getComputedStyle(menu).display;
+      menu.style.display = (display === 'none') ? 'block' : 'none';
+    }
+    function closeFabMenu() {
+      const menu = document.getElementById('fab-menu');
+      if (!menu) return;
+      menu.style.display = 'none';
+    }
+
+    // ---------- ファイル ----------
     function renderFileButtons() {
       const container = document.getElementById('file-buttons');
       container.innerHTML = '';
@@ -269,11 +245,35 @@ if (theme === 'dark') {
       });
     }
 
+    function openFileModal() {
+      const modal = document.getElementById('file-modal');
+      const input = document.getElementById('file-name');
+      if (!modal || !input) return;
+      input.value = '';
+      modal.style.display = 'flex';
+      closeFabMenu();
+    }
+    function closeFileModal() {
+      const modal = document.getElementById('file-modal');
+      if (!modal) return;
+      modal.style.display = 'none';
+    }
+    function confirmFile() {
+      const name = document.getElementById('file-name').value.trim();
+      if (!name || files.includes(name)) return;
+      files.unshift(name);
+      localStorage.setItem('files', JSON.stringify(files));
+      renderFileButtons();
+      closeFileModal();
+    }
+
+    // ---------- メモ ----------
     function openMemoView(fileName) {
       currentFile = fileName;
       document.getElementById('memo-title').textContent = fileName;
       const list = document.getElementById('memo-list');
-      list.innerHTML = (memos[fileName] || []).map((memo, index) => `
+      const arr = (memos[fileName] || []);
+      list.innerHTML = arr.map((memo, index) => `
         <div class="memo-card">
           <div class="memo-title">${memo.title}</div>
           ${memo.body ? `<div class="memo-body">${memo.body}</div>` : ''}
@@ -290,32 +290,12 @@ if (theme === 'dark') {
       document.getElementById('home-view').style.display = 'block';
     }
 
-    function toggleFabMenu() {
-      const menu = document.getElementById('fab-menu');
-      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function openFileModal() {
-      document.getElementById('file-name').value = '';
-      document.getElementById('file-modal').style.display = 'flex';
-      closeFabMenu();
-    }
-
-    function closeFileModal() {
-      document.getElementById('file-modal').style.display = 'none';
-    }
-
-    function confirmFile() {
-      const name = document.getElementById('file-name').value.trim();
-      if (!name || files.includes(name)) return;
-      files.unshift(name);
-      localStorage.setItem('files', JSON.stringify(files));
-      renderFileButtons();
-      closeFileModal();
-    }
-
     function openMemoModal() {
       const select = document.getElementById('memo-file-select');
+      const modal = document.getElementById('memo-modal');
+      if (!select || !modal) return;
+
+      // ファイル選択肢を再構成
       select.innerHTML = '';
       files.forEach(name => {
         const option = document.createElement('option');
@@ -323,20 +303,28 @@ if (theme === 'dark') {
         option.textContent = name;
         select.appendChild(option);
       });
-      document.getElementById('memo-title').value = '';
-      document.getElementById('memo-body').value = '';
-            document.getElementById('memo-modal').style.display = 'flex';
+
+      // 入力初期化（IDは memo-title-input で統一）
+      const titleInput = document.getElementById('memo-title-input');
+      const bodyInput = document.getElementById('memo-body');
+      if (titleInput) titleInput.value = '';
+      if (bodyInput) bodyInput.value = '';
+
+      modal.style.display = 'flex';
       closeFabMenu();
     }
-
     function closeMemoModal() {
-      document.getElementById('memo-modal').style.display = 'none';
+      const modal = document.getElementById('memo-modal');
+      if (!modal) return;
+      modal.style.display = 'none';
     }
 
     function confirmMemo() {
       const file = document.getElementById('memo-file-select').value;
-      const title = document.getElementById('memo-title').value.trim();
-      const body = document.getElementById('memo-body').value.trim();
+      const titleInput = document.getElementById('memo-title-input');
+      const bodyInput = document.getElementById('memo-body');
+      const title = titleInput ? titleInput.value.trim() : '';
+      const body = bodyInput ? bodyInput.value.trim() : '';
       if (!file || !title) return;
       if (!memos[file]) memos[file] = [];
       memos[file].unshift({ title, body });
@@ -366,35 +354,8 @@ if (theme === 'dark') {
       }
     }
 
-    function toggleTheme() {
-      const root = document.documentElement;
-      const isDark = root.classList.contains('dark');
-      if (isDark) {
-        root.classList.remove('dark');
-        localStorage.removeItem('theme');
-      } else {
-        root.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-      }
-    }
-
+    // 初期描画
     renderFileButtons();
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
