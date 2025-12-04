@@ -5,74 +5,52 @@
   <title>Ad-Hub Light</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="メモも広告も、あなたの手のひらで。Ad-Hubは静かで美しい活動拠点です。">
-  <meta name="google-adsense-account" content="ca-pub-3571574988222927">
   <link rel="icon" href="/favicon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <!-- AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
 
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-D6SC2D5KK4"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-D6SC2D5KK4');
-  </script>
-
   <style>
-    :root {
-      --bg: #fefefe;
-      --fg: #111;
-      --muted: #6b7280;
-      --accent: #0078d7;
-      --ring: #e5e7eb;
-      --card: #ffffff;
-    }
     body {
       margin: 0;
-      background: linear-gradient(to bottom right, #e0f7ff, #ffffff);
-      color: var(--fg);
       font-family: "Inter", "Hiragino Sans", sans-serif;
+      background: #f9fbff;
+      color: #111;
     }
-    header {
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--ring);
-    }
-    .logo {
-      font-weight: bold;
-      font-size: 22px;
-      background: linear-gradient(90deg, #0078d7, #00c6ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    nav a {
-      margin-left: 16px;
-      text-decoration: none;
-      color: var(--accent);
-      font-weight: 500;
-    }
+
+    /* ヒーローセクション */
     .hero {
-      text-align: center;
-      padding: 80px 20px 40px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      height: 100vh;
+      padding: 60px;
+      background: linear-gradient(135deg, #dbeafe, #f0f9ff);
+      box-sizing: border-box;
     }
-    .hero h1 {
-      font-size: 36px;
-      margin-bottom: 16px;
+    .hero-text {
+      flex: 1;
+      min-width: 300px;
+      max-width: 600px;
     }
-    .hero p {
-      font-size: 16px;
-      color: var(--muted);
+    .hero-text h1 {
+      font-size: 48px;
+      line-height: 1.2;
       margin-bottom: 24px;
     }
+    .hero-text p {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 32px;
+    }
     .cta-button {
-      background: var(--accent);
+      background: #0078d7;
       color: white;
-      padding: 12px 24px;
+      padding: 16px 32px;
+      font-size: 16px;
+      border: none;
       border-radius: 8px;
       text-decoration: none;
       font-weight: bold;
@@ -81,17 +59,43 @@
     .cta-button:hover {
       background: #005fa3;
     }
+    .hero-image {
+      flex: 1;
+      text-align: center;
+      min-width: 300px;
+    }
+    .hero-image img {
+      max-width: 90%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    /* 機能紹介 */
     .features {
-      max-width: 800px;
-      margin: 40px auto;
+      max-width: 1000px;
+      margin: 80px auto 40px;
       padding: 0 20px;
     }
+    .features h2 {
+      font-size: 28px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .card-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
     .card {
-      background: var(--card);
-      border: 1px solid var(--ring);
+      background: white;
+      border: 1px solid #e5e7eb;
       border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
+      padding: 24px;
+      flex: 1;
+      min-width: 260px;
+      max-width: 300px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
     .card h3 {
@@ -99,54 +103,78 @@
       font-size: 20px;
     }
     .card p {
-      color: var(--muted);
+      color: #666;
       font-size: 14px;
     }
+
+    /* 世界観セクション */
+    .philosophy {
+      text-align: center;
+      padding: 60px 20px;
+      font-style: italic;
+      color: #555;
+      background: #f0f4f8;
+    }
+
+    /* フッター */
     footer {
       text-align: center;
       padding: 32px 20px;
-      color: var(--muted);
+      color: #888;
       font-size: 12px;
-      border-top: 1px solid var(--ring);
-      background: var(--bg);
+      border-top: 1px solid #e5e7eb;
+      background: #fff;
     }
-    @media (max-width: 600px) {
-      .hero h1 { font-size: 28px; }
-      .hero p { font-size: 14px; }
-      .card { padding: 16px; }
+
+    @media (max-width: 768px) {
+      .hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 20px;
+        height: auto;
+      }
+      .hero-text h1 {
+        font-size: 36px;
+      }
+      .hero-image {
+        margin-top: 40px;
+      }
     }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">Ad-Hub Light</div>
-  <nav>
-    <a href="#features">機能</a>
-    <a href="lh">リンク</a>
-    <a href="memo-folder">メモ</a>
-  </nav>
-</header>
-
 <section class="hero">
-  <h1>メモも簡単、広告も自由。</h1>
-  <p>Ad-Hubは、あなたの活動を支える静かなツールボックス。<br>シンプルで美しい体験を、今すぐ。</p>
-  <a href="#features" class="cta-button">はじめる</a>
+  <div class="hero-text">
+    <h1>メモも簡単、広告も自由。</h1>
+    <p>Ad-Hubは、あなたの活動を支える静かなツールボックス。<br>シンプルで美しい体験を、今すぐ。</p>
+    <a href="#features" class="cta-button">今すぐはじめる</a>
+  </div>
+  <div class="hero-image">
+    <img src="https://source.unsplash.com/600x400/?workspace,technology" alt="Ad-Hubイメージ">
+  </div>
 </section>
 
 <section class="features" id="features">
-  <div class="card">
-    <h3>📌 メモも簡単</h3>
-    <p>アイデアをすぐに書き留めて、フォルダーで整理。シンプルで静かな書き心地。</p>
+  <h2>Ad-Hubでできること</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h3>📌 メモも簡単</h3>
+      <p>アイデアをすぐに書き留めて、フォルダーで整理。シンプルで静かな書き心地。</p>
+    </div>
+    <div class="card">
+      <h3>🖼️ 広告も自由</h3>
+      <p>画像・動画・テキスト広告を生成して、あなたのサイトにぴったりの形で表示。</p>
+    </div>
+    <div class="card">
+      <h3>🔗 導線も美しく</h3>
+      <p>リンク集や案内ページを、詩的で洗練されたUIでまとめられます。</p>
+    </div>
   </div>
-  <div class="card">
-    <h3>🖼️ 広告も自由</h3>
-    <p>画像・動画・テキスト広告を生成して、あなたのサイトにぴったりの形で表示。</p>
-  </div>
-  <div class="card">
-    <h3>🔗 導線も美しく</h3>
-    <p>リンク集や案内ページを、詩的で洗練されたUIでまとめられます。</p>
-  </div>
+</section>
+
+<section class="philosophy">
+  <p>Ad-Hubは、静けさと創造性を大切にする人のための場所。<br>あなたの活動が、そっと世界へ広がっていきますように。</p>
 </section>
 
 <footer>
@@ -155,4 +183,3 @@
 
 </body>
 </html>
-
