@@ -32,11 +32,11 @@
   </script>
 <script>
   // テーマ
-  const theme = localStorage.getItem('theme');
-  if (theme === 'dark') {
-    document.documentElement.classList.add('dark');
-    document.body.classList.add('dark');
-  }
+const theme = localStorage.getItem('theme');
+if (theme === 'dark') {
+  document.documentElement.classList.add('dark');
+}
+
 
   // フォント
   const font = localStorage.getItem('font');
@@ -66,13 +66,13 @@
       --border: #ccc;
       --padding: 32px;
     }
-    body.dark {
-      --bg: #0f172a;
-      --text: #f1f5f9;
-      --card: #1e293b;
-      --muted: #94a3b8;
-      --border: #334155;
-    }
+:root.dark {
+  --bg: #0f172a;
+  --text: #f1f5f9;
+  --card: #1e293b;
+  --muted: #94a3b8;
+  --border: #334155;
+}
     body {
       margin: 0;
       font-family: var(--font, 'Helvetica Neue', sans-serif);
@@ -294,6 +294,7 @@
   </script>
 </body>
 </html>
+
 
 
 
