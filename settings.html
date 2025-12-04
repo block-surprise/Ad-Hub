@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>Ad-Hub 設定</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     :root {
       --bg: #f9fbff;
@@ -50,6 +52,9 @@
     }
     label {
       font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     select {
       padding: 6px 12px;
@@ -130,7 +135,7 @@
 
   <section class="settings">
     <div class="setting-item">
-      <label for="darkModeToggle">🌙 ダークモード</label>
+      <label for="darkModeToggle"><i class="fas fa-moon"></i> ダークモード</label>
       <label class="switch">
         <input type="checkbox" id="darkModeToggle">
         <span class="slider"></span>
@@ -138,7 +143,7 @@
     </div>
 
     <div class="setting-item">
-      <label for="fontSelect">🖋️ フォントスタイル</label>
+      <label for="fontSelect"><i class="fas fa-font"></i> フォントスタイル</label>
       <select id="fontSelect">
         <option value="Hiragino Sans">Hiragino Sans</option>
         <option value="serif">明朝体</option>
@@ -147,7 +152,7 @@
     </div>
 
     <div class="setting-item">
-      <label for="paddingSelect">📐 余白の密度</label>
+      <label for="paddingSelect"><i class="fas fa-expand-arrows-alt"></i> 余白の密度</label>
       <select id="paddingSelect">
         <option value="48px">ゆったり</option>
         <option value="32px" selected>標準</option>
@@ -156,7 +161,7 @@
     </div>
 
     <div class="setting-item">
-      <label for="labsToggle">🧪 Labs機能</label>
+      <label for="labsToggle"><i class="fas fa-flask"></i> Labs機能</label>
       <label class="switch">
         <input type="checkbox" id="labsToggle">
         <span class="slider"></span>
@@ -164,7 +169,7 @@
     </div>
 
     <div class="setting-item">
-      <label>🧼 データリセット</label>
+      <label><i class="fas fa-undo-alt"></i> データリセット</label>
       <button id="resetBtn">リセット</button>
     </div>
   </section>
