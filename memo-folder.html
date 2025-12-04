@@ -168,133 +168,216 @@ if (theme === 'dark') {
   </div>
 
 <script>
-  let originalConfirmMemo = confirmMemo;
-  let files = JSON.parse(localStorage.getItem('files') || '[]');
-  let memos = JSON.parse(localStorage.getItem('memos') || '{}');
-  let currentFile = null;
+let files = JSON.parse(localStorage.getItem('files') || '[]');
+let memos = JSON.parse(localStorage.getItem('memos') || '{}');
+let currentFile = null;
+let sortMode = "date";
 
-  function renderFileButtons() {
-    const container = document.getElementById('file-buttons');
-    container.innerHTML = '';
-    files.forEach((name, index) => {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'file-wrapper';
-      const btn = document.createElement('button');
-      btn.className = 'file-name-button';
-      btn.textContent = name;
-      btn.onclick = () => openMemoView(name);
-      const del = document.createElement('button');
-      del.className = 'delete-button';
-      del.textContent = '×';
-      del.onclick = (e) => { e.stopPropagation(); deleteFile(index); };
-      wrapper.appendChild(btn);
-      wrapper.appendChild(del);
-      container.appendChild(wrapper);
-    });
+function renderFileButtons() {
+  const container = document.getElementById('file-buttons');
+  container.innerHTML = '';
+  files.forEach((name, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'file-wrapper';
+    const btn = document.createElement('button');
+    btn.className = 'file-name-button';
+    btn.textContent = name;
+    btn.onclick = () => openMemoView(name);
+    const del = document.createElement('button');
+    del.className = 'delete-button';
+    del.textContent = '×';
+    del.onclick = (e) => { e.stopPropagation(); deleteFile(index); };
+    wrapper.appendChild(btn);
+    wrapper.appendChild(del);
+    container.appendChild(wrapper);
+  });
+}
+
+function openMemoView(fileName) {
+  currentFile = fileName;
+  document.getElementById('memo-title').textContent = fileName;
+  const list = document.getElementById('memo-list');
+  let arr = (memos[fileName] || []);
+  if (sortMode === "date") {
+    arr.sort((a, b) => b.createdAt - a.createdAt);
+  } else if (sortMode === "title") {
+    arr.sort((a, b) => a.title.localeCompare(b.title));
+  } else if (sortMode === "pinned") {
+    arr.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.createdAt - a.createdAt);
   }
+  list.innerHTML = arr.map((memo, index) => `
+    <div class="memo-card">
+      <div class="memo-title">${memo.title}</div>
+      ${memo.body ? `<div class="memo-body">${memo.body}</div>` : ''}
+      <div class="memo-meta">${new Date(memo.createdAt).toLocaleString()}</div>
+      <button onclick="togglePin('${fileName}', ${index})">${memo.pinned ? '📌解除' : '📌固定'}</button>
+      <button onclick="editMemo('${fileName}', ${index})">編集</button>
+      <button onclick="deleteMemo('${fileName}', ${index})">削除</button>
+      <button onclick="shareMemo('${fileName}', ${index})">共有</button>
+    </div>`).join('');
+  document.getElementById('home-view').style.display = 'none';
+  document.getElementById('memo-view').style.display = 'block';
+}
 
-  function openMemoView(fileName) {
-    currentFile = fileName;
-    document.getElementById('memo-title').textContent = fileName;
-    const list = document.getElementById('memo-list');
-    list.innerHTML = (memos[fileName] || []).map((memo, index) => `
-      <div class="memo-card">
-        <div class="memo-title">${memo.title}</div>
-        ${memo.body ? `<div class="memo-body">${memo.body}</div>` : ''}
-        <button class="memo-delete" onclick="deleteMemo('${fileName}', ${index})">削除</button>
-      </div>
-    `).join('');
-    document.getElementById('home-view').style.display = 'none';
-    document.getElementById('memo-view').style.display = 'block';
+function changeSort() {
+  sortMode = document.getElementById('sort-select').value;
+  if (currentFile) openMemoView(currentFile);
+}
+
+function backToHome() {
+  currentFile = null;
+  document.getElementById('memo-view').style.display = 'none';
+  document.getElementById('home-view').style.display = 'block';
+}
+
+function toggleFabMenu() {
+  const menu = document.getElementById('fab-menu');
+  menu.style.display = (getComputedStyle(menu).display === 'none') ? 'block' : 'none';
+}
+function closeFabMenu() {
+  document.getElementById('fab-menu').style.display = 'none';
+}
+
+function openFileModal() {
+  document.getElementById('file-name').value = '';
+  document.getElementById('file-modal').style.display = 'flex';
+  closeFabMenu();
+}
+function closeFileModal() {
+  document.getElementById('file-modal').style.display = 'none';
+}
+function confirmFile() {
+  const name = document.getElementById('file-name').value.trim();
+  if (!name || files.includes(name)) return;
+  files.unshift(name);
+  localStorage.setItem('files', JSON.stringify(files));
+  renderFileButtons();
+  closeFileModal();
+}
+
+function openMemoModal() {
+  if (files.length === 0) {
+    alert('先にファイルを追加してください');
+    return;
   }
+  const select = document.getElementById('memo-file-select');
+  select.innerHTML = '';
+  files.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+  document.getElementById('memo-title-input').value = '';
+  document.getElementById('memo-body').value = '';
+  document.getElementById('memo-modal').style.display = 'flex';
+  closeFabMenu();
+}
+function closeMemoModal() {
+  document.getElementById('memo-modal').style.display = 'none';
+}
 
-  function backToHome() {
+function confirmMemo() {
+  const file = document.getElementById('memo-file-select').value;
+  const title = document.getElementById('memo-title-input').value.trim();
+  const body = document.getElementById('memo-body').value.trim();
+  if (!file || !title) return;
+  if (!memos[file]) memos[file] = [];
+  memos[file].unshift({ title, body, createdAt: Date.now(), pinned: false });
+  localStorage.setItem('memos', JSON.stringify(memos));
+  if (file === currentFile) openMemoView(file);
+  renderFileButtons();
+  closeMemoModal();
+}
+
+function togglePin(file, index) {
+  memos[file][index].pinned = !memos[file][index].pinned;
+  localStorage.setItem('memos', JSON.stringify(memos));
+  if (file === currentFile) openMemoView(file);
+}
+
+function editMemo(file, index) {
+  const memo = memos[file][index];
+  document.getElementById('memo-file-select').value = file;
+  document.getElementById('memo-title-input').value = memo.title;
+  document.getElementById('memo-body').value = memo.body;
+  document.getElementById('memo-modal').style.display = 'flex';
+  closeFabMenu();
+
+  const tempConfirm = confirmMemo;
+  confirmMemo = function () {
+    const title = document.getElementById('memo-title-input').value.trim();
+    const body = document.getElementById('memo-body').value.trim();
+    memos[file][index] = {
+      title,
+      body,
+      createdAt: memo.createdAt,
+      pinned: memo.pinned
+    };
+    localStorage.setItem('memos', JSON.stringify(memos));
+    openMemoView(file);
+    closeMemoModal();
+    confirmMemo = tempConfirm;
+  };
+}
+
+function deleteMemo(file, index) {
+  if (!memos[file]) return;
+  memos[file].splice(index, 1);
+  localStorage.setItem('memos', JSON.stringify(memos));
+  if (file === currentFile) openMemoView(file);
+}
+
+function deleteFile(index) {
+  const name = files[index];
+  files.splice(index, 1);
+  delete memos[name];
+  localStorage.setItem('files', JSON.stringify(files));
+  localStorage.setItem('memos', JSON.stringify(memos));
+  renderFileButtons();
+  if (name === currentFile) {
     currentFile = null;
-    document.getElementById('memo-view').style.display = 'none';
-    document.getElementById('home-view').style.display = 'block';
+    backToHome();
   }
+}
 
-  function toggleFabMenu() {
-    const menu = document.getElementById('fab-menu');
-    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-  }
-  function closeFabMenu() { document.getElementById('fab-menu').style.display = 'none'; }
-
-    function openFileModal() {
-      document.getElementById('file-name').value = '';
-      document.getElementById('file-modal').style.display = 'flex';
-      closeFabMenu();
-    }
-
-    function confirmFile() {
-      const name = document.getElementById('file-name').value.trim();
-      if (!name || files.includes(name)) return;
-      files.unshift(name);
-      localStorage.setItem('files', JSON.stringify(files));
-      renderFileButtons();
-      closeFileModal();
-    }
-
-    function closeFileModal() {
-      document.getElementById('file-modal').style.display = 'none';
-    }
-
-    function openMemoModal() {
-      const select = document.getElementById('memo-file-select');
-      select.innerHTML = '';
-      files.forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        select.appendChild(option);
-      });
-      document.querySelector('#memo-modal input#memo-title').value = '';
-      document.getElementById('memo-body').value = '';
-      document.getElementById('memo-modal').style.display = 'flex';
-      closeFabMenu();
-    }
-
-    function confirmMemo() {
-      const file = document.getElementById('memo-file-select').value;
-      const title = document.querySelector('#memo-modal input#memo-title').value.trim();
-      const body = document.getElementById('memo-body').value.trim();
-      if (!file || !title) return;
-      if (!memos[file]) memos[file] = [];
-      memos[file].unshift({ title, body });
-      localStorage.setItem('memos', JSON.stringify(memos));
-      if (file === currentFile) openMemoView(file);
-      renderFileButtons();
-      closeMemoModal();
-    }
-
-    function closeMemoModal() {
-      document.getElementById('memo-modal').style.display = 'none';
-    }
-
-    function deleteMemo(file, index) {
-      if (!memos[file]) return;
-      memos[file].splice(index, 1);
-      localStorage.setItem('memos', JSON.stringify(memos));
-      if (file === currentFile) openMemoView(file);
-    }
-
-    function deleteFile(index) {
-      const name = files[index];
-      files.splice(index, 1);
-      delete memos[name];
-      localStorage.setItem('files', JSON.stringify(files));
-      localStorage.setItem('memos', JSON.stringify(memos));
-      renderFileButtons();
-      if (name === currentFile) {
-        currentFile = null;
-        backToHome();
+function searchAll() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const results = [];
+  files.forEach(file => {
+    (memos[file] || []).forEach(memo => {
+      if (
+        file.toLowerCase().includes(q) ||
+        memo.title.toLowerCase().includes(q) ||
+        memo.body.toLowerCase().includes(q)
+      ) {
+        results.push({ file, memo });
       }
-    }
+    });
+  });
+  const list = document.getElementById('memo-list');
+  list.innerHTML = results.map(r => `
+    <div class="memo-card">
+      <div class="memo-title">${r.memo.title}</div>
+      ${r.memo.body ? `<div class="memo-body">${r.memo.body}</div>` : ''}
+      <div class="memo-meta">${new Date(r.memo.createdAt).toLocaleString()} (${r.file})</div>
+    </div>`).join('');
+}
 
-    renderFileButtons();
+function shareMemo(file, index) {
+  const memo = memos[file][index];
+  const text = `【${memo.title}】\n${memo.body || ''}\n(${new Date(memo.createdAt).toLocaleString()})`;
+  navigator.clipboard.writeText(text).then(() => {
+    alert("メモをコピーしました！他のアプリに貼り付けて共有できます。");
+  });
+}
+
+renderFileButtons();
+
   </script>
 </body>
 </html>
+
 
 
 
