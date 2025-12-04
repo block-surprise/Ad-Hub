@@ -127,7 +127,6 @@
 <body>
   <header>
     <h1>QRコードツール</h1>
-    <button class="theme" onclick="toggleTheme()">🌗</button>
   </header>
   <nav class="tabs">
     <button onclick="showTab('generate')">生成</button>
@@ -181,6 +180,7 @@
         <button onclick="downloadSVG()">SVGで保存</button>
       </div>
     </div>
+    <p>※中央アイコンは40%をこえると読み取りにくくなります</p>
 
     <canvas id="qr-canvas" style="margin-top:1rem; border:1px solid var(--border); border-radius:8px;"></canvas>
   </div>
