@@ -42,153 +42,177 @@ if (theme === 'dark') {
   }
 </script>
 
- <style>
-    :root {
-      --bg: #f8f8f8;
-      --text: #111;
-      --card: #fff;
-      --muted: #666;
-      --border: #ccc;
-      --padding: 32px;
-    }
- :root.dark {
-  --bg: #0f172a;
-  --text: #f1f5f9;
-  --card: #1e293b;
-  --muted: #94a3b8;
-  --border: #334155;
-}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>メモフォルダープラス</title>
 
-    body {
-      margin: 0;
-      font-family: "Inter", "Hiragino Sans", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px;
-    }
-    h2.gradient-title {
-      background: linear-gradient(90deg, #2458b8, #ff4081);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-size: 22px;
-      margin: 0;
-    }
-    #search {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      font-size: 14px;
-      background: var(--card);
-      color: var(--text);
-    }
-    .file-button-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 20px;
-    }
-.file-name-button {
-  background: var(--card);
-  border: 1px solid var(--border);
-  color: var(--text);
-}
+<style>
+  :root {
+    --bg: #f8f8f8;
+    --text: #111;
+    --card: #fff;
+    --muted: #666;
+    --border: #ccc;
+    --padding: 32px;
+  }
+  :root.dark {
+    --bg: #0f172a;
+    --text: #f1f5f9;
+    --card: #1e293b;
+    --muted: #94a3b8;
+    --border: #334155;
+  }
 
-    .file-name-button.dragging {
-      opacity: 0.5;
-    }
-    .memo-card {
-      background: var(--card);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
-      border: 1px solid var(--border);
-    }
-    .memo-title {
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-    .memo-body {
-      font-size: 15px;
-      color: var(--muted);
-    }
-    .memo-meta {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-    .fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: linear-gradient(135deg, #2458b8, #ff4081);
-      color: #fff;
-      border-radius: 50%;
-      width: 56px;
-      height: 56px;
-      font-size: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .fab-menu {
-      position: fixed;
-      bottom: 90px;
-      right: 24px;
-      background: var(--card);
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      display: none;
-    }
-    .fab-menu button {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      border: none;
-      background: none;
-      text-align: left;
-      cursor: pointer;
-      font-size: 15px;
-      color: var(--text);
-    }
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: var(--card);
-      padding: 24px;
-      border-radius: 12px;
-      width: 95%;
-      max-width: 700px;
-    }
-    .modal-content input,
-    .modal-content textarea {
-      width: 100%;
-      margin-bottom: 12px;
-      padding: 10px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .modal-content textarea {
-      height: 200px;
-      font-size: 16px;
-    }
-  </style>
+  body {
+    margin: 0;
+    font-family: "Inter", "Hiragino Sans", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .header-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 20px;
+  }
+  h2.gradient-title {
+    background: linear-gradient(90deg, #2458b8, #ff4081);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 22px;
+    margin: 0;
+  }
+  #search {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    background: var(--card);
+    color: var(--text);
+  }
+  #sort-select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+  }
+  .file-button-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+  }
+  .file-name-button {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .file-name-button.dragging { opacity: 0.5; }
+  .memo-card {
+    background: var(--card);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .memo-title { font-weight: bold; margin-bottom: 6px; }
+  .memo-body { font-size: 15px; color: var(--muted); }
+  .memo-meta { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .memo-card button {
+    margin-right: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: linear-gradient(135deg, #2458b8, #ff4081);
+    color: #fff;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .fab-menu {
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    background: var(--card);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .fab-menu button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-content {
+    background: var(--card);
+    padding: 24px;
+    border-radius: 12px;
+    width: 95%;
+    max-width: 700px;
+    color: var(--text);
+  }
+  .modal-content input,
+  .modal-content textarea,
+  .modal-content select {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+  }
+  .modal-content textarea {
+    height: 200px;
+    font-size: 16px;
+  }
+</style>
+
+<script>
+  // テーマ適用（localStorage）
+  const theme = localStorage.getItem('theme');
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark');
+  }
+</script>
 </head>
 <body>
 
@@ -200,6 +224,7 @@ if (theme === 'dark') {
     <option value="title">タイトル順</option>
     <option value="pinned">ピン留め優先</option>
   </select>
+  <button onclick="toggleTheme()" title="テーマ切替">🌗</button>
 </div>
 
 <div id="home-view">
@@ -239,181 +264,197 @@ if (theme === 'dark') {
 </div>
 
 <script>
-let files = JSON.parse(localStorage.getItem('files') || '[]');
-let memos = JSON.parse(localStorage.getItem('memos') || '{}');
-let currentFile = null;
-let sortMode = "date";
+  let files = JSON.parse(localStorage.getItem('files') || '[]');
+  let memos = JSON.parse(localStorage.getItem('memos') || '{}');
+  let currentFile = null;
+  let sortMode = "date";
 
-function renderFileButtons(){
-  const container=document.getElementById('file-buttons');
-  container.innerHTML='';
-  files.forEach((name,index)=>{
-    const btn=document.createElement('button');
-    btn.className='file-name-button';
-    btn.textContent=name;
-    btn.draggable=true;
-    btn.ondragstart=(e)=>{e.dataTransfer.setData("index",index);btn.classList.add("dragging");};
-    btn.ondragend=()=>btn.classList.remove("dragging");
-    btn.ondragover=(e)=>e.preventDefault();
-    btn.ondrop=(e)=>{
-      const fromIndex=e.dataTransfer.getData("index");
-      const toIndex=index;
-      const moved=files.splice(fromIndex,1)[0];
-      files.splice(toIndex,0,moved);
-      localStorage.setItem('files',JSON.stringify(files));
-      renderFileButtons();
-    };
-    btn.onclick=()=>openMemoView(name);
-    container.appendChild(btn);
-  });
-}
-
-function openMemoView(fileName){
-  currentFile=fileName;
-  document.getElementById('memo-title').textContent=fileName;
-  const list=document.getElementById('memo-list');
-  let arr=(memos[fileName]||[]);
-  if(sortMode==="date"){arr.sort((a,b)=>b.createdAt-a.createdAt);}
-  else if(sortMode==="title"){arr.sort((a,b)=>a.title.localeCompare(b.title));}
-  else if(sortMode==="pinned"){arr.sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||b.createdAt-a.createdAt);}
-  list.innerHTML=arr.map((memo,index)=>`
-    <div class="memo-card">
-      <div class="memo-title">${memo.title}</div>
-      ${memo.body?`<div class="memo-body">${memo.body}</div>`:''}
-      <div class="memo-meta">${new Date(memo.createdAt).toLocaleString()}</div>
-      <button onclick="togglePin('${fileName}',${index})">${memo.pinned?'📌解除':'📌固定'}</button>
-      <button onclick="editMemo('${fileName}',${index})">編集</button>
-      <button onclick="deleteMemo('${fileName}',${index})">削除</button>
-      <button onclick="shareMemo('${fileName}',${index})">共有</button>
-    </div>`).join('');
-  document.getElementById('home-view').style.display='none';
-  document.getElementById('memo-view').style.display='block';
-}
-
-function changeSort(){sortMode=document.getElementById('sort-select').value;if(currentFile)openMemoView(currentFile);}
-function backToHome(){currentFile=null;document.getElementById('memo-view').style.display='none';document.getElementById('home-view').style.display='block';}
-function toggleFabMenu(){
-  const menu=document.getElementById('fab-menu');
-  menu.style.display=(getComputedStyle(menu).display==='none')?'block':'none';
-}
-function closeFabMenu(){document.getElementById('fab-menu').style.display='none';}
-
-function openFileModal(){
-  document.getElementById('file-name').value='';
-  document.getElementById('file-modal').style.display='flex';
-  closeFabMenu();
-}
-function closeFileModal(){document.getElementById('file-modal').style.display='none';}
-function confirmFile(){
-  const name=document.getElementById('file-name').value.trim();
-  if(!name||files.includes(name))return;
-  files.unshift(name);
-  localStorage.setItem('files',JSON.stringify(files));
-  renderFileButtons();
-  closeFileModal();
-}
-
-function openMemoModal(){
-  if(files.length===0){alert('先にファイルを追加してください');return;}
-  const select=document.getElementById('memo-file-select');
-  select.innerHTML='';
-  files.forEach(name=>{
-    const opt=document.createElement('option');
-    opt.value=name;opt.textContent=name;
-    select.appendChild(opt);
-  });
-  document.getElementById('memo-title-input').value='';
-  document.getElementById('memo-body').value='';
-  document.getElementById('memo-modal').style.display='flex';
-  closeFabMenu();
-}
-function closeMemoModal(){document.getElementById('memo-modal').style.display='none';}
-
-function confirmMemo(){
-  const file=document.getElementById('memo-file-select').value;
-  const title=document.getElementById('memo-title-input').value.trim();
-  const body=document.getElementById('memo-body').value.trim();
-  if(!file||!title)return;
-  if(!memos[file])memos[file]=[];
-  memos[file].unshift({title,body,createdAt:Date.now(),pinned:false});
-  localStorage.setItem('memos',JSON.stringify(memos));
-  if(file===currentFile)openMemoView(file);
-  renderFileButtons();
-  closeMemoModal();
-}
-
-function togglePin(file,index){
-  memos[file][index].pinned=!memos[file][index].pinned;
-  localStorage.setItem('memos',JSON.stringify(memos));
-  if(file===currentFile)openMemoView(file);
-}
-
-function editMemo(file,index){
-  const memo=memos[file][index];
-  document.getElementById('memo-file-select').value=file;
-  document.getElementById('memo-title-input').value=memo.title;
-  document.getElementById('memo-body').value=memo.body;
-  document.getElementById('memo-modal').style.display='flex';
-  // 保存時は上書き
-  confirmMemo=function(){
-    const title=document.getElementById('memo-title-input').value.trim();
-    const body=document.getElementById('memo-body').value.trim();
-    memos[file][index]={title,body,createdAt:memo.createdAt,pinned:memo.pinned};
-    localStorage.setItem('memos',JSON.stringify(memos));
-    openMemoView(file);
-    closeMemoModal();
-    confirmMemo=originalConfirmMemo;
-  }
-}
-const originalConfirmMemo=confirmMemo;
-
-function deleteMemo(file,index){
-  if(!memos[file])return;
-  memos[file].splice(index,1);
-  localStorage.setItem('memos',JSON.stringify(memos));
-  if(file===currentFile)openMemoView(file);
-}
-
-function deleteFile(index){
-  const name=files[index];
-  files.splice(index,1);
-  delete memos[name];
-  localStorage.setItem('files',JSON.stringify(files));
-  localStorage.setItem('memos',JSON.stringify(memos));
-  renderFileButtons();
-  if(name===currentFile){currentFile=null;backToHome();}
-}
-
-function searchAll(){
-  const q=document.getElementById('search').value.toLowerCase();
-  const results=[];
-  files.forEach(file=>{
-    (memos[file]||[]).forEach(memo=>{
-      if(file.toLowerCase().includes(q)||
-         memo.title.toLowerCase().includes(q)||
-         memo.body.toLowerCase().includes(q)){
-        results.push({file,memo});
-      }
+  function renderFileButtons(){
+    const container = document.getElementById('file-buttons');
+    container.innerHTML = '';
+    files.forEach((name,index)=>{
+      const btn = document.createElement('button');
+      btn.className = 'file-name-button';
+      btn.textContent = name;
+      btn.draggable = true;
+      btn.ondragstart = (e)=>{ e.dataTransfer.setData("index", index); btn.classList.add("dragging"); };
+      btn.ondragend = ()=> btn.classList.remove("dragging");
+      btn.ondragover = (e)=> e.preventDefault();
+      btn.ondrop = (e)=>{
+        const fromIndex = e.dataTransfer.getData("index");
+        const toIndex = index;
+        const moved = files.splice(fromIndex,1)[0];
+        files.splice(toIndex,0,moved);
+        localStorage.setItem('files', JSON.stringify(files));
+        renderFileButtons();
+      };
+      btn.onclick = ()=> openMemoView(name);
+      container.appendChild(btn);
     });
-  });
-  const list=document.getElementById('memo-list');
-  list.innerHTML=results.map(r=>`
-    <div class="memo-card">
-      <div class="memo-title">${r.memo.title}</div>
-      ${r.memo.body?`<div class="memo-body">${r.memo.body}</div>`:''}
-      <div class="memo-meta">${new Date(r.memo.createdAt).toLocaleString()} (${r.file})</div>
-    </div>`).join('');
-}
+  }
 
-function shareMemo(file,index){
-  const memo=memos[file][index];
-  const text=`【${memo.title}】\n${memo.body||''}\n(${new Date(memo.createdAt).toLocaleString()})`;
-  navigator.clipboard.writeText(text).then(()=>{
-    alert("メモをコピーしました！他のアプリに貼り付けて共有できます。");
-  });
-}
+  function openMemoView(fileName){
+    currentFile = fileName;
+    document.getElementById('memo-title').textContent = fileName;
+    const list = document.getElementById('memo-list');
+    let arr = (memos[fileName] || []);
+    if (sortMode === "date"){ arr.sort((a,b)=> b.createdAt - a.createdAt); }
+    else if (sortMode === "title"){ arr.sort((a,b)=> a.title.localeCompare(b.title)); }
+    else if (sortMode === "pinned"){ arr.sort((a,b)=> (b.pinned?1:0) - (a.pinned?1:0) || b.createdAt - a.createdAt); }
+    list.innerHTML = arr.map((memo,index)=>`
+      <div class="memo-card">
+        <div class="memo-title">${memo.title}</div>
+        ${memo.body ? `<div class="memo-body">${memo.body}</div>` : ''}
+        <div class="memo-meta">${new Date(memo.createdAt).toLocaleString()}</div>
+        <button onclick="togglePin('${fileName}',${index})">${memo.pinned?'📌解除':'📌固定'}</button>
+        <button onclick="editMemo('${fileName}',${index})">編集</button>
+        <button onclick="deleteMemo('${fileName}',${index})">削除</button>
+        <button onclick="shareMemo('${fileName}',${index})">共有</button>
+      </div>`).join('');
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('memo-view').style.display = 'block';
+  }
 
-renderFileButtons();
+  function changeSort(){ sortMode = document.getElementById('sort-select').value; if (currentFile) openMemoView(currentFile); }
+  function backToHome(){ currentFile = null; document.getElementById('memo-view').style.display = 'none'; document.getElementById('home-view').style.display = 'block'; }
+  function toggleFabMenu(){
+    const menu = document.getElementById('fab-menu');
+    menu.style.display = (getComputedStyle(menu).display === 'none') ? 'block' : 'none';
+  }
+  function closeFabMenu(){ document.getElementById('fab-menu').style.display = 'none'; }
+
+  function openFileModal(){
+    document.getElementById('file-name').value = '';
+    document.getElementById('file-modal').style.display = 'flex';
+    closeFabMenu();
+  }
+  function closeFileModal(){ document.getElementById('file-modal').style.display = 'none'; }
+  function confirmFile(){
+    const name = document.getElementById('file-name').value.trim();
+    if (!name || files.includes(name)) return;
+    files.unshift(name);
+    localStorage.setItem('files', JSON.stringify(files));
+    renderFileButtons();
+    closeFileModal();
+  }
+
+  function openMemoModal(){
+    if (files.length === 0){ alert('先にファイルを追加してください'); return; }
+    const select = document.getElementById('memo-file-select');
+    select.innerHTML = '';
+    files.forEach(name=>{
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      select.appendChild(opt);
+    });
+    document.getElementById('memo-title-input').value = '';
+    document.getElementById('memo-body').value = '';
+    document.getElementById('memo-modal').style.display = 'flex';
+    closeFabMenu();
+  }
+  function closeMemoModal(){ document.getElementById('memo-modal').style.display = 'none'; }
+
+  function confirmMemo(){
+    const file = document.getElementById('memo-file-select').value;
+    const title = document.getElementById('memo-title-input').value.trim();
+    const body = document.getElementById('memo-body').value.trim();
+    if (!file || !title) return;
+    if (!memos[file]) memos[file] = [];
+    memos[file].unshift({ title, body, createdAt: Date.now(), pinned: false });
+    localStorage.setItem('memos', JSON.stringify(memos));
+    if (file === currentFile) openMemoView(file);
+    renderFileButtons();
+    closeMemoModal();
+  }
+
+  function togglePin(file,index){
+    memos[file][index].pinned = !memos[file][index].pinned;
+    localStorage.setItem('memos', JSON.stringify(memos));
+    if (file === currentFile) openMemoView(file);
+  }
+
+  function editMemo(file,index){
+    const memo = memos[file][index];
+    document.getElementById('memo-file-select').value = file;
+    document.getElementById('memo-title-input').value = memo.title;
+    document.getElementById('memo-body').value = memo.body;
+    document.getElementById('memo-modal').style.display = 'flex';
+    closeFabMenu();
+
+    // confirmMemo を一時的に上書きし、保存後に復元
+    const tempConfirm = confirmMemo;
+    confirmMemo = function(){
+      const title = document.getElementById('memo-title-input').value.trim();
+      const body = document.getElementById('memo-body').value.trim();
+      memos[file][index] = { title, body, createdAt: memo.createdAt, pinned: memo.pinned };
+      localStorage.setItem('memos', JSON.stringify(memos));
+      openMemoView(file);
+      closeMemoModal();
+      confirmMemo = tempConfirm;
+    };
+  }
+
+  function deleteMemo(file,index){
+    if (!memos[file]) return;
+    memos[file].splice(index,1);
+    localStorage.setItem('memos', JSON.stringify(memos));
+    if (file === currentFile) openMemoView(file);
+  }
+
+  function deleteFile(index){
+    const name = files[index];
+    files.splice(index,1);
+    delete memos[name];
+    localStorage.setItem('files', JSON.stringify(files));
+    localStorage.setItem('memos', JSON.stringify(memos));
+    renderFileButtons();
+    if (name === currentFile){ currentFile = null; backToHome(); }
+  }
+
+  function searchAll(){
+    const q = document.getElementById('search').value.toLowerCase();
+    const results = [];
+    files.forEach(file=>{
+      (memos[file]||[]).forEach(memo=>{
+        if (file.toLowerCase().includes(q) ||
+            memo.title.toLowerCase().includes(q) ||
+            (memo.body||'').toLowerCase().includes(q)) {
+          results.push({ file, memo });
+        }
+      });
+    });
+    const list = document.getElementById('memo-list');
+    list.innerHTML = results.map(r=>`
+      <div class="memo-card">
+        <div class="memo-title">${r.memo.title}</div>
+        ${r.memo.body ? `<div class="memo-body">${r.memo.body}</div>` : ''}
+        <div class="memo-meta">${new Date(r.memo.createdAt).toLocaleString()} (${r.file})</div>
+      </div>`).join('');
+    document.getElementById('home-view').style.display = 'none';
+    document.getElementById('memo-view').style.display = 'block';
+  }
+
+  function shareMemo(file,index){
+    const memo = memos[file][index];
+    const text = `【${memo.title}】\n${memo.body || ''}\n(${new Date(memo.createdAt).toLocaleString()})`;
+    navigator.clipboard.writeText(text).then(()=>{
+      alert("メモをコピーしました！他のアプリに貼り付けて共有できます。");
+    });
+  }
+
+  function toggleTheme(){
+    const root = document.documentElement;
+    const isDark = root.classList.contains('dark');
+    if (isDark) {
+      root.classList.remove('dark');
+      localStorage.removeItem('theme');
+    } else {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
+  }
+
+  renderFileButtons();
 </script>
 </body>
 </html>
