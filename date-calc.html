@@ -3,18 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>日付計算ツール - DateCalc</title>
+  <title>日付計算ツール | DateCalc</title>
   <style>
+    :root {
+      --bg: #f9f9f9;
+      --fg: #222;
+      --card: #fff;
+      --accent: #0078d4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121212;
+        --fg: #eee;
+        --card: #1e1e1e;
+        --accent: #4aa8ff;
+      }
+    }
     body {
-      font-family: 'Noto Sans JP', sans-serif;
-      background: #f9f9f9;
       margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
       padding: 2rem;
-      color: #333;
     }
     h1 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       margin-bottom: 1rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      max-width: 600px;
+      margin: auto;
     }
     label {
       display: block;
@@ -23,65 +45,110 @@
     input, select, button {
       font-size: 1rem;
       padding: 0.5rem;
-      margin-top: 0.5rem;
+      margin-top: 0.3rem;
       width: 100%;
-      max-width: 300px;
+      box-sizing: border-box;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      margin-top: 1.5rem;
+      cursor: pointer;
+      border-radius: 4px;
     }
     .result {
       margin-top: 2rem;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+      font-size: 1.1rem;
     }
     .ad {
       margin-top: 2rem;
-      padding: 1rem;
-      background: #eee;
       text-align: center;
+      color: gray;
+      font-size: 0.9rem;
+    }
+    footer {
+      margin-top: 4rem;
+      text-align: center;
+      font-size: 0.8rem;
       color: #888;
     }
   </style>
 </head>
 <body>
-  <h1>日付計算ツール</h1>
+  <div class="card">
+    <h1>日付計算ツール</h1>
 
-  <label>
-    開始日:
-    <input type="date" id="startDate" />
-  </label>
+    <label>モード選択:
+      <select id="mode">
+        <option value="add">○日後を計算</option>
+        <option value="diff">日数差を計算</option>
+      </select>
+    </label>
 
-  <label>
-    日数（±）:
-    <input type="number" id="days" placeholder="例: 30 または -10" />
-  </label>
+    <div id="input-add">
+      <label>開始日:
+        <input type="date" id="startDate" />
+      </label>
+      <label>日数（±）:
+        <input type="number" id="days" placeholder="例: 30 または -10" />
+      </label>
+    </div>
 
-  <button onclick="calculate()">計算する</button>
+    <div id="input-diff" style="display:none;">
+      <label>開始日:
+        <input type="date" id="fromDate" />
+      </label>
+      <label>終了日:
+        <input type="date" id="toDate" />
+      </label>
+    </div>
 
-  <div class="result" id="result"></div>
+    <button onclick="calculate()">計算する</button>
 
-  <div class="ad">
-    （ここに広告が入ります）
+    <div class="result" id="result"></div>
+
+    <div class="ad">（ここに広告が入ります）</div>
   </div>
 
+  <footer>© 2025 DateCalc</footer>
+
   <script>
+    const modeSelect = document.getElementById('mode');
+    const inputAdd = document.getElementById('input-add');
+    const inputDiff = document.getElementById('input-diff');
+    const resultDiv = document.getElementById('result');
+
+    modeSelect.addEventListener('change', () => {
+      const mode = modeSelect.value;
+      inputAdd.style.display = mode === 'add' ? 'block' : 'none';
+      inputDiff.style.display = mode === 'diff' ? 'block' : 'none';
+      resultDiv.innerHTML = '';
+    });
+
     function calculate() {
-      const start = document.getElementById('startDate').value;
-      const days = parseInt(document.getElementById('days').value, 10);
-      const resultDiv = document.getElementById('result');
-
-      if (!start || isNaN(days)) {
-        resultDiv.textContent = '開始日と日数を入力してください。';
-        return;
+      const mode = modeSelect.value;
+      if (mode === 'add') {
+        const start = document.getElementById('startDate').value;
+        const days = parseInt(document.getElementById('days').value, 10);
+        if (!start || isNaN(days)) {
+          resultDiv.textContent = '開始日と日数を入力してください。';
+          return;
+        }
+        const date = new Date(start);
+        date.setDate(date.getDate() + days);
+        const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+        resultDiv.innerHTML = `<strong>${days}日後:</strong><br>${date.toLocaleDateString('ja-JP', options)}`;
+      } else {
+        const from = new Date(document.getElementById('fromDate').value);
+        const to = new Date(document.getElementById('toDate').value);
+        if (!from || !to || isNaN(from) || isNaN(to)) {
+          resultDiv.textContent = '両方の日付を入力してください。';
+          return;
+        }
+        const diff = Math.floor((to - from) / (1000 * 60 * 60 * 24));
+        resultDiv.innerHTML = `<strong>日数差:</strong><br>${diff}日間`;
       }
-
-      const startDate = new Date(start);
-      startDate.setDate(startDate.getDate() + days);
-
-      const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-      const formatted = startDate.toLocaleDateString('ja-JP', options);
-
-      resultDiv.innerHTML = `<strong>${days}日後:</strong><br>${formatted}`;
     }
   </script>
 </body>
