@@ -202,168 +202,171 @@
     <p id="cam-result" style="margin-top:1rem; font-family:monospace;"></p>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
-  <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
-  <script>
-    const canvas = document.getElementById('qr-canvas');
-    const ctx = canvas.getContext('2d');
-    const iconInput = document.getElementById('qr-icon');
-    const iconPreview = document.getElementById('icon-preview');
-    let iconImage = null;
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
+<script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
+<script>
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  const iconInput = document.getElementById('qr-icon');
+  const iconPreview = document.getElementById('icon-preview');
+  let iconImage = null;
+  let iconDataURL = null;
 
-    iconInput.addEventListener('change', () => {
-      const file = iconInput.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        iconImage = new Image();
-        iconImage.onload = () => generateQR();
-        iconImage.src = reader.result;
-        iconPreview.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    document.getElementById('icon-size').addEventListener('input', e => {
-      document.getElementById('icon-size-label').textContent = e.target.value + '%';
-      if (document.getElementById('live-preview').checked) generateQR();
-    });
-
-    document.querySelectorAll('#qr-text, #qr-size, #qr-margin, #qr-dark, #qr-light, #qr-transparent')
-      .forEach(el => el.addEventListener('input', () => {
-        if (document.getElementById('live-preview').checked) generateQR();
-      }));
-
-function generateQR() {
-  const text = document.getElementById('qr-text').value || ' ';
-  const size = parseInt(document.getElementById('qr-size').value);
-  const margin = parseInt(document.getElementById('qr-margin').value);
-  const dark = document.getElementById('qr-dark').value;
-  const light = document.getElementById('qr-light').value;
-  const transparent = document.getElementById('qr-transparent').checked;
-
-  const qr = qrcode(0, 'H');
-  qr.addData(text);
-  qr.make();
-
-  const cellSize = Math.floor(size / qr.getModuleCount());
-  const qrSize = cellSize * qr.getModuleCount();
-  canvas.width = canvas.height = qrSize + margin * 2 * cellSize;
-
-  ctx.fillStyle = transparent ? 'rgba(0,0,0,0)' : light;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  for (let r = 0; r < qr.getModuleCount(); r++) {
-    for (let c = 0; c < qr.getModuleCount(); c++) {
-      if (qr.isDark(r, c)) {
-        ctx.fillStyle = dark;
-        ctx.fillRect(
-          margin * cellSize + c * cellSize,
-          margin * cellSize + r * cellSize,
-          cellSize, cellSize
-        );
-      }
-    }
-  }
-
-  if (iconImage) {
-    const iconScale = parseInt(document.getElementById('icon-size').value) / 100;
-    const iconSize = qrSize * iconScale;
-    const x = (canvas.width - iconSize) / 2;
-    const y = (canvas.height - iconSize) / 2;
-    ctx.drawImage(iconImage, x, y, iconSize, iconSize);
-  }
-
-  // ✅ ここで履歴に保存！
-  saveToHistory({ text, dark, light });
-}
-
-    function downloadPNG() {
-      const link = document.createElement('a');
-      link.download = 'qr.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    }
-
-    function downloadSVG() {
-      alert('SVG保存はこのバージョンでは未対応です（別ライブラリが必要です）');
-    }
-
-    function decodeImage() {
-      const file = document.getElementById('file-input').files[0];
-      const img = document.getElementById('img-preview');
-      const result = document.getElementById('img-result');
-      result.textContent = '';
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        img.onload = () => {
-          const tempCanvas = document.createElement('canvas');
-          tempCanvas.width = img.naturalWidth;
-          tempCanvas.height = img.naturalHeight;
-          const tempCtx = tempCanvas.getContext('2d');
-          tempCtx.drawImage(img, 0, 0);
-          const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-          const code = jsQR(imageData.data, tempCanvas.width, tempCanvas.height);
-          result.textContent = code ? code.data : 'QRが検出できませんでした';
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    let stream = null;
-    async function startCamera() {
-      const video = document.getElementById('video');
-      const result = document.getElementById('cam-result');
-      result.textContent = '';
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        video.srcObject = stream;
-        await video.play();
-        const interval = setInterval(() => {
-          if (!video.videoWidth) return;
-          const tempCanvas = document.createElement('canvas');
-          tempCanvas.width = video.videoWidth;
-          tempCanvas.height = video.videoHeight;
-          const tempCtx = tempCanvas.getContext('2d');
-          tempCtx.drawImage(video, 0, 0);
-          const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-          const code = jsQR(imageData.data, tempCanvas.width, tempCanvas.height);
-          if (code) {
-            result.textContent = code.data;
-            stopCamera();
-            clearInterval(interval);
-          }
-        }, 300);
-      } catch (e) {
-        alert('カメラにアクセスできません: ' + e.message);
-      }
-    }
-
-    function stopCamera() {
-      const video = document.getElementById('video');
-      if (stream) {
-        stream.getTracks().forEach(t => t.stop());
-        stream = null;
-      }
-      video.srcObject = null;
-    }
-
-    generateQR();
-    
-    function saveToHistory(data) {
-  const history = JSON.parse(localStorage.getItem('qr-history') || '[]');
-  history.unshift({
-    text: data.text,
-    dark: data.dark,
-    light: data.light,
-    created: Date.now()
+  iconInput.addEventListener('change', () => {
+    const file = iconInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      iconImage = new Image();
+      iconImage.onload = () => generateQR();
+      iconImage.src = reader.result;
+      iconPreview.src = reader.result;
+      iconDataURL = reader.result; // ← ここで保存用に保持！
+    };
+    reader.readAsDataURL(file);
   });
-  localStorage.setItem('qr-history', JSON.stringify(history.slice(0, 50))); // 最大50件
-}
 
-  </script>
+  document.getElementById('icon-size').addEventListener('input', e => {
+    document.getElementById('icon-size-label').textContent = e.target.value + '%';
+    if (document.getElementById('live-preview').checked) generateQR();
+  });
+
+  document.querySelectorAll('#qr-text, #qr-size, #qr-margin, #qr-dark, #qr-light, #qr-transparent')
+    .forEach(el => el.addEventListener('input', () => {
+      if (document.getElementById('live-preview').checked) generateQR();
+    }));
+
+  function generateQR() {
+    const text = document.getElementById('qr-text').value || ' ';
+    const size = parseInt(document.getElementById('qr-size').value);
+    const margin = parseInt(document.getElementById('qr-margin').value);
+    const dark = document.getElementById('qr-dark').value;
+    const light = document.getElementById('qr-light').value;
+    const transparent = document.getElementById('qr-transparent').checked;
+
+    const qr = qrcode(0, 'H');
+    qr.addData(text);
+    qr.make();
+
+    const cellSize = Math.floor(size / qr.getModuleCount());
+    const qrSize = cellSize * qr.getModuleCount();
+    canvas.width = canvas.height = qrSize + margin * 2 * cellSize;
+
+    ctx.fillStyle = transparent ? 'rgba(0,0,0,0)' : light;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let r = 0; r < qr.getModuleCount(); r++) {
+      for (let c = 0; c < qr.getModuleCount(); c++) {
+        if (qr.isDark(r, c)) {
+          ctx.fillStyle = dark;
+          ctx.fillRect(
+            margin * cellSize + c * cellSize,
+            margin * cellSize + r * cellSize,
+            cellSize, cellSize
+          );
+        }
+      }
+    }
+
+    if (iconImage) {
+      const iconScale = parseInt(document.getElementById('icon-size').value) / 100;
+      const iconSize = qrSize * iconScale;
+      const x = (canvas.width - iconSize) / 2;
+      const y = (canvas.height - iconSize) / 2;
+      ctx.drawImage(iconImage, x, y, iconSize, iconSize);
+    }
+
+    // ✅ 履歴に保存（中央アイコンも含めて！）
+    saveToHistory({ text, dark, light, icon: iconDataURL });
+  }
+
+  function saveToHistory(data) {
+    const history = JSON.parse(localStorage.getItem('qr-history') || '[]');
+    history.unshift({
+      text: data.text,
+      dark: data.dark,
+      light: data.light,
+      icon: data.icon || null,
+      created: Date.now()
+    });
+    localStorage.setItem('qr-history', JSON.stringify(history.slice(0, 50)));
+  }
+
+  function downloadPNG() {
+    const link = document.createElement('a');
+    link.download = 'qr.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  function downloadSVG() {
+    alert('SVG保存はこのバージョンでは未対応です（別ライブラリが必要です）');
+  }
+
+  function decodeImage() {
+    const file = document.getElementById('file-input').files[0];
+    const img = document.getElementById('img-preview');
+    const result = document.getElementById('img-result');
+    result.textContent = '';
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      img.onload = () => {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = img.naturalWidth;
+        tempCanvas.height = img.naturalHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(img, 0, 0);
+        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        const code = jsQR(imageData.data, tempCanvas.width, tempCanvas.height);
+        result.textContent = code ? code.data : 'QRが検出できませんでした';
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  let stream = null;
+  async function startCamera() {
+    const video = document.getElementById('video');
+    const result = document.getElementById('cam-result');
+    result.textContent = '';
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      video.srcObject = stream;
+      await video.play();
+      const interval = setInterval(() => {
+        if (!video.videoWidth) return;
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = video.videoWidth;
+        tempCanvas.height = video.videoHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(video, 0, 0);
+        const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+        const code = jsQR(imageData.data, tempCanvas.width, tempCanvas.height);
+        if (code) {
+          result.textContent = code.data;
+          stopCamera();
+          clearInterval(interval);
+        }
+      }, 300);
+    } catch (e) {
+      alert('カメラにアクセスできません: ' + e.message);
+    }
+  }
+
+  function stopCamera() {
+    const video = document.getElementById('video');
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    video.srcObject = null;
+  }
+
+  generateQR();
+</script>
+
 </body>
 </html>
 
