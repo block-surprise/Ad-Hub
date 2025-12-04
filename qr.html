@@ -6,57 +6,99 @@
   <title>QRコードツール</title>
   <style>
     :root {
-      --bg: #f7f8fa;
-      --text: #111;
-      --card: #fff;
-      --border: #d9dee3;
-      --muted: #616b74;
+      --bg: #f9fafb;
+      --text: #1f2937;
+      --card: #ffffffcc;
+      --border: #e5e7eb;
+      --muted: #6b7280;
     }
     :root.dark {
       --bg: #0f172a;
-      --text: #f1f5f9;
-      --card: #1e293b;
+      --text: #e2e8f0;
+      --card: #1e293bcc;
       --border: #334155;
       --muted: #94a3b8;
     }
     body {
       margin: 0;
-      font-family: system-ui, sans-serif;
+      font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
       background: var(--bg);
       color: var(--text);
+      line-height: 1.7;
+      transition: background 0.3s, color 0.3s;
     }
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px;
+      padding: 1rem 1.5rem;
     }
     h1 {
       font-size: 18px;
       margin: 0;
     }
     .theme {
+      background: none;
+      border: none;
+      font-size: 20px;
       cursor: pointer;
+      color: var(--text);
     }
     nav.tabs {
       display: flex;
-      gap: 8px;
-      padding: 0 16px 16px;
+      gap: 0.5rem;
+      padding: 0 1.5rem 1rem;
     }
     nav.tabs button {
-      padding: 8px 16px;
+      padding: 0.5rem 1rem;
       border: 1px solid var(--border);
       background: var(--card);
       color: var(--text);
       border-radius: 6px;
       cursor: pointer;
+      transition: background 0.2s;
+    }
+    nav.tabs button:hover {
+      background: var(--border);
     }
     .tab {
       display: none;
-      padding: 0 16px 32px;
+      padding: 0 1.5rem 2rem;
+      animation: fade 0.3s ease;
     }
     .tab.active {
       display: block;
+    }
+    .row {
+      margin-bottom: 1rem;
+    }
+    input, select, button {
+      font: inherit;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--card);
+      color: var(--text);
+    }
+    input[type="file"] {
+      padding: 0.3rem;
+    }
+    canvas, video, img {
+      margin-top: 1rem;
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .details {
+      background: var(--card);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+    @keyframes fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
   </style>
   <script>
@@ -127,7 +169,7 @@
         <input type="range" id="icon-size" min="10" max="50" value="20" />
         <span id="icon-size-label">20%</span>
         <br />
-        <img id="icon-preview" class="icon-preview" style="max-width:64px; max-height:64px;" />
+        <img id="icon-preview" style="max-width:64px; max-height:64px; margin-top:0.5rem;" />
       </div>
 
       <div class="row">
@@ -140,21 +182,21 @@
       </div>
     </div>
 
-    <canvas id="qr-canvas" style="margin-top:1rem; border:1px solid #ccc;"></canvas>
+    <canvas id="qr-canvas" style="margin-top:1rem; border:1px solid var(--border); border-radius:8px;"></canvas>
   </div>
   <div id="tab-image" class="tab">
     <h2>画像から読み取り</h2>
     <input type="file" id="file-input" accept="image/*" />
     <button onclick="decodeImage()">解析</button>
     <p id="img-result" style="margin-top:1rem; font-family:monospace;"></p>
-    <img id="img-preview" style="max-width:100%; margin-top:1rem;" />
+    <img id="img-preview" />
   </div>
 
   <div id="tab-camera" class="tab">
     <h2>カメラで読み取り</h2>
     <button onclick="startCamera()">カメラ開始</button>
     <button onclick="stopCamera()">停止</button>
-    <video id="video" playsinline style="width:100%; max-width:400px; margin-top:1rem;"></video>
+    <video id="video" playsinline></video>
     <p id="cam-result" style="margin-top:1rem; font-family:monospace;"></p>
   </div>
 
@@ -307,3 +349,4 @@
   </script>
 </body>
 </html>
+
