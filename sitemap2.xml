@@ -42,4 +42,17 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+        <url>
+    <loc>https://ad-hub.f5.si/features</loc>
+    <lastmod>2025-12-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+      <url>
+    <loc>https://ad-hub.f5.si/settings</loc>
+    <lastmod>2025-12-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
 </urlset>
