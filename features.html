@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Ad-Hub 機能一覧</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Hiragino Sans", "Inter", sans-serif;
+      background: #f9fbff;
+      color: #111;
+    }
+    header {
+      text-align: center;
+      padding: 80px 20px 40px;
+    }
+    header h1 {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+    header p {
+      font-size: 16px;
+      color: #555;
+    }
+    .feature-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 32px;
+      max-width: 1000px;
+      margin: auto;
+      padding: 40px 20px 80px;
+    }
+    .feature-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      flex: 1;
+      min-width: 260px;
+      max-width: 300px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+    }
+    .feature-card h2 {
+      font-size: 20px;
+      margin: 16px 0 8px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 24px;
+    }
+    .feature-card a {
+      display: inline-block;
+      background: #0078d7;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .feature-card a:hover {
+      background: #005fa3;
+    }
+    footer {
+      text-align: center;
+      padding: 48px 20px;
+      font-size: 12px;
+      color: #888;
+      background: #fff;
+      border-top: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Ad-Hubの機能一覧</h1>
+  <p>あなたの活動を支える、静かで美しいツールたち。</p>
+</header>
+
+<section class="feature-grid">
+  <div class="feature-card">
+    <div style="font-size: 32px;">📝</div>
+    <h2>メモ</h2>
+    <p>思考のしずくを、そっと書き留める場所。</p>
+    <a href="/memo">開く</a>
+  </div>
+  <div class="feature-card">
+    <div style="font-size: 32px;">📁</div>
+    <h2>フォルダー</h2>
+    <p>メモを整理し、静かに分類する空間。</p>
+    <a href="/memo-folder">開く</a>
+  </div>
+  <div class="feature-card">
+    <div style="font-size: 32px;">🔗</div>
+    <h2>リンク集</h2>
+    <p>導線を美しくまとめる、詩的なリンクページ。</p>
+    <a href="/lh">開く</a>
+  </div>
+  <div class="feature-card">
+    <div style="font-size: 32px;">🖼️</div>
+    <h2>広告生成</h2>
+    <p>あなたの世界観に合った広告を、自由に。</p>
+    <a href="/ads">開く</a>
+  </div>
+  <div class="feature-card">
+    <div style="font-size: 32px;">🌙</div>
+    <h2>ダークモード</h2>
+    <p>夜の作業も、目にやさしく静かに。</p>
+    <a href="/settings#theme">切り替える</a>
+  </div>
+  <div class="feature-card">
+    <div style="font-size: 32px;">⚙️</div>
+    <h2>設定</h2>
+    <p>あなたらしい使い方を、そっと整える。</p>
+    <a href="/settings">開く</a>
+  </div>
+</section>
+
+<footer>
+  © 2025 Ad-Hub. 静けさと創造性を大切に。
+</footer>
+
+</body>
+</html>
