@@ -4,30 +4,23 @@
   <meta charset="UTF-8">
   <title>Ad-Hub Light</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927"
-     crossorigin="anonymous"></script>
-<link rel="icon" type="image/png" sizes="48x48" href="/favicon2.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
-
-    <script type="application/ld+json">
-    {
-    "@context" : "https://schema.org",
-    "@type" : "Organization",
-    "name" : "ad-hub",
-    "url" : "https://ad-hub.f5.si"
-    "logo": "https://ad-hub.f5.si/favicon2.png"
-    }
-  </script>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-D6SC2D5KK4"></script>
+  <meta name="description" content="メモも広告も、あなたの手のひらで。Ad-Hubは静かで美しい活動拠点です。">
   <meta name="google-adsense-account" content="ca-pub-3571574988222927">
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <link rel="icon" href="/favicon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  gtag('config', 'G-D6SC2D5KK4');
-</script>
+  <!-- AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-D6SC2D5KK4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-D6SC2D5KK4');
+  </script>
+
   <style>
     :root {
       --bg: #fefefe;
@@ -39,75 +32,69 @@
     }
     body {
       margin: 0;
-      background: var(--bg);
+      background: linear-gradient(to bottom right, #e0f7ff, #ffffff);
       color: var(--fg);
       font-family: "Inter", "Hiragino Sans", sans-serif;
     }
     header {
       padding: 20px;
-      border-bottom: 1px solid var(--ring);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
+      border-bottom: 1px solid var(--ring);
     }
-.logo {
-  font-weight: bold;
-  font-size: 22px;
-  letter-spacing: 0.5px;
-  background: linear-gradient(90deg, #0078d7, #00c6ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-    nav {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-top: 8px;
+    .logo {
+      font-weight: bold;
+      font-size: 22px;
+      background: linear-gradient(90deg, #0078d7, #00c6ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     nav a {
+      margin-left: 16px;
       text-decoration: none;
       color: var(--accent);
       font-weight: 500;
-      cursor: pointer;
     }
-body {
-  margin: 0;
-  background: linear-gradient(to bottom, #f0f8ff, #ffffff);
-  color: var(--fg);
-  font-family: "Inter", "Hiragino Sans", sans-serif;
-}
-
-
+    .hero {
+      text-align: center;
+      padding: 80px 20px 40px;
+    }
     .hero h1 {
-      font-size: 30px;
-      margin-bottom: 12px;
-      color: var(--fg);
+      font-size: 36px;
+      margin-bottom: 16px;
     }
     .hero p {
-      color: var(--muted);
       font-size: 16px;
-      line-height: 1.6;
+      color: var(--muted);
+      margin-bottom: 24px;
     }
-    .section {
+    .cta-button {
+      background: var(--accent);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .cta-button:hover {
+      background: #005fa3;
+    }
+    .features {
       max-width: 800px;
-      margin: auto;
-      padding: 20px;
-      display: none;
-    }
-    .section.active {
-      display: block;
+      margin: 40px auto;
+      padding: 0 20px;
     }
     .card {
       background: var(--card);
       border: 1px solid var(--ring);
       border-radius: 12px;
       padding: 20px;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
-    .card h2 {
+    .card h3 {
       margin-top: 0;
       font-size: 20px;
     }
@@ -115,80 +102,19 @@ body {
       color: var(--muted);
       font-size: 14px;
     }
-    .card a {
-      display: inline-block;
-      margin-top: 8px;
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 500;
+    footer {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--ring);
+      background: var(--bg);
     }
     @media (max-width: 600px) {
-      .hero h1 { font-size: 24px; }
+      .hero h1 { font-size: 28px; }
       .hero p { font-size: 14px; }
-      nav { gap: 12px; }
       .card { padding: 16px; }
     }
-    .footer {
-  text-align: center;
-  padding: 32px 20px;
-  color: var(--muted);
-  font-size: 12px;
-  border-top: 1px solid var(--ring);
-  background: var(--bg);
-}
-section {
-  max-width: 800px;
-  margin: 60px auto;
-  padding: 0 20px;
-  font-family: "Inter", "Hiragino Sans", sans-serif;
-  color: #333;
-}
-
-.features h2 {
-  font-size: 20px;
-  margin-bottom: 16px;
-}
-
-.features ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-.features li {
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.philosophy p {
-  font-size: 14px;
-  font-style: italic;
-  color: #555;
-}
-
-.quiet-nav nav {
-  text-align: center;
-  font-size: 13px;
-  color: #888;
-}
-
-.quiet-nav a {
-  color: #888;
-  text-decoration: none;
-  margin: 0 8px;
-}
-@media (max-width: 600px) {
-  .hero {
-    padding: 40px 16px 28px;
-    max-width: 100%;
-  }
-  .hero h1 {
-    font-size: 24px;
-  }
-  .hero p {
-    font-size: 14px;
-  }
-}
-
   </style>
 </head>
 <body>
@@ -196,107 +122,37 @@ section {
 <header>
   <div class="logo">Ad-Hub Light</div>
   <nav>
-    <a onclick="showSection('home')">ホーム</a>
-    <a onclick="showSection('links')">案内リンク</a>
-    <a onclick="showSection('ads')">広告ツール</a>
-    <a onclick="showSection('memo')">メモ</a>
+    <a href="#features">機能</a>
+    <a href="lh">リンク</a>
+    <a href="memo-folder">メモ</a>
   </nav>
 </header>
 
-<section class="hero" id="homeSection">
-  <h1>あなたの活動を広げる、拠点</h1>
-  <p>Ad-Hubは、広告生成とリンク案内を備えた、あなたの活動を支えるツールです。<br>明るく、静かに、世界へとつながる場所。</p>
+<section class="hero">
+  <h1>メモも簡単、広告も自由。</h1>
+  <p>Ad-Hubは、あなたの活動を支える静かなツールボックス。<br>シンプルで美しい体験を、今すぐ。</p>
+  <a href="#features" class="cta-button">はじめる</a>
 </section>
 
-<div class="section active" id="home">
+<section class="features" id="features">
   <div class="card">
-    <h2>案内リンク</h2>
-    <p>お気に入りのサイトや作品ページをまとめて案内できます。</p>
-    <a href="lh">リンク集へ →</a>
+    <h3>📌 メモも簡単</h3>
+    <p>アイデアをすぐに書き留めて、フォルダーで整理。シンプルで静かな書き心地。</p>
   </div>
   <div class="card">
-    <h2>広告ツール</h2>
-    <p>画像・動画・テキスト広告を生成して、他サイトに埋め込めます。</p>
-    <a href="ad-hub">広告ツールへ →</a>
+    <h3>🖼️ 広告も自由</h3>
+    <p>画像・動画・テキスト広告を生成して、あなたのサイトにぴったりの形で表示。</p>
   </div>
   <div class="card">
-  <h2>メモツール</h2>
-  <p>アイデアや下書きを簡単に残すことができます。フォルダーもあるので仕分けやすい。</p>
-  <a href="memo-folder" target="_blank">メモへ →</a>
-</div>
-  <!-- 機能紹介セクション -->
-  <section class="features">
-    <h2>Ad-Hubでできること</h2>
-    <ul>
-      <li>広告画像の生成</li>
-      <li>リンクの整理と案内</li>
-      <li>詩的な導線の設計</li>
-    </ul>
-  </section>
-
-  <!-- 世界観を伝える一文 -->
-  <section class="philosophy">
-    <p>Ad-Hubは、多くのサイトの利用者様に寄り添い作成されたサイトです。</p>
-  </section>
-</div>
-  
-<div class="section" id="links">
-  <div class="card">
-    <h2>案内リンクセクション</h2>
-    <p>お気に入りのサイトや作品ページをまとめて案内できます。</p>
-      <a href="lh">リンク集へ →</a>
+    <h3>🔗 導線も美しく</h3>
+    <p>リンク集や案内ページを、詩的で洗練されたUIでまとめられます。</p>
   </div>
-</div>
-
-<div class="section" id="ads">
-  <div class="card">
-    <h2>広告ツールセクション</h2>
-    <p>ここにAd-Hubの広告生成機能を組み込んでいきます。</p>
-    <a href="ad-hub">広告ツールへ →</a>
-  </div>
-</div>
-  <div class="section" id="memo">
-  <div class="card">
-    <h2>メモセクション</h2>
-    <p>ここにAd-Hubが開発したメモツールが組み込んでいます。</p>
-    <a href="memo.folder">メモへ →</a>
-  </div>
-</div>
-
-<!-- 静かなナビゲーション -->
-  <section class="quiet-nav">
-  <nav>
-    <a href="/terms.html">利用規約</a> |
-    <a href="/privacy.html">プライバシー</a>|
-    <a href="https://help.ad-hub.f5.si/">ヘルプ</a>
-  </nav>
 </section>
-<footer class="footer">
+
+<footer>
   <small>© Ad-Hub 2025</small>
 </footer>
 
-<script>
-function showSection(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.getElementById('homeSection').style.display = id === 'home' ? 'block' : 'none';
-}
-</script>
-  <script>
-    document.cookie = "visited=true; max-age=86400; path=/";
-  </script>
-  <script>
-    function getCookie(name) {
-  const cookies = document.cookie.split("; ");
-  for (let c of cookies) {
-    const [key, value] = c.split("=");
-    if (key === name) return value;
-  }
-  return null;
-}
-
-const visited = getCookie("visited");
-  </script>
-
 </body>
 </html>
+
