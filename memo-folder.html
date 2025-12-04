@@ -208,7 +208,6 @@ if (theme === 'dark') {
 
   <div class="header-row">
     <h2>ファイル一覧</h2>
-    <button class="theme-toggle" onclick="toggleTheme()">🌗</button>
   </div>
 
   <div id="home-view">
@@ -238,7 +237,7 @@ if (theme === 'dark') {
   <div id="memo-modal" class="modal">
     <div class="modal-content">
       <select id="memo-file-select"></select>
-      <input type="text" id="memo-title" placeholder="メモのタイトル" />
+      <input type="text" id="memo-title-input" placeholder="メモのタイトル" />
       <textarea id="memo-body" rows="4" placeholder="詳細"></textarea>
       <button onclick="confirmMemo()">追加</button>
       <button onclick="closeMemoModal()">キャンセル</button>
@@ -383,6 +382,7 @@ if (theme === 'dark') {
   </script>
 </body>
 </html>
+
 
 
 
