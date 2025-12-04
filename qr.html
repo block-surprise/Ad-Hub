@@ -128,11 +128,13 @@
   <header>
     <h1>QRコードツール</h1>
   </header>
-  <nav class="tabs">
-    <button onclick="showTab('generate')">生成</button>
-    <button onclick="showTab('image')">画像から読み取り</button>
-    <button onclick="showTab('camera')">カメラで読み取り</button>
-  </nav>
+<nav class="tabs">
+  <button onclick="showTab('generate')">生成</button>
+  <button onclick="showTab('image')">画像から読み取り</button>
+  <button onclick="showTab('camera')">カメラで読み取り</button>
+  <button onclick="window.open('qr-memories.html', '_blank')">履歴</button>
+</nav>
+
   <div id="tab-generate" class="tab active">
     <h2>QRコード生成</h2>
     <div class="row">
