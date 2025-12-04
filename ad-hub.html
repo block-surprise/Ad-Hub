@@ -20,7 +20,46 @@
 
   gtag('config', 'G-D6SC2D5KK4');
 </script>
+    <script>
+  // テーマ
+  const theme = localStorage.getItem('theme');
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
+  }
+
+  // フォント
+  const font = localStorage.getItem('font');
+  if (font) {
+    document.body.style.fontFamily = font;
+  }
+
+  // 余白
+  const padding = localStorage.getItem('padding');
+  if (padding) {
+    document.documentElement.style.setProperty('--padding', padding);
+  }
+
+  // Labs
+  const labs = localStorage.getItem('labs');
+  if (labs === 'on') {
+    document.body.dataset.labs = 'on';
+  }
+</script>
+  
   <style>
+
+body.dark {
+  --bg: #0f172a;
+  --text: #f1f5f9;
+  --card: #1e293b;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font, "Hiragino Sans", sans-serif);
+}
+
     :root {
       --bg: #0f1115;
       --text: #e8ebf0;
