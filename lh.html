@@ -19,7 +19,51 @@
 
   gtag('config', 'G-D6SC2D5KK4');
 </script>
+ <script>
+  // テーマ
+  const theme = localStorage.getItem('theme');
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
+  }
+
+  // フォント
+  const font = localStorage.getItem('font');
+  if (font) {
+    document.body.style.fontFamily = font;
+  }
+
+  // 余白
+  const padding = localStorage.getItem('padding');
+  if (padding) {
+    document.documentElement.style.setProperty('--padding', padding);
+  }
+
+  // Labs
+  const labs = localStorage.getItem('labs');
+  if (labs === 'on') {
+    document.body.dataset.labs = 'on';
+  }
+</script>
+
 <style>
+ :root {
+  --bg: #f9fbff;
+  --text: #111;
+  --card: #fff;
+  --padding: 32px;
+}
+body.dark {
+  --bg: #0f172a;
+  --text: #f1f5f9;
+  --card: #1e293b;
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font, "Hiragino Sans", sans-serif);
+}
+
 body { font-family: "Inter", sans-serif; background: #f9fafc; margin: 0; }
 header { background: #0078d7; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
 header .logo { font-weight: bold; font-size: 20px; }
