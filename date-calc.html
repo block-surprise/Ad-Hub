@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>日付計算ツール - DateCalc</title>
+  <style>
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 2rem;
+      color: #333;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+    }
+    input, select, button {
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      width: 100%;
+      max-width: 300px;
+    }
+    .result {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    }
+    .ad {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #eee;
+      text-align: center;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h1>日付計算ツール</h1>
+
+  <label>
+    開始日:
+    <input type="date" id="startDate" />
+  </label>
+
+  <label>
+    日数（±）:
+    <input type="number" id="days" placeholder="例: 30 または -10" />
+  </label>
+
+  <button onclick="calculate()">計算する</button>
+
+  <div class="result" id="result"></div>
+
+  <div class="ad">
+    （ここに広告が入ります）
+  </div>
+
+  <script>
+    function calculate() {
+      const start = document.getElementById('startDate').value;
+      const days = parseInt(document.getElementById('days').value, 10);
+      const resultDiv = document.getElementById('result');
+
+      if (!start || isNaN(days)) {
+        resultDiv.textContent = '開始日と日数を入力してください。';
+        return;
+      }
+
+      const startDate = new Date(start);
+      startDate.setDate(startDate.getDate() + days);
+
+      const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+      const formatted = startDate.toLocaleDateString('ja-JP', options);
+
+      resultDiv.innerHTML = `<strong>${days}日後:</strong><br>${formatted}`;
+    }
+  </script>
+</body>
+</html>
