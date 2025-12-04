@@ -2,91 +2,164 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>QRコード生成（詳細設定付き）</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QRコードツール</title>
   <style>
+    :root {
+      --bg: #f7f8fa;
+      --text: #111;
+      --card: #fff;
+      --border: #d9dee3;
+      --muted: #616b74;
+    }
+    :root.dark {
+      --bg: #0f172a;
+      --text: #f1f5f9;
+      --card: #1e293b;
+      --border: #334155;
+      --muted: #94a3b8;
+    }
     body {
-      font-family: sans-serif;
-      background: #f9f9f9;
-      color: #333;
-      padding: 2rem;
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
-    h1 { font-size: 20px; }
-    .row { margin-bottom: 1rem; }
-    label { display: block; margin-bottom: 4px; }
-    input, select, button {
-      padding: 8px;
-      font: inherit;
-      margin-right: 8px;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
     }
-    canvas {
-      margin-top: 1rem;
-      border: 1px solid #ccc;
+    h1 {
+      font-size: 18px;
+      margin: 0;
     }
-    .details {
-      margin-top: 1rem;
-      padding: 1rem;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+    .theme {
+      cursor: pointer;
     }
-    .icon-preview {
-      max-width: 64px;
-      max-height: 64px;
-      margin-top: 8px;
+    nav.tabs {
+      display: flex;
+      gap: 8px;
+      padding: 0 16px 16px;
+    }
+    nav.tabs button {
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .tab {
+      display: none;
+      padding: 0 16px 32px;
+    }
+    .tab.active {
+      display: block;
     }
   </style>
+  <script>
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') document.documentElement.classList.add('dark');
+    function toggleTheme() {
+      const root = document.documentElement;
+      const isDark = root.classList.contains('dark');
+      if (isDark) {
+        root.classList.remove('dark');
+        localStorage.removeItem('theme');
+      } else {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+    function showTab(name) {
+      ['generate', 'image', 'camera'].forEach(id => {
+        const el = document.getElementById('tab-' + id);
+        if (el) el.classList.toggle('active', id === name);
+      });
+    }
+    window.addEventListener('DOMContentLoaded', () => showTab('generate'));
+  </script>
 </head>
 <body>
-  <h1>QRコード生成（詳細設定付き）</h1>
+  <header>
+    <h1>QRコードツール</h1>
+    <button class="theme" onclick="toggleTheme()">🌗</button>
+  </header>
+  <nav class="tabs">
+    <button onclick="showTab('generate')">生成</button>
+    <button onclick="showTab('image')">画像から読み取り</button>
+    <button onclick="showTab('camera')">カメラで読み取り</button>
+  </nav>
+  <div id="tab-generate" class="tab active">
+    <h2>QRコード生成</h2>
+    <div class="row">
+      <input type="text" id="qr-text" value="https://ad-hub.f5.si/" size="40" placeholder="テキストやURLを入力" />
+      <button onclick="generateQR()">生成</button>
+    </div>
 
-  <div class="row">
-    <label>テキストまたはURL</label>
-    <input type="text" id="qr-text" value="https://ad-hub.f5.si/" size="40" />
-    <button onclick="generateQR()">生成</button>
+    <div class="details">
+      <h3>詳細設定</h3>
+
+      <div class="row">
+        サイズ:
+        <select id="qr-size">
+          <option value="256">256px</option>
+          <option value="384">384px</option>
+          <option value="512" selected>512px</option>
+        </select>
+        余白:
+        <input type="number" id="qr-margin" value="2" min="0" max="16" />
+        <label><input type="checkbox" id="qr-transparent" /> 背景透過</label>
+      </div>
+
+      <div class="row">
+        色:
+        <input type="color" id="qr-dark" value="#000000" />
+        <input type="color" id="qr-light" value="#ffffff" />
+      </div>
+
+      <div class="row">
+        中央アイコン:
+        <input type="file" id="qr-icon" accept="image/*" />
+        サイズ:
+        <input type="range" id="icon-size" min="10" max="50" value="20" />
+        <span id="icon-size-label">20%</span>
+        <br />
+        <img id="icon-preview" class="icon-preview" style="max-width:64px; max-height:64px;" />
+      </div>
+
+      <div class="row">
+        <label><input type="checkbox" id="live-preview" checked /> ライブプレビュー</label>
+      </div>
+
+      <div class="row">
+        <button onclick="downloadPNG()">PNGで保存</button>
+        <button onclick="downloadSVG()">SVGで保存</button>
+      </div>
+    </div>
+
+    <canvas id="qr-canvas" style="margin-top:1rem; border:1px solid #ccc;"></canvas>
+  </div>
+  <div id="tab-image" class="tab">
+    <h2>画像から読み取り</h2>
+    <input type="file" id="file-input" accept="image/*" />
+    <button onclick="decodeImage()">解析</button>
+    <p id="img-result" style="margin-top:1rem; font-family:monospace;"></p>
+    <img id="img-preview" style="max-width:100%; margin-top:1rem;" />
   </div>
 
-  <div class="details">
-    <h2>詳細設定</h2>
-
-    <div class="row">
-      <label>サイズ / 余白 / 背景透過</label>
-      <select id="qr-size">
-        <option value="256">256px</option>
-        <option value="384">384px</option>
-        <option value="512" selected>512px</option>
-      </select>
-      <input type="number" id="qr-margin" value="2" min="0" max="16" />
-      <label><input type="checkbox" id="qr-transparent" /> 背景透過</label>
-    </div>
-
-    <div class="row">
-      <label>前景色 / 背景色</label>
-      <input type="color" id="qr-dark" value="#000000" />
-      <input type="color" id="qr-light" value="#ffffff" />
-    </div>
-
-    <div class="row">
-      <label>中央アイコン画像</label>
-      <input type="file" id="qr-icon" accept="image/*" />
-      <input type="range" id="icon-size" min="10" max="50" value="20" />
-      <span id="icon-size-label">20%</span>
-      <br />
-      <img id="icon-preview" class="icon-preview" />
-    </div>
-
-    <div class="row">
-      <label><input type="checkbox" id="live-preview" checked /> ライブプレビュー</label>
-    </div>
-
-    <div class="row">
-      <button onclick="downloadPNG()">PNGで保存</button>
-      <button onclick="downloadSVG()">SVGで保存</button>
-    </div>
+  <div id="tab-camera" class="tab">
+    <h2>カメラで読み取り</h2>
+    <button onclick="startCamera()">カメラ開始</button>
+    <button onclick="stopCamera()">停止</button>
+    <video id="video" playsinline style="width:100%; max-width:400px; margin-top:1rem;"></video>
+    <p id="cam-result" style="margin-top:1rem; font-family:monospace;"></p>
   </div>
 
-  <canvas id="qr-canvas"></canvas>
-
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
+  <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
   <script>
     const canvas = document.getElementById('qr-canvas');
     const ctx = canvas.getContext('2d');
@@ -167,6 +240,67 @@
 
     function downloadSVG() {
       alert('SVG保存はこのバージョンでは未対応です（別ライブラリが必要です）');
+    }
+
+    function decodeImage() {
+      const file = document.getElementById('file-input').files[0];
+      const img = document.getElementById('img-preview');
+      const result = document.getElementById('img-result');
+      result.textContent = '';
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        img.onload = () => {
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = img.naturalWidth;
+          tempCanvas.height = img.naturalHeight;
+          const tempCtx = tempCanvas.getContext('2d');
+          tempCtx.drawImage(img, 0, 0);
+          const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+          const code = jsQR(imageData.data, tempCanvas.width, tempCanvas.height);
+          result.textContent = code ? code.data : 'QRが検出できませんでした';
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    let stream = null;
+    async function startCamera() {
+      const video = document.getElementById('video');
+      const result = document.getElementById('cam-result');
+      result.textContent = '';
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = stream;
+        await video.play();
+        const interval = setInterval(() => {
+          if (!video.videoWidth) return;
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = video.videoWidth;
+          tempCanvas.height = video.videoHeight;
+          const tempCtx = tempCanvas.getContext('2d');
+          tempCtx.drawImage(video, 0, 0);
+          const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+          const code = jsQR(imageData.data, tempCanvas.width, tempCanvas.height);
+          if (code) {
+            result.textContent = code.data;
+            stopCamera();
+            clearInterval(interval);
+          }
+        }, 300);
+      } catch (e) {
+        alert('カメラにアクセスできません: ' + e.message);
+      }
+    }
+
+    function stopCamera() {
+      const video = document.getElementById('video');
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
+      video.srcObject = null;
     }
 
     generateQR();
