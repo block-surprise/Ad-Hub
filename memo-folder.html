@@ -104,7 +104,11 @@
     .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .file-button-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
     .file-wrapper { position: relative; }
-    .file-name-button { width: 100%; padding: 14px 20px; font-size: 16px; background: #fff; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+.file-name-button {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
     .file-name-button:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .delete-button { position: absolute; top: 6px; right: 6px; background: none; border: none; font-size: 18px; color: #999; cursor: pointer; }
     .delete-button:hover { color: #e00; }
@@ -290,6 +294,7 @@
   </script>
 </body>
 </html>
+
 
 
 
