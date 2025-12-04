@@ -126,6 +126,41 @@
       background: #fff;
     }
 
+      .highlight-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 80px 40px;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .highlight-block:nth-child(even) {
+    flex-direction: row-reverse;
+    background: #f9fbff;
+  }
+  .highlight-text {
+    flex: 1;
+    min-width: 280px;
+  }
+  .highlight-text h2 {
+    font-size: 32px;
+    margin-bottom: 16px;
+    color: #111;
+  }
+  .highlight-text p {
+    font-size: 16px;
+    color: #555;
+  }
+  .highlight-image {
+    flex: 1;
+    min-width: 280px;
+    text-align: center;
+  }
+  .highlight-image img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
     @media (max-width: 768px) {
       .hero {
         flex-direction: column;
@@ -172,25 +207,43 @@
     </div>
   </div>
 </section>
-<section class="highlights" style="padding: 80px 20px; background: #f9fbff; text-align: center;">
-  <h2 style="font-size: 24px; margin-bottom: 40px; color: #333;">Ad-Hubができること、もっと。</h2>
-  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 32px;">
-    <div style="flex: 1; min-width: 240px; max-width: 300px;">
-      <h3 style="font-size: 20px; color: #111;">メモも簡単。</h3>
-      <p style="color: #666;">思いついた瞬間を、逃さない。</p>
-    </div>
-    <div style="flex: 1; min-width: 240px; max-width: 300px;">
-      <h3 style="font-size: 20px; color: #111;">広告も自由。</h3>
-      <p style="color: #666;">あなたの色で、世界に届ける。</p>
-    </div>
-    <div style="flex: 1; min-width: 240px; max-width: 300px;">
-      <h3 style="font-size: 20px; color: #111;">導線も美しく。</h3>
-      <p style="color: #666;">詩のように、やさしくつなぐ。</p>
-    </div>
-    <div style="flex: 1; min-width: 240px; max-width: 300px;">
-      <h3 style="font-size: 20px; color: #111;">静けさも、機能。</h3>
-      <p style="color: #666;">余白が、あなたの集中を守る。</p>
-    </div>
+<section class="highlight-block">
+  <div class="highlight-text">
+    <h2>メモも簡単。</h2>
+    <p>思いついた瞬間を、逃さない。静かに書き留めて、あとで見返せる安心感。</p>
+  </div>
+  <div class="highlight-image">
+    <img src="https://source.unsplash.com/600x400/?notebook,writing" alt="メモのイメージ">
+  </div>
+</section>
+
+<section class="highlight-block">
+  <div class="highlight-text">
+    <h2>広告も自由。</h2>
+    <p>あなたの色で、世界に届ける。画像も動画も、思いのままに。</p>
+  </div>
+  <div class="highlight-image">
+    <img src="https://source.unsplash.com/600x400/?design,ads" alt="広告のイメージ">
+  </div>
+</section>
+
+<section class="highlight-block">
+  <div class="highlight-text">
+    <h2>導線も美しく。</h2>
+    <p>詩のように、やさしくつなぐ。リンクも案内も、静かな導きに。</p>
+  </div>
+  <div class="highlight-image">
+    <img src="https://source.unsplash.com/600x400/?path,light" alt="導線のイメージ">
+  </div>
+</section>
+
+<section class="highlight-block">
+  <div class="highlight-text">
+    <h2>静けさも、機能。</h2>
+    <p>余白が、あなたの集中を守る。派手さより、心地よさを。</p>
+  </div>
+  <div class="highlight-image">
+    <img src="https://source.unsplash.com/600x400/?calm,workspace" alt="静けさのイメージ">
   </div>
 </section>
 
