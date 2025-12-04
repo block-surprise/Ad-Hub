@@ -19,8 +19,42 @@
 
   gtag('config', 'G-D6SC2D5KK4');
 </script>
+  <script>
+  // テーマ
+  const theme = localStorage.getItem('theme');
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
+  }
+
+  // フォント
+  const font = localStorage.getItem('font');
+  if (font) {
+    document.body.style.fontFamily = font;
+  }
+
+  // 余白
+  const padding = localStorage.getItem('padding');
+  if (padding) {
+    document.documentElement.style.setProperty('--padding', padding);
+  }
+
+  // Labs
+  const labs = localStorage.getItem('labs');
+  if (labs === 'on') {
+    document.body.dataset.labs = 'on';
+  }
+</script>
+
   <title>Ad-Hub</title>
   <style>
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font, "Hiragino Sans", sans-serif);
+}
+
     :root {
       --bg: #0f1115;
       --panel: #151922;
@@ -465,6 +499,7 @@
   </script>
 </body>
 </html>
+
 
 
 
