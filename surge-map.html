@@ -16,78 +16,87 @@
       display: flex;
       gap: 10px;
       align-items: center;
+      flex-wrap: wrap;
     }
     #map {
-      height: calc(100vh - 50px);
+      height: calc(100vh - 60px);
     }
-    button {
-      padding: 6px 12px;
+    input, button {
+      padding: 6px 10px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
   <header>
     <h1>SURGE MAP</h1>
-    <select id="category">
-      <option value="cafe">カフェ</option>
-      <option value="park">公園</option>
-      <option value="station">駅</option>
-    </select>
+    <input type="text" id="searchInput" placeholder="例：ローソン 渋谷" />
     <button id="searchBtn">検索</button>
-    <button id="locateBtn">現在地</button>
+    <button id="trackBtn">現在地追従</button>
   </header>
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([35.8616, 139.6455], 14);
+    let markers = L.layerGroup().addTo(map);
+    let tracking = false;
+    let watchId = null;
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    const markers = L.layerGroup().addTo(map);
-
-    const categorySelect = document.getElementById('category');
-    const searchBtn = document.getElementById('searchBtn');
-    const locateBtn = document.getElementById('locateBtn');
-
-    // 前回のカテゴリを復元
-    const savedCategory = localStorage.getItem('lastCategory');
-    if (savedCategory) {
-      categorySelect.value = savedCategory;
-    }
-
-    searchBtn.addEventListener('click', () => {
-      const category = categorySelect.value;
-      localStorage.setItem('lastCategory', category);
-      searchPlaces(category);
+    document.getElementById('searchBtn').addEventListener('click', () => {
+      const query = document.getElementById('searchInput').value.trim();
+      if (query) {
+        searchKeyword(query);
+      }
     });
 
-    locateBtn.addEventListener('click', () => {
-      map.locate({ setView: true, maxZoom: 15 });
+    document.getElementById('trackBtn').addEventListener('click', () => {
+      if (!tracking) {
+        if (navigator.geolocation) {
+          watchId = navigator.geolocation.watchPosition(pos => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            map.setView([lat, lon], 16);
+            L.circleMarker([lat, lon], {
+              radius: 8,
+              color: '#2563eb',
+              fillColor: '#3b82f6',
+              fillOpacity: 0.8
+            }).addTo(markers).bindPopup("現在地").openPopup();
+          }, err => {
+            alert("現在地を取得できませんでした");
+          }, { enableHighAccuracy: true });
+          tracking = true;
+          document.getElementById('trackBtn').textContent = "追従停止";
+        }
+      } else {
+        navigator.geolocation.clearWatch(watchId);
+        tracking = false;
+        document.getElementById('trackBtn').textContent = "現在地追従";
+      }
     });
 
-    function searchPlaces(type) {
+    function searchKeyword(query) {
       markers.clearLayers();
-      const center = map.getCenter();
-      const query = `
-        [out:json];
-        node["amenity"="${type}"](around:1000,${center.lat},${center.lng});
-        out;
-      `;
-
-      fetch("https://overpass-api.de/api/interpreter", {
-        method: "POST",
-        body: query
-      })
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
         .then(res => res.json())
         .then(data => {
-          data.elements.forEach(el => {
-            const name = el.tags.name || "(名称不明)";
-            const marker = L.marker([el.lat, el.lon]).addTo(markers);
-            marker.bindPopup(`<strong>${name}</strong>`);
+          if (data.length === 0) {
+            alert("見つかりませんでした");
+            return;
+          }
+          data.forEach(place => {
+            const lat = parseFloat(place.lat);
+            const lon = parseFloat(place.lon);
+            const name = place.display_name;
+            const marker = L.marker([lat, lon]).addTo(markers);
+            marker.bindPopup(`<strong>${name}</strong>`).openPopup();
           });
+          map.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 16);
         });
     }
   </script>
