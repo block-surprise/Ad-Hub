@@ -20,6 +20,9 @@
     #map {
       height: calc(100vh - 50px);
     }
+    button {
+      padding: 6px 12px;
+    }
   </style>
 </head>
 <body>
@@ -31,6 +34,7 @@
       <option value="station">駅</option>
     </select>
     <button id="searchBtn">検索</button>
+    <button id="locateBtn">現在地</button>
   </header>
   <div id="map"></div>
 
@@ -44,9 +48,24 @@
 
     const markers = L.layerGroup().addTo(map);
 
-    document.getElementById('searchBtn').addEventListener('click', () => {
-      const category = document.getElementById('category').value;
+    const categorySelect = document.getElementById('category');
+    const searchBtn = document.getElementById('searchBtn');
+    const locateBtn = document.getElementById('locateBtn');
+
+    // 前回のカテゴリを復元
+    const savedCategory = localStorage.getItem('lastCategory');
+    if (savedCategory) {
+      categorySelect.value = savedCategory;
+    }
+
+    searchBtn.addEventListener('click', () => {
+      const category = categorySelect.value;
+      localStorage.setItem('lastCategory', category);
       searchPlaces(category);
+    });
+
+    locateBtn.addEventListener('click', () => {
+      map.locate({ setView: true, maxZoom: 15 });
     });
 
     function searchPlaces(type) {
@@ -67,7 +86,7 @@
           data.elements.forEach(el => {
             const name = el.tags.name || "(名称不明)";
             const marker = L.marker([el.lat, el.lon]).addTo(markers);
-            marker.bindPopup(\`<strong>\${name}</strong>\`);
+            marker.bindPopup(`<strong>${name}</strong>`);
           });
         });
     }
