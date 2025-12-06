@@ -63,6 +63,7 @@
   <script>
     const map = L.map('map').setView([35.6812, 139.7671], 14);
     let markers = L.layerGroup().addTo(map);
+    let routeLayer = null;
     let currentLocation = null;
     let following = true;
 
@@ -74,14 +75,12 @@
     const searchBtn = document.getElementById('searchBtn');
     const resultsList = document.getElementById('results');
 
-    // Enterキーで検索
     searchInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         searchBtn.click();
       }
     });
 
-    // 検索ボタン
     searchBtn.addEventListener('click', () => {
       const query = searchInput.value.trim();
       if (query) {
@@ -89,12 +88,10 @@
       }
     });
 
-    // 地図を動かしたら追従をオフ
     map.on('movestart', () => {
       following = false;
     });
 
-    // 現在地の追従
     if (navigator.geolocation) {
       navigator.geolocation.watchPosition(pos => {
         const lat = pos.coords.latitude;
@@ -116,6 +113,10 @@
 
     function searchKeyword(query) {
       markers.clearLayers();
+      if (routeLayer) {
+        map.removeLayer(routeLayer);
+        routeLayer = null;
+      }
       resultsList.innerHTML = '';
       fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=20`)
         .then(res => res.json())
@@ -145,11 +146,38 @@
             li.addEventListener('click', () => {
               map.setView([item.lat, item.lon], 17);
               marker.openPopup();
+              if (currentLocation) {
+                drawRoute(currentLocation, [item.lat, item.lon]);
+              } else {
+                alert("現在地が取得できていません");
+              }
             });
             resultsList.appendChild(li);
           });
 
           map.setView([results[0].lat, results[0].lon], 16);
+        });
+    }
+
+    function drawRoute(from, to) {
+      const url = `https://router.project-osrm.org/route/v1/foot/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (routeLayer) {
+            map.removeLayer(routeLayer);
+          }
+          const route = data.routes[0];
+          routeLayer = L.geoJSON(route.geometry, {
+            style: { color: "#10b981", weight: 5 }
+          }).addTo(map);
+          const distance = route.distance / 1000;
+          const duration = route.duration / 60;
+          alert(`距離：約${distance.toFixed(2)}km\n所要時間：約${duration.toFixed(0)}分`);
+        })
+        .catch(err => {
+          alert("ルートを取得できませんでした");
+          console.error(err);
         });
     }
 
