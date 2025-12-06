@@ -54,7 +54,6 @@
     <header>
       <input type="text" id="searchInput" placeholder="例：ダイソー 渋谷" />
       <button id="searchBtn">検索</button>
-      <button id="trackBtn">現在地追従</button>
     </header>
     <ul id="results"></ul>
   </aside>
@@ -62,11 +61,10 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([35.6812, 139.7671], 14); // 東京駅初期位置
+    const map = L.map('map').setView([35.6812, 139.7671], 14);
     let markers = L.layerGroup().addTo(map);
-    let tracking = false;
-    let watchId = null;
     let currentLocation = null;
+    let following = true;
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
@@ -74,15 +72,16 @@
 
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
-    const trackBtn = document.getElementById('trackBtn');
     const resultsList = document.getElementById('results');
 
+    // Enterキーで検索
     searchInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         searchBtn.click();
       }
     });
 
+    // 検索ボタン
     searchBtn.addEventListener('click', () => {
       const query = searchInput.value.trim();
       if (query) {
@@ -90,32 +89,30 @@
       }
     });
 
-    trackBtn.addEventListener('click', () => {
-      if (!tracking) {
-        if (navigator.geolocation) {
-          watchId = navigator.geolocation.watchPosition(pos => {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            currentLocation = [lat, lon];
-            map.setView(currentLocation, 16);
-            L.circleMarker(currentLocation, {
-              radius: 8,
-              color: '#2563eb',
-              fillColor: '#3b82f6',
-              fillOpacity: 0.8
-            }).addTo(markers).bindPopup("現在地").openPopup();
-          }, err => {
-            alert("現在地を取得できませんでした");
-          }, { enableHighAccuracy: true });
-          tracking = true;
-          trackBtn.textContent = "追従停止";
-        }
-      } else {
-        navigator.geolocation.clearWatch(watchId);
-        tracking = false;
-        trackBtn.textContent = "現在地追従";
-      }
+    // 地図を動かしたら追従をオフ
+    map.on('movestart', () => {
+      following = false;
     });
+
+    // 現在地の追従
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        currentLocation = [lat, lon];
+        if (following) {
+          map.setView(currentLocation, 16);
+        }
+        L.circleMarker(currentLocation, {
+          radius: 8,
+          color: '#2563eb',
+          fillColor: '#3b82f6',
+          fillOpacity: 0.8
+        }).addTo(markers).bindPopup("現在地");
+      }, err => {
+        console.warn("現在地を取得できませんでした");
+      }, { enableHighAccuracy: true });
+    }
 
     function searchKeyword(query) {
       markers.clearLayers();
