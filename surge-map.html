@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>SURGE MAP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+    header {
+      padding: 10px;
+      background: #f0f4f8;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    #map {
+      height: calc(100vh - 50px);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SURGE MAP</h1>
+    <select id="category">
+      <option value="cafe">カフェ</option>
+      <option value="park">公園</option>
+      <option value="station">駅</option>
+    </select>
+    <button id="searchBtn">検索</button>
+  </header>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([35.8616, 139.6455], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const markers = L.layerGroup().addTo(map);
+
+    document.getElementById('searchBtn').addEventListener('click', () => {
+      const category = document.getElementById('category').value;
+      searchPlaces(category);
+    });
+
+    function searchPlaces(type) {
+      markers.clearLayers();
+      const center = map.getCenter();
+      const query = `
+        [out:json];
+        node["amenity"="${type}"](around:1000,${center.lat},${center.lng});
+        out;
+      `;
+
+      fetch("https://overpass-api.de/api/interpreter", {
+        method: "POST",
+        body: query
+      })
+        .then(res => res.json())
+        .then(data => {
+          data.elements.forEach(el => {
+            const name = el.tags.name || "(名称不明)";
+            const marker = L.marker([el.lat, el.lon]).addTo(markers);
+            marker.bindPopup(\`<strong>\${name}</strong>\`);
+          });
+        });
+    }
+  </script>
+</body>
+</html>
