@@ -262,6 +262,24 @@
   </div>
 <script>
   // タブ切り替え
+    const tabHome = document.getElementById("tabHome");
+  const tabSettings = document.getElementById("tabSettings");
+  const homePage = document.getElementById("homePage");
+  const settingsPage = document.getElementById("settingsPage");
+
+  tabHome.addEventListener("click", () => {
+    tabHome.classList.add("active");
+    tabSettings.classList.remove("active");
+    homePage.classList.add("active");
+    settingsPage.classList.remove("active");
+  });
+
+  tabSettings.addEventListener("click", () => {
+    tabSettings.classList.add("active");
+    tabHome.classList.remove("active");
+    settingsPage.classList.add("active");
+    homePage.classList.remove("active");
+  });
 const appsKey = "paydore_apps";
 const storesKey = "paydore_stores";
 let currentLat = null, currentLng = null;
