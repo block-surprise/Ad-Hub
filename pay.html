@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payどれ？（位置対応）</title>
+  <style>
+    body { font-family: sans-serif; background: #0f1115; color: #e6e8ea; padding: 20px; }
+    input, button { font-size: 16px; padding: 8px; margin: 4px 0; }
+    .card { background: #161a21; padding: 16px; border-radius: 12px; margin-bottom: 20px; }
+    .pill { display: inline-block; background: #232834; padding: 4px 8px; border-radius: 999px; margin: 2px; font-size: 13px; }
+    .hint { color: #9aa1a9; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Payどれ？（近い順対応）</h1>
+
+  <div class="card">
+    <h2>店舗登録</h2>
+    <input type="text" id="storeName" placeholder="店舗名" />
+    <br />
+    <button id="getLocation">現在地を取得</button>
+    <span id="locationStatus" class="hint"></span>
+    <br />
+    <label>使える決済:</label><br />
+    <label><input type="checkbox" value="PayPay" /> PayPay</label>
+    <label><input type="checkbox" value="Visa" /> Visa</label>
+    <label><input type="checkbox" value="楽天ペイ" /> 楽天ペイ</label>
+    <br />
+    <button id="saveStore">登録</button>
+  </div>
+
+  <div class="card">
+    <h2>店舗一覧（近い順）</h2>
+    <div id="storeList"></div>
+  </div>
+
+  <div class="card">
+    <h2>おすすめ決済</h2>
+    <input type="text" id="searchStore" placeholder="店舗名を入力" list="storeNames" />
+    <datalist id="storeNames"></datalist>
+    <button id="recommendBtn">おすすめ表示</button>
+    <div id="recommendResult" class="hint"></div>
+  </div>
+
+  <script>
+    let currentLat = null;
+    let currentLng = null;
+
+    const storesKey = "paydore_stores";
+
+    function loadStores() {
+      try {
+        return JSON.parse(localStorage.getItem(storesKey)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveStores(data) {
+      localStorage.setItem(storesKey, JSON.stringify(data));
+    }
+
+    function calcDistance(lat1, lng1, lat2, lng2) {
+      const R = 6371;
+      const toRad = deg => deg * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    document.getElementById("getLocation").addEventListener("click", () => {
+      const status = document.getElementById("locationStatus");
+      status.textContent = "取得中…";
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          currentLat = pos.coords.latitude;
+          currentLng = pos.coords.longitude;
+          status.textContent = `取得成功：${currentLat.toFixed(4)}, ${currentLng.toFixed(4)}`;
+        },
+        () => {
+          status.textContent = "取得失敗";
+        }
+      );
+    });
+
+    document.getElementById("saveStore").addEventListener("click", () => {
+      const name = document.getElementById("storeName").value.trim();
+      if (!name) return alert("店舗名を入力してね！");
+      const checkboxes = document.querySelectorAll("input[type=checkbox]:checked");
+      const apps = Array.from(checkboxes).map(cb => cb.value);
+      if (apps.length === 0) return alert("決済を選んでね！");
+      const stores = loadStores();
+      stores[name] = {
+        apps,
+        lat: currentLat,
+        lng: currentLng
+      };
+      saveStores(stores);
+      alert("登録したよ！");
+      renderStoreList();
+      renderStoreNames();
+    });
+
+    function renderStoreList() {
+      const list = document.getElementById("storeList");
+      list.innerHTML = "読み込み中…";
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const userLat = pos.coords.latitude;
+        const userLng = pos.coords.longitude;
+        const stores = loadStores();
+        const sorted = Object.entries(stores).map(([name, data]) => {
+          const dist = (data.lat && data.lng) ? calcDistance(userLat, userLng, data.lat, data.lng) : Infinity;
+          return { name, apps: data.apps, dist };
+        }).sort((a, b) => a.dist - b.dist);
+
+        list.innerHTML = "";
+        sorted.forEach(store => {
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <strong>${store.name}</strong>（${isFinite(store.dist) ? store.dist.toFixed(2) + "km" : "位置不明"}）<br />
+            ${store.apps.map(a => `<span class="pill">${a}</span>`).join("")}
+            <hr />
+          `;
+          list.appendChild(div);
+        });
+      });
+    }
+
+    function renderStoreNames() {
+      const datalist = document.getElementById("storeNames");
+      datalist.innerHTML = "";
+      const stores = loadStores();
+      Object.keys(stores).forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        datalist.appendChild(opt);
+      });
+    }
+
+    document.getElementById("recommendBtn").addEventListener("click", () => {
+      const name = document.getElementById("searchStore").value.trim();
+      const stores = loadStores();
+      const store = stores[name];
+      const result = document.getElementById("recommendResult");
+      if (!store) {
+        result.textContent = "店舗が見つかりません";
+        return;
+      }
+      // 仮の還元率（実際は店舗ごとに設定可能に拡張予定）
+      const rates = {
+        "PayPay": 0.01,
+        "Visa": 0.02,
+        "楽天ペイ": 0.05
+      };
+      let best = null;
+      store.apps.forEach(app => {
+        const rate = rates[app] || 0;
+        if (!best || rate > best.rate) best = { app, rate };
+      });
+      if (best) {
+        result.innerHTML = `おすすめ：<strong>${best.app}</strong>（<span class="pill">${(best.rate * 100).toFixed(1)}%</span>）`;
+      } else {
+        result.textContent = "おすすめが見つかりません";
+      }
+    });
+
+    renderStoreList();
+    renderStoreNames();
+  </script>
+</body>
+</html>
