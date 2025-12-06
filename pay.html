@@ -3,31 +3,96 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Payどれ？（位置対応）</title>
+  <title>Payどれ？（明るい版）</title>
   <style>
-    body { font-family: sans-serif; background: #0f1115; color: #e6e8ea; padding: 20px; }
-    input, button { font-size: 16px; padding: 8px; margin: 4px 0; }
-    .card { background: #161a21; padding: 16px; border-radius: 12px; margin-bottom: 20px; }
-    .pill { display: inline-block; background: #232834; padding: 4px 8px; border-radius: 999px; margin: 2px; font-size: 13px; }
-    .hint { color: #9aa1a9; font-size: 12px; }
+    :root {
+      --bg: #f9f9fb;
+      --fg: #222;
+      --accent: #4a90e2;
+      --muted: #888;
+      --card: #ffffff;
+      --border: #ddd;
+    }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    input, select, button, textarea {
+      font-size: 16px;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #eee;
+      color: var(--fg);
+    }
+    .pill {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #2c3e50;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 13px;
+      margin: 2px;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .section-title {
+      font-weight: bold;
+      margin-top: 12px;
+    }
   </style>
 </head>
 <body>
-  <h1>Payどれ？（近い順対応）</h1>
+  <h1>Payどれ？（明るい版）</h1>
 
   <div class="card">
-    <h2>店舗登録</h2>
+    <h2>決済手段の管理</h2>
+    <input type="text" id="newAppName" placeholder="決済名（例：PayPay）" />
+    <input type="number" id="newAppRate" placeholder="還元率（例：0.01）" step="0.001" />
+    <button id="addApp">追加</button>
+    <div id="appList" class="hint"></div>
+  </div>
+
+  <div class="card">
+    <h2>店舗登録・編集</h2>
     <input type="text" id="storeName" placeholder="店舗名" />
-    <br />
     <button id="getLocation">現在地を取得</button>
-    <span id="locationStatus" class="hint"></span>
-    <br />
-    <label>使える決済:</label><br />
-    <label><input type="checkbox" value="PayPay" /> PayPay</label>
-    <label><input type="checkbox" value="Visa" /> Visa</label>
-    <label><input type="checkbox" value="楽天ペイ" /> 楽天ペイ</label>
-    <br />
-    <button id="saveStore">登録</button>
+    <div id="locationStatus" class="hint"></div>
+    <div id="appSelectArea"></div>
+    <button id="saveStore">保存</button>
   </div>
 
   <div class="card">
@@ -42,33 +107,64 @@
     <button id="recommendBtn">おすすめ表示</button>
     <div id="recommendResult" class="hint"></div>
   </div>
-
   <script>
-    let currentLat = null;
-    let currentLng = null;
-
+    const appsKey = "paydore_apps";
     const storesKey = "paydore_stores";
+    let currentLat = null, currentLng = null;
+
+    function loadApps() {
+      return JSON.parse(localStorage.getItem(appsKey) || "{}");
+    }
+
+    function saveApps(apps) {
+      localStorage.setItem(appsKey, JSON.stringify(apps));
+    }
 
     function loadStores() {
-      try {
-        return JSON.parse(localStorage.getItem(storesKey)) || {};
-      } catch {
-        return {};
-      }
+      return JSON.parse(localStorage.getItem(storesKey) || "{}");
     }
 
-    function saveStores(data) {
-      localStorage.setItem(storesKey, JSON.stringify(data));
+    function saveStores(stores) {
+      localStorage.setItem(storesKey, JSON.stringify(stores));
     }
 
-    function calcDistance(lat1, lng1, lat2, lng2) {
-      const R = 6371;
-      const toRad = deg => deg * Math.PI / 180;
-      const dLat = toRad(lat2 - lat1);
-      const dLng = toRad(lng2 - lng1);
-      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    function renderAppList() {
+      const apps = loadApps();
+      const list = Object.entries(apps).map(([name, rate]) =>
+        `<span class="pill">${name} (${(rate * 100).toFixed(1)}%)</span>`
+      ).join(" ");
+      document.getElementById("appList").innerHTML = list || "まだ登録されていません";
+      renderAppSelect();
     }
+
+    function renderAppSelect(selected = {}) {
+      const apps = loadApps();
+      const area = document.getElementById("appSelectArea");
+      area.innerHTML = '<div class="section-title">使える決済と還元率（店舗ごと）</div>';
+      Object.entries(apps).forEach(([name, rate]) => {
+        const input = document.createElement("input");
+        input.type = "number";
+        input.step = "0.001";
+        input.placeholder = `${name} の還元率（例: 0.01）`;
+        input.value = selected[name] ?? "";
+        input.dataset.app = name;
+        area.appendChild(document.createTextNode(name + ": "));
+        area.appendChild(input);
+        area.appendChild(document.createElement("br"));
+      });
+    }
+
+    document.getElementById("addApp").addEventListener("click", () => {
+      const name = document.getElementById("newAppName").value.trim();
+      const rate = parseFloat(document.getElementById("newAppRate").value);
+      if (!name || isNaN(rate)) return alert("名前と還元率を正しく入力してね！");
+      const apps = loadApps();
+      apps[name] = rate;
+      saveApps(apps);
+      renderAppList();
+      document.getElementById("newAppName").value = "";
+      document.getElementById("newAppRate").value = "";
+    });
 
     document.getElementById("getLocation").addEventListener("click", () => {
       const status = document.getElementById("locationStatus");
@@ -88,9 +184,13 @@
     document.getElementById("saveStore").addEventListener("click", () => {
       const name = document.getElementById("storeName").value.trim();
       if (!name) return alert("店舗名を入力してね！");
-      const checkboxes = document.querySelectorAll("input[type=checkbox]:checked");
-      const apps = Array.from(checkboxes).map(cb => cb.value);
-      if (apps.length === 0) return alert("決済を選んでね！");
+      const inputs = document.querySelectorAll("#appSelectArea input");
+      const apps = {};
+      inputs.forEach(input => {
+        const val = parseFloat(input.value);
+        if (!isNaN(val)) apps[input.dataset.app] = val;
+      });
+      if (Object.keys(apps).length === 0) return alert("少なくとも1つ還元率を入力してね！");
       const stores = loadStores();
       stores[name] = {
         apps,
@@ -98,10 +198,21 @@
         lng: currentLng
       };
       saveStores(stores);
-      alert("登録したよ！");
+      alert("保存したよ！");
       renderStoreList();
       renderStoreNames();
+      document.getElementById("storeName").value = "";
+      document.getElementById("locationStatus").textContent = "";
     });
+
+    function calcDistance(lat1, lng1, lat2, lng2) {
+      const R = 6371;
+      const toRad = deg => deg * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
 
     function renderStoreList() {
       const list = document.getElementById("storeList");
@@ -112,20 +223,49 @@
         const stores = loadStores();
         const sorted = Object.entries(stores).map(([name, data]) => {
           const dist = (data.lat && data.lng) ? calcDistance(userLat, userLng, data.lat, data.lng) : Infinity;
-          return { name, apps: data.apps, dist };
+          return { name, data, dist };
         }).sort((a, b) => a.dist - b.dist);
 
         list.innerHTML = "";
-        sorted.forEach(store => {
+        sorted.forEach(({ name, data, dist }) => {
           const div = document.createElement("div");
+          const pills = Object.entries(data.apps).map(([app, rate]) =>
+            `<span class="pill">${app} (${(rate * 100).toFixed(1)}%)</span>`
+          ).join(" ");
           div.innerHTML = `
-            <strong>${store.name}</strong>（${isFinite(store.dist) ? store.dist.toFixed(2) + "km" : "位置不明"}）<br />
-            ${store.apps.map(a => `<span class="pill">${a}</span>`).join("")}
+            <div class="row">
+              <div style="flex:1">
+                <strong>${name}</strong>（${isFinite(dist) ? dist.toFixed(2) + "km" : "位置不明"}）<br />
+                ${pills}
+              </div>
+              <div>
+                <button class="secondary" onclick="editStore('${name}')">編集</button>
+                <button class="secondary" onclick="deleteStore('${name}')">削除</button>
+              </div>
+            </div>
             <hr />
           `;
           list.appendChild(div);
         });
       });
+    }
+
+    function editStore(name) {
+      const stores = loadStores();
+      const data = stores[name];
+      document.getElementById("storeName").value = name;
+      currentLat = data.lat;
+      currentLng = data.lng;
+      renderAppSelect(data.apps);
+    }
+
+    function deleteStore(name) {
+      if (!confirm(`${name} を削除しますか？`)) return;
+      const stores = loadStores();
+      delete stores[name];
+      saveStores(stores);
+      renderStoreList();
+      renderStoreNames();
     }
 
     function renderStoreNames() {
@@ -148,15 +288,8 @@
         result.textContent = "店舗が見つかりません";
         return;
       }
-      // 仮の還元率（実際は店舗ごとに設定可能に拡張予定）
-      const rates = {
-        "PayPay": 0.01,
-        "Visa": 0.02,
-        "楽天ペイ": 0.05
-      };
       let best = null;
-      store.apps.forEach(app => {
-        const rate = rates[app] || 0;
+      Object.entries(store.apps).forEach(([app, rate]) => {
         if (!best || rate > best.rate) best = { app, rate };
       });
       if (best) {
@@ -166,6 +299,7 @@
       }
     });
 
+    renderAppList();
     renderStoreList();
     renderStoreNames();
   </script>
