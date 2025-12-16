@@ -5,5 +5,6 @@
     { "href": "warikan_tool", "icon": "🧮", "title": "割り勘計算ツール", "description": "合計金額と人数を入力し、端数処理をした一人当たりの金額を計算します。" },
     { "href": "timer_tool", "icon": "⏱️", "title": "シンプルタイマー", "description": "カウントダウンタイマーとストップウォッチ機能を搭載。" },
     { "href": "flashcard_tool", "icon": "📚", "title": "暗記カードメーカー", "description": "問題と答えを登録し、ブラウザに保存できるデジタル暗記カードを作成します。" },
+    { "href": "markdown_converter", "icon": "🏷️", "title": "Markdown to HTML 変換", "description": "Markdown形式のテキストをHTMLタグに変換し、リアルタイムでプレビューします。" },
     { "href": "text_compare_tool", "icon": "📄", "title": "文字列比較ツール", "description": "2つの文章を比較し、異なっている部分をハイライト表示します。" }
 ]
