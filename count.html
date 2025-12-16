@@ -2,28 +2,45 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>文字数・行数カウントツール</title>
+    <title>高機能 文字数・行数カウントツール</title>
     <style>
+        /* 基本的なスタイリング */
         .container { 
             max-width: 800px; 
             margin: 20px auto; 
-            padding: 20px; 
-            border: 1px solid #ccc;
+            padding: 30px; 
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
         }
+        h1 { text-align: center; color: #333; }
         textarea { 
             width: 100%; 
-            height: 200px; 
+            height: 250px; 
             font-size: 16px; 
-            padding: 10px;
+            padding: 15px;
             box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            resize: vertical; /* 縦方向のみリサイズ可能 */
+        }
+        .results h2, .results h3 { 
+            border-bottom: 2px solid #eee; 
+            padding-bottom: 5px; 
+            margin-top: 20px;
         }
         .results p {
             font-size: 1.1em;
-            margin: 8px 0;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
         }
         .results strong {
             font-size: 1.2em;
-            color: #007bff;
+            font-weight: bold;
+            color: #007bff; /* メインカラー */
         }
     </style>
 </head>
@@ -31,13 +48,24 @@
     <div class="container">
         <h1>文字数・行数カウントツール</h1>
 
-        <textarea id="input-text" oninput="countText()"></textarea>
+        <textarea id="input-text" oninput="countText()" placeholder="ここにテキストを入力してください..."></textarea>
 
         <div class="results">
-            <h2>カウント結果</h2>
-            <p>全文字数 (空白・改行含む): <strong id="total-count">0</strong> 文字</p>
-            <p>空白・改行を除く文字数: <strong id="pure-count">0</strong> 文字</p>
-            <p>行数: <strong id="line-count">1</strong> 行</p>
+            <h2>📊 基本カウント</h2>
+            <p><span>全文字数 (空白・改行含む):</span> <strong id="total-count">0</strong> <span>文字</span></p>
+            <p><span>空白・改行を除く文字数:</span> <strong id="pure-count">0</strong> <span>文字</span></p>
+            <p><span>行数:</span> <strong id="line-count">1</strong> <span>行</span></p>
+            
+            <hr>
+
+            <h2>⏱️ 時間と効率</h2>
+            <p><span>推定読了時間 (500字/分換算):</span> <strong id="reading-time">0分 0秒</strong></p>
+
+            <hr>
+
+            <h2>🌐 プラットフォーム別チェック</h2>
+            <p><span>X (旧Twitter) (280字):</span> <strong id="limit-x">0 文字</strong></p>
+            <p><span>Google Title (32字目安):</span> <strong id="limit-google-title">0 文字</strong></p>
         </div>
     </div>
 
@@ -51,15 +79,49 @@
             document.getElementById('total-count').textContent = totalCount;
 
             // 3. 空白・改行を除く文字数をカウント
-            // 正規表現で空白(\s)と改行(\n)をすべて削除（g=全体）
             const pureText = text.replace(/[\s\n]/g, '');
             const pureCount = pureText.length;
             document.getElementById('pure-count').textContent = pureCount;
 
             // 4. 行数をカウント
-            // テキストを改行文字('\n')で分割し、配列の要素数を取得
             const lineCount = text.split('\n').length;
             document.getElementById('line-count').textContent = lineCount;
+            
+            // --- 拡張機能 ---
+
+            // 5. 読了時間の推定
+            const readingSpeed = 500; // 1分間に500文字と仮定
+            const readingTimeMinutes = totalCount / readingSpeed;
+
+            const minutes = Math.floor(readingTimeMinutes);
+            const seconds = Math.round((readingTimeMinutes - minutes) * 60);
+
+            document.getElementById('reading-time').textContent = `${minutes}分 ${seconds}秒`;
+
+            // 6. 各プラットフォームの文字数制限チェック
+            const limits = [
+                { id: 'limit-x', name: 'X (旧Twitter)', limit: 280, count: totalCount },
+                { id: 'limit-google-title', name: 'Google Title (目安)', limit: 32, count: pureCount }, 
+            ];
+
+            limits.forEach(item => {
+                const element = document.getElementById(item.id);
+                const remaining = item.limit - item.count;
+                
+                let color = '#28a745'; // デフォルトは緑
+                let statusText = `${item.count} 文字`;
+
+                if (item.count > item.limit) {
+                    // 制限を超えている場合
+                    color = 'red';
+                    statusText = `${item.count} 文字 (超過: ${Math.abs(remaining)} 文字)`;
+                } else {
+                    // 制限内の場合
+                    statusText = `${item.count} 文字 (残り ${remaining} 文字)`;
+                }
+
+                element.innerHTML = `<span style="color: ${color};">${statusText}</span>`;
+            });
         }
 
         // ページ読み込み時に一度実行し、初期値を設定
