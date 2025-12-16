@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 暗記カードメーカー</title>
+    <style>
+        /* 共通スタイル */
+        body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
+        .wrapper { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; }
+        
+        /* メインコンテンツ */
+        .main-content {
+            flex-grow: 1;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 { text-align: center; color: #28a745; border-bottom: 3px solid #c3e6cb; padding-bottom: 10px; }
+
+        /* 入力エリア */
+        .input-area {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .input-group input {
+            width: 100%; padding: 10px; font-size: 16px;
+            border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
+        }
+        .add-btn {
+            width: 100%; padding: 12px; background-color: #28a745; color: white;
+            border: none; border-radius: 4px; font-size: 16px; cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .add-btn:hover { background-color: #218838; }
+
+        /* カードリストエリア */
+        .card-list-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .study-btn {
+            padding: 10px 20px; background-color: #007bff; color: white;
+            border: none; border-radius: 4px; font-size: 16px; cursor: pointer; text-decoration: none;
+        }
+        .study-btn:hover { background-color: #0056b3; }
+        
+        ul#card-list { list-style: none; padding: 0; }
+        li.card-item {
+            background-color: #fff; border: 1px solid #ddd; padding: 15px;
+            margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .card-text { font-size: 1.1em; }
+        .card-text small { color: #666; display: block; font-size: 0.9em; margin-top: 5px; }
+        .delete-btn {
+            background-color: #dc3545; color: white; border: none; padding: 5px 10px;
+            border-radius: 4px; cursor: pointer; margin-left: 10px;
+        }
+
+        /* 学習モード（モーダル） */
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
+        }
+        .modal-content {
+            background-color: #fefefe; margin: 5% auto; padding: 0;
+            border-radius: 10px; width: 90%; max-width: 600px;
+            text-align: center; position: relative; overflow: hidden;
+            min-height: 400px; display: flex; flex-direction: column;
+        }
+        .modal-header { padding: 15px; background-color: #f1f1f1; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;}
+        .close-btn { font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
+        
+        .flashcard-container {
+            flex-grow: 1; display: flex; justify-content: center; align-items: center;
+            padding: 20px; perspective: 1000px; cursor: pointer;
+        }
+        .flashcard {
+            width: 100%; height: 300px; background-color: #fff; border: 2px solid #007bff;
+            border-radius: 10px; display: flex; justify-content: center; align-items: center;
+            font-size: 2em; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .flashcard.flipped { background-color: #e6f2ff; color: #0056b3; transform: rotateX(0deg); }
+        .flashcard-hint { font-size: 0.5em; color: #888; margin-top: 10px; display: block;}
+
+        .modal-footer { padding: 20px; background-color: #f1f1f1; display: flex; justify-content: space-between; }
+        .nav-btn { padding: 10px 20px; font-size: 16px; cursor: pointer; border: 1px solid #ccc; background-color: white; border-radius: 4px; }
+        .nav-btn:hover { background-color: #ddd; }
+
+        /* サイドバー */
+        .sidebar { width: 300px; padding: 20px; background-color: #e9ecef; border-radius: 8px; }
+        .sidebar h3 { color: #007bff; border-bottom: 2px solid #b8daff; margin-top: 0; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar li { margin-bottom: 10px; }
+        .sidebar a { text-decoration: none; color: #333; padding: 5px; display: block; border-radius: 4px; transition: background-color 0.2s; }
+        .sidebar a:hover { background-color: #d6eaff; color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="main-content">
+            <h1>📚 暗記カードメーカー</h1>
+
+            <!-- 入力フォーム -->
+            <div class="input-area">
+                <div class="input-group">
+                    <label>表面 (問題):</label>
+                    <input type="text" id="card-front" placeholder="例: Apple">
+                </div>
+                <div class="input-group">
+                    <label>裏面 (答え):</label>
+                    <input type="text" id="card-back" placeholder="例: りんご">
+                </div>
+                <button class="add-btn" onclick="addCard()">カードを追加する</button>
+            </div>
+
+            <!-- リスト表示 -->
+            <div class="card-list-header">
+                <h2>作成したカード (<span id="card-count">0</span>枚)</h2>
+                <button class="study-btn" onclick="startStudy()">📖 学習スタート</button>
+            </div>
+            <ul id="card-list">
+                <!-- ここにカードが追加されます -->
+            </ul>
+        </div>
+
+        <!-- サイドバー -->
+        <div class="sidebar">
+            <h3>便利なツール集</h3>
+            <ul>
+                <li><a href="index.html">📝 文字数・行数カウント</a></li> 
+                <li><a href="zipcode_search.html">📮 郵便番号・住所検索</a></li>
+                <li><a href="wareki_converter.html">🗓️ 西暦・和暦 相互変換</a></li>
+                <li><a href="warikan_tool.html">🧮 割り勘計算ツール</a></li>
+                <li><a href="timer_tool.html">⏱️ シンプルタイマー</a></li>
+                <li><a href="law_navigator.html">⚖️ 法律の全体像ナビ</a></li>
+            </ul>
+            <h3 style="margin-top: 30px;">使い方</h3>
+            <p style="font-size: 0.9em; color: #555;">
+                1. 問題と答えを入力して追加します。<br>
+                2. データは自動的に保存されます。<br>
+                3. 「学習スタート」でテストができます。カードをクリックすると答えが出ます。
+            </p>
+        </div>
+    </div>
+
+    <!-- 学習モード用モーダル -->
+    <div id="study-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>学習モード</span>
+                <span class="close-btn" onclick="closeStudy()">&times;</span>
+            </div>
+            <div class="flashcard-container" onclick="flipCard()">
+                <div id="flashcard" class="flashcard">
+                    <div>
+                        <span id="flashcard-text">問題テキスト</span>
+                        <small class="flashcard-hint" id="flashcard-hint">クリックして答えを見る</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="nav-btn" onclick="prevCard()">← 前へ</button>
+                <span id="study-progress">1 / 10</span>
+                <button class="nav-btn" onclick="nextCard()">次へ →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // カードデータを管理する配列
+        let cards = [];
+        let currentCardIndex = 0;
+        let isFlipped = false;
+
+        // ページ読み込み時にデータをロード
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCards();
+            renderList();
+        });
+
+        // LocalStorageからデータを読み込む
+        function loadCards() {
+            const storedCards = localStorage.getItem('myFlashcards');
+            if (storedCards) {
+                cards = JSON.parse(storedCards);
+            }
+        }
+
+        // LocalStorageにデータを保存する
+        function saveCards() {
+            localStorage.setItem('myFlashcards', JSON.stringify(cards));
+        }
+
+        // カードを追加する
+        function addCard() {
+            const frontInput = document.getElementById('card-front');
+            const backInput = document.getElementById('card-back');
+            const frontText = frontInput.value.trim();
+            const backText = backInput.value.trim();
+
+            if (!frontText || !backText) {
+                alert('表面と裏面の両方を入力してください。');
+                return;
+            }
+
+            cards.push({ front: frontText, back: backText });
+            saveCards();
+            renderList();
+
+            // 入力欄をクリア
+            frontInput.value = '';
+            backInput.value = '';
+            frontInput.focus();
+        }
+
+        // カードを削除する
+        function deleteCard(index) {
+            if (confirm('このカードを削除しますか？')) {
+                cards.splice(index, 1);
+                saveCards();
+                renderList();
+            }
+        }
+
+        // リストを描画する
+        function renderList() {
+            const listElement = document.getElementById('card-list');
+            const countElement = document.getElementById('card-count');
+            listElement.innerHTML = '';
+            countElement.textContent = cards.length;
+
+            if (cards.length === 0) {
+                listElement.innerHTML = '<li style="text-align:center; color:#888;">カードがまだありません。「追加」して作成しましょう！</li>';
+                return;
+            }
+
+            cards.forEach((card, index) => {
+                const li = document.createElement('li');
+                li.className = 'card-item';
+                li.innerHTML = `
+                    <div class="card-text">
+                        <strong>Q: ${escapeHtml(card.front)}</strong>
+                        <small>A: ${escapeHtml(card.back)}</small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteCard(${index})">削除</button>
+                `;
+                listElement.appendChild(li);
+            });
+        }
+
+        // HTMLエスケープ処理（安全のため）
+        function escapeHtml(str) {
+            if(!str) return "";
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+
+        // --- 学習モードの処理 ---
+
+        function startStudy() {
+            if (cards.length === 0) {
+                alert('カードがありません。まずはカードを作成してください。');
+                return;
+            }
+            currentCardIndex = 0;
+            isFlipped = false;
+            showModal();
+            updateCardDisplay();
+        }
+
+        function showModal() {
+            document.getElementById('study-modal').style.display = 'block';
+        }
+
+        function closeStudy() {
+            document.getElementById('study-modal').style.display = 'none';
+        }
+
+        function updateCardDisplay() {
+            const card = cards[currentCardIndex];
+            const cardElement = document.getElementById('flashcard');
+            const textElement = document.getElementById('flashcard-text');
+            const hintElement = document.getElementById('flashcard-hint');
+            const progressElement = document.getElementById('study-progress');
+
+            // 状態をリセット（表面を表示）
+            isFlipped = false;
+            cardElement.classList.remove('flipped');
+            cardElement.style.backgroundColor = '#fff';
+            cardElement.style.color = '#333';
+            
+            textElement.textContent = card.front;
+            hintElement.textContent = "クリックして答えを見る";
+            
+            progressElement.textContent = `${currentCardIndex + 1} / ${cards.length}`;
+        }
+
+        function flipCard() {
+            const card = cards[currentCardIndex];
+            const cardElement = document.getElementById('flashcard');
+            const textElement = document.getElementById('flashcard-text');
+            const hintElement = document.getElementById('flashcard-hint');
+
+            isFlipped = !isFlipped;
+
+            if (isFlipped) {
+                // 裏面（答え）を表示
+                textElement.textContent = card.back;
+                hintElement.textContent = "クリックして問題に戻る";
+                cardElement.classList.add('flipped');
+            } else {
+                // 表面（問題）を表示
+                textElement.textContent = card.front;
+                hintElement.textContent = "クリックして答えを見る";
+                cardElement.classList.remove('flipped');
+            }
+        }
+
+        function nextCard() {
+            if (currentCardIndex < cards.length - 1) {
+                currentCardIndex++;
+                updateCardDisplay();
+            } else {
+                if(confirm("最後のカードです。最初に戻りますか？")) {
+                    currentCardIndex = 0;
+                    updateCardDisplay();
+                }
+            }
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                updateCardDisplay();
+            }
+        }
+        
+        // モーダル外クリックで閉じる
+        window.onclick = function(event) {
+            const modal = document.getElementById('study-modal');
+            if (event.target == modal) {
+                closeStudy();
+            }
+        }
+    </script>
+</body>
+</html>
