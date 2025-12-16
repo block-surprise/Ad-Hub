@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPアドレス・ドメイン情報検索ツール</title>
+    
+    <style>
+        
+        body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
+        .wrapper { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; }
+        
+        .main-content {
+            flex-grow: 1;
+            background-color: #fff;
+            padding: 30px; 
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex; 
+            flex-direction: column;
+        }
+
+        h1 { text-align: center; color: #333; margin-top: 0; margin-bottom: 20px; }
+
+        
+        .sidebar {
+            width: 300px;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0; 
+        }
+        .sidebar h3 { color: #007bff; border-bottom: 2px solid #b8daff; padding-bottom: 5px; margin-top: 0; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar li { margin-bottom: 10px; }
+        .sidebar a { text-decoration: none; color: #333; padding: 5px; display: block; border-radius: 4px; transition: background-color 0.2s; }
+        .sidebar a:hover { background-color: #d6eaff; color: #0056b3; }
+
+   
+        .search-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #queryInput {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        #searchButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        #searchButton:hover {
+            background-color: #0056b3;
+        }
+
+        .result-panel {
+            background-color: #f8f8f8;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 250px;
+            flex-grow: 1;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-item {
+            display: flex;
+            padding: 5px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: #007bff;
+            width: 150px;
+            flex-shrink: 0;
+        }
+
+        .result-value {
+            flex-grow: 1;
+        }
+
+        #message {
+            color: #d9534f;
+            font-weight: bold;
+            margin-top: 10px;
+            min-height: 1.2em;
+            text-align: center;
+        }
+
+       
+        @media (max-width: 1024px) {
+            .wrapper {
+                flex-direction: column;
+                margin: 10px;
+                gap: 10px;
+            }
+            .sidebar {
+                width: auto;
+            }
+            .search-area {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        
+  
+        <div class="main-content">
+            <h1>🌐 IPアドレス・ドメイン情報検索ツール</h1>
+            <p class="text-gray-500 text-center mb-4">IPアドレスまたはドメイン名を入力すると、その地理情報やネットワーク情報が表示されます。</p>
+
+       
+            <div class="search-area">
+                <input type="text" id="queryInput" placeholder="IPアドレスまたはドメインを入力 (例: 8.8.8.8 または google.com)">
+                <button id="searchButton" onclick="searchInfo()">検索</button>
+            </div>
+            
+            <p id="message"></p>
+
+            
+            <div class="result-panel" id="resultPanel">
+                <p>検索結果がここに表示されます。</p>
+            </div>
+            
+            <footer class="mt-8 text-center text-gray-500 text-sm">
+                <p>※ 本ツールは <a href="http://ip-api.com/" target="_blank">ip-api.com</a> の公開APIを利用しています。</p>
+                <p><a href="tools_index.html" class="text-red-500 hover:text-red-700">← 全ツール一覧に戻る</a></p>
+            </footer>
+        </div>
+
+
+        <div class="sidebar">
+            <h3>便利なツール集</h3>
+            <ul id="dynamic-tool-list">
+                <li>ナビゲーションをロード中...</li>
+            </ul>
+
+            <h3 style="margin-top: 30px;">検索のヒント</h3>
+            <ul style="font-size: 0.9em; list-style-type: square; margin-left: 10px;">
+                <li>✅ 自分のIPアドレスは空欄で検索できます。</li>
+                <li>✅ ドメイン名 (例: `google.com`) も検索可能です。</li>
+                <li>✅ APIには利用制限があります。連打は避けてください。</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+
+        const FIELD_MAP = {
+            'query': 'IPアドレス',
+            'country': '国',
+            'countryCode': '国コード',
+            'regionName': '地域/州',
+            'city': '都市',
+            'zip': '郵便番号',
+            'isp': 'プロバイダ (ISP)',
+            'org': '組織名',
+            'as': 'AS番号',
+            'timezone': 'タイムゾーン'
+        };
+
+  
+        async function searchInfo() {
+            const queryInput = document.getElementById('queryInput');
+            const resultPanel = document.getElementById('resultPanel');
+            const messageElement = document.getElementById('message');
+            let query = queryInput.value.trim();
+
+    
+            if (!query) {
+                query = ''; // ip-api.com のデフォルトはリクエスト元のIP
+                queryInput.value = '（自分のIPを検索中...）';
+            }
+            
+            const API_URL = `http://ip-api.com/json/${query}?lang=ja`;
+
+            messageElement.textContent = '🔍 情報を検索中...';
+            messageElement.style.color = '#007bff';
+            resultPanel.innerHTML = '<p style="text-align:center;">情報を読み込んでいます...</p>';
+
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                
+                    messageElement.textContent = '✅ 検索が完了しました。';
+                    messageElement.style.color = '#28a745';
+                    renderResults(data);
+                } else {
+              
+                    messageElement.textContent = `🚨 検索に失敗しました: ${data.message || '無効なクエリです。'}`;
+                    messageElement.style.color = '#d9534f';
+                    resultPanel.innerHTML = '<p style="text-align:center; color: #d9534f;">検索結果が見つかりませんでした。</p>';
+                }
+
+            } catch (e) {
+      
+                messageElement.textContent = '🚨 ネットワークエラーが発生しました。時間を置いて再試行してください。';
+                messageElement.style.color = '#d9534f';
+                resultPanel.innerHTML = '<p style="text-align:center; color: #d9534f;">通信に失敗しました。</p>';
+                console.error('Fetch Error:', e);
+            } finally {
+                if (queryInput.value === '（自分のIPを検索中...）') {
+                    queryInput.value = '';
+                }
+            }
+        }
+
+
+        function renderResults(data) {
+            const panel = document.getElementById('resultPanel');
+            let html = '';
+
+            for (const key in FIELD_MAP) {
+                if (data.hasOwnProperty(key)) {
+                    const label = FIELD_MAP[key];
+                    const value = data[key] || 'N/A';
+                    
+                    html += `
+                        <div class="result-item">
+                            <span class="result-label">${label}</span>
+                            <span class="result-value">${value}</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            panel.innerHTML = html;
+        }
+
+   
+        const JSON_URL = 'tools.json';
+        const TOP_TOOLS_COUNT = 4;
+
+        async function loadAndRenderTools(renderFunction, listId) {
+            try {
+                const response = await fetch(JSON_URL);
+                if (!response.ok) {
+                    throw new Error('ネットワークエラー、またはJSONファイルが見つかりません。');
+                }
+                const toolsData = await response.json();
+                renderFunction(toolsData, listId);
+            } catch (error) {
+                console.error('ツールデータの読み込みに失敗しました:', error);
+                const container = document.getElementById(listId);
+                if (container) {
+                    container.innerHTML = `<li style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</li>`;
+                }
+            }
+        }
+
+        function generateSidebarNav(toolsData, listId = 'dynamic-tool-list') {
+            const listContainer = document.getElementById(listId);
+            if (!listContainer) return;
+
+            let listHtml = '';
+            const totalCount = toolsData.length;
+            const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
+
+            toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
+
+                const toolHref = tool.href + '.html'; 
+                const currentPathFull = currentPath.includes('.') ? currentPath : currentPath + '.html';
+
+                const isActive = toolHref === currentPathFull;
+                const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
+                const title = isActive ? `${tool.icon} ${tool.title} (現在地)` : `${tool.icon} ${tool.title}`;
+                
+                listHtml += `<li><a href="${toolHref}" ${activeStyle}>${title}</a></li>`;
+            });
+
+            const otherCount = totalCount - TOP_TOOLS_COUNT;
+
+            if (otherCount > 0) {
+                listHtml += `<hr style="margin: 10px 0;">`;
+                listHtml += `<li><a href="tools_index.html" style="font-weight: bold; color: #dc3545;">✨ その他 (${otherCount}件) を見る</a></li>`;
+            }
+
+            listContainer.innerHTML = listHtml;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list');
+    
+            document.getElementById('queryInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchInfo();
+                }
+            });
+            
+            document.getElementById('message').textContent = 'IPアドレスまたはドメインを入力して「検索」ボタンを押してください。';
+            document.getElementById('message').style.color = '#333';
+        });
+    </script>
+</body>
+</html>
