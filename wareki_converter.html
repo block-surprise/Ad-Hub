@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>西暦・和暦 相互変換ツール</title>
+    <style>
+        /* 共通のレイアウトスタイル */
+        body { 
+            margin: 0; 
+            background-color: #f4f7f6;
+            font-family: Arial, sans-serif; 
+        }
+        .wrapper {
+            max-width: 1200px;
+            margin: 20px auto;
+            display: flex;
+            gap: 20px;
+        }
+        
+        /* メインコンテンツエリア */
+        .main-content {
+            flex-grow: 1;
+            background-color: #fff;
+            padding: 30px; 
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 { text-align: center; color: #333; }
+
+        /* フォームのスタイル */
+        .input-group {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        input[type="number"] { 
+            padding: 10px; 
+            font-size: 16px; 
+            width: 150px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 0 5px;
+            text-align: center;
+        }
+        button { 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            margin-left: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* 結果表示エリア */
+        .results {
+            padding: 20px;
+            border: 1px dashed #28a745; /* 緑系の枠に変更 */
+            border-radius: 4px;
+            background-color: #f8fff8;
+            text-align: center;
+        }
+        .results h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        #result-text {
+            font-size: 2.0em;
+            font-weight: bold;
+            color: #28a745; /* 結果表示は緑色 */
+            min-height: 2.0em;
+            line-height: 1.2;
+            padding-top: 10px;
+        }
+        
+        /* サイドバーエリア (共通スタイル) */
+        .sidebar {
+            width: 300px;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .sidebar h3 {
+            color: #007bff;
+            border-bottom: 2px solid #b8daff;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            padding: 5px;
+            display: block;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .sidebar a:hover {
+            background-color: #d6eaff;
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        
+        <div class="main-content">
+            <h1>🗓️ 西暦・和暦 相互変換ツール</h1>
+
+            <div class="input-group">
+                <label for="seireki">西暦を入力:</label>
+                <input type="number" id="seireki" placeholder="例: 2025" min="1868">
+                <button onclick="convertToWareki()">和暦に変換</button>
+            </div>
+
+            <div class="input-group">
+                <label for="nenngo">年号を入力:</label>
+                <select id="nenngo">
+                    <option value="reiwa">令和</option>
+                    <option value="heisei">平成</option>
+                    <option value="showa">昭和</option>
+                    <option value="taisho">大正</option>
+                    <option value="meiji">明治</option>
+                </select>
+                <input type="number" id="wareki-year" placeholder="例: 7" min="1">
+                <button onclick="convertToSeireki()">西暦に変換</button>
+            </div>
+
+            <div class="results">
+                <h2>変換結果</h2>
+                <div id="result-text">...結果が表示されます...</div>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <h3>便利なツール集</h3>
+            <ul>
+                <li><a href="index.html">📝 文字数・行数カウント</a></li> 
+                <li><a href="zipcode_search.html">📮 郵便番号・住所検索</a></li>
+                <li><a href="#">🧮 割り勘計算ツール</a></li>
+                <li><a href="#">⏱️ シンプルタイマー</a></li>
+            </ul>
+
+            <h3 style="margin-top: 30px;">年号の基準日</h3>
+            <ul style="font-size: 0.9em; list-style-type: square; margin-left: 20px;">
+                <li>令和：2019年5月1日〜</li>
+                <li>平成：1989年1月8日〜</li>
+                <li>昭和：1926年12月25日〜</li>
+                <li>大正：1912年7月30日〜</li>
+            </ul>
+        </div>
+        
+    </div>
+
+    <script>
+        // 年号の基準年定義 (開始年)
+        const NENGO_START_YEAR = {
+            'reiwa': 2019,
+            'heisei': 1989,
+            'showa': 1926,
+            'taisho': 1912,
+            'meiji': 1868
+        };
+
+        // 西暦から和暦への変換
+        function convertToWareki() {
+            const seireki = parseInt(document.getElementById('seireki').value);
+            const resultElement = document.getElementById('result-text');
+
+            if (isNaN(seireki) || seireki < 1868) {
+                resultElement.textContent = "西暦を正しく入力してください (1868年以降)。";
+                return;
+            }
+
+            let result = "";
+            let nengoName = "";
+            let warekiYear = 0;
+
+            // 令和
+            if (seireki >= NENGO_START_YEAR['reiwa']) {
+                nengoName = "令和";
+                warekiYear = seireki - NENGO_START_YEAR['reiwa'] + 1;
+            // 平成
+            } else if (seireki >= NENGO_START_YEAR['heisei']) {
+                nengoName = "平成";
+                warekiYear = seireki - NENGO_START_YEAR['heisei'] + 1;
+            // 昭和
+            } else if (seireki >= NENGO_START_YEAR['showa']) {
+                nengoName = "昭和";
+                warekiYear = seireki - NENGO_START_YEAR['showa'] + 1;
+            // 大正
+            } else if (seireki >= NENGO_START_YEAR['taisho']) {
+                nengoName = "大正";
+                warekiYear = seireki - NENGO_START_YEAR['taisho'] + 1;
+            // 明治
+            } else if (seireki >= NENGO_START_YEAR['meiji']) {
+                nengoName = "明治";
+                warekiYear = seireki - NENGO_START_YEAR['meiji'] + 1;
+            } else {
+                resultElement.textContent = "明治より前の年号には対応していません。";
+                return;
+            }
+
+            result = `${nengoName} ${warekiYear} 年`;
+            resultElement.textContent = result;
+        }
+
+        // 和暦から西暦への変換
+        function convertToSeireki() {
+            const nengoKey = document.getElementById('nenngo').value;
+            const warekiYear = parseInt(document.getElementById('wareki-year').value);
+            const resultElement = document.getElementById('result-text');
+            const nengoName = document.getElementById('nenngo').options[document.getElementById('nenngo').selectedIndex].text;
+
+            if (isNaN(warekiYear) || warekiYear < 1) {
+                resultElement.textContent = "年数を正しく入力してください (1年以降)。";
+                return;
+            }
+
+            // 基準年を取得
+            const startYear = NENGO_START_YEAR[nengoKey];
+            
+            // 西暦を計算 (基準年 + 年数 - 1)
+            const seireki = startYear + warekiYear - 1;
+
+            const result = `${seireki} 年`;
+            resultElement.textContent = result;
+        }
+
+        // 初期表示
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('result-text').textContent = '西暦または和暦を入力して変換してください。';
+        });
+    </script>
+</body>
+</html>
