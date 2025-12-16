@@ -144,7 +144,7 @@
             </div>
             
             <footer class="mt-8 text-center text-gray-500 text-sm">
-                <p>※ 本ツールは <a href="http://ipwhois.io/" target="_blank">ipwhois.io</a> の公開APIを利用するロジックを実装しています。</p>
+                <p>※ 本ツールは <a href="https://ipinfo.io/" target="_blank">ipinfo.io</a> の公開APIを利用しています。</p>
                 <p><a href="tools_index.html" class="text-red-500 hover:text-red-700">← 全ツール一覧に戻る</a></p>
             </footer>
         </div>
@@ -160,27 +160,24 @@
             <ul style="font-size: 0.9em; list-style-type: square; margin-left: 10px;">
                 <li>✅ 自分のIPアドレスは空欄で検索できます。</li>
                 <li>✅ ドメイン名 (例: `google.com`) も検索可能です。</li>
-                <li>⚠️ **注意:** 現在のAPI (`ipwhois.io`) は、このCanvas環境ではMixed Contentエラーにより動作しません。</li>
+                <li>✅ サービスには利用制限があります。連打は避けてください。</li>
             </ul>
         </div>
     </div>
 
     <script>
         /**
-         * 情報を表示するためのマップ (ipwhois.ioのデータ構造に合わせる)
+         * 情報を表示するためのマップ (ipinfo.ioのデータ構造に合わせる)
          */
         const FIELD_MAP = {
             'ip': 'IPアドレス',
-            'type': 'タイプ',
             'country': '国',
-            'country_code': '国コード',
             'region': '地域/州',
             'city': '都市',
-            'zip': '郵便番号',
-            'latitude': '緯度',
-            'longitude': '経度',
-            'isp': 'プロバイダ (ISP)',
-            'organization': '組織名'
+            'postal': '郵便番号',
+            'org': '組織名/ISP',
+            'timezone': 'タイムゾーン',
+            'loc': '緯度,経度'
         };
 
         /**
@@ -197,9 +194,8 @@
                 queryInput.value = '（自分のIPを検索中...）';
             }
             
-            // ユーザーの要求に従い、ipwhois.io の HTTP エンドポイントを実装
-            // ⚠️ 注意: これは Mixed Content エラーによりブラウザでブロックされます
-            const API_URL = `http://ipwhois.io/json/${query}`; 
+            // 修正: ipinfo.io の HTTPS エンドポイントを使用
+            const API_URL = `https://ipinfo.io/${query}/json`;
 
             messageElement.textContent = '🔍 情報を検索中...';
             messageElement.style.color = '#007bff';
@@ -209,24 +205,24 @@
                 const response = await fetch(API_URL);
                 const data = await response.json();
 
-                if (data.success) {
-                    // 成功 (ロジックのみ実装)
-                    messageElement.textContent = '✅ 検索が完了しました。(ロジックのみ動作)';
-                    messageElement.style.color = '#28a745';
-                    renderResults(data);
-                } else {
-                    // 失敗
-                    messageElement.textContent = `🚨 検索に失敗しました: ${data.message || '無効なクエリです。'}`;
+                // ipinfo.ioはエラー時に 'error' キーを持つオブジェクトを返す
+                if (data.error || !data.ip) {
+                    messageElement.textContent = `🚨 検索に失敗しました: ${data.reason || '無効なクエリまたはAPIエラーです。'}`;
                     messageElement.style.color = '#d9534f';
                     resultPanel.innerHTML = '<p style="text-align:center; color: #d9534f;">検索結果が見つかりませんでした。</p>';
+                } else {
+                    // 成功
+                    messageElement.textContent = '✅ 検索が完了しました。';
+                    messageElement.style.color = '#28a745';
+                    renderResults(data);
                 }
 
             } catch (e) {
-                // ネットワークエラー、またはMixed Contentエラー
-                messageElement.textContent = '🚨 APIアクセスエラー: この環境ではHTTPリクエストがブロックされています。';
+                // ネットワークエラーなど
+                messageElement.textContent = '🚨 ネットワークエラーが発生しました。時間を置いて再試行してください。';
                 messageElement.style.color = '#d9534f';
-                resultPanel.innerHTML = '<p style="text-align:center; color: #d9534f;">**セキュリティ制限により通信がブロックされました。**</p>';
-                console.error('Fetch Error (Blocked by browser):', e);
+                resultPanel.innerHTML = '<p style="text-align:center; color: #d9534f;">通信に失敗しました。</p>';
+                console.error('Fetch Error:', e);
             } finally {
                 if (queryInput.value === '（自分のIPを検索中...）') {
                     queryInput.value = '';
@@ -242,8 +238,10 @@
             let html = '';
 
             for (const key in FIELD_MAP) {
+                // ipinfo.io のキー名を使用
                 if (data.hasOwnProperty(key)) {
                     const label = FIELD_MAP[key];
+                    // 値を適切に表示。空欄の場合はN/A
                     const value = (data[key] !== null && data[key] !== undefined && data[key] !== "") ? data[key] : 'N/A';
                     
                     html += `
@@ -296,7 +294,7 @@
                 const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
                 const title = isActive ? `${tool.icon} ${tool.title} (現在地)` : `${tool.icon} ${tool.title}`;
                 
-                listHtml += `<li><a href="${toolHref}" ${activeStyle}>${title}</a></li>`;
+                listHtml += `<li><a href="${tool.href}.html" ${activeStyle}>${title}</a></li>`;
             });
 
             const otherCount = totalCount - TOP_TOOLS_COUNT;
@@ -321,8 +319,8 @@
                 }
             });
             
-            document.getElementById('message').textContent = '⚠️ このAPIはセキュリティ制限により動作しません。ロジックのみ実装されています。';
-            document.getElementById('message').style.color = '#d9534f';
+            document.getElementById('message').textContent = 'IPアドレスまたはドメインを入力して「検索」ボタンを押してください。';
+            document.getElementById('message').style.color = '#333';
         });
     </script>
 </body>
