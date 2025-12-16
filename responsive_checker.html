@@ -6,7 +6,7 @@
     <title>レスポンシブデザイン確認ツール</title>
     
     <style>
-    
+        /* 共通レイアウトスタイル (他のツールと統一) */
         body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
         .wrapper { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; }
         
@@ -23,7 +23,7 @@
 
         h1 { text-align: center; color: #333; margin-top: 0; margin-bottom: 20px; }
 
- 
+        /* サイドバーのスタイル */
         .sidebar {
             width: 300px;
             padding: 20px;
@@ -38,7 +38,7 @@
         .sidebar a { text-decoration: none; color: #333; padding: 5px; display: block; border-radius: 4px; transition: background-color 0.2s; }
         .sidebar a:hover { background-color: #d6eaff; color: #0056b3; }
 
-
+        /* ツール固有のスタイル */
         .url-input-area {
             display: flex;
             gap: 10px;
@@ -69,7 +69,8 @@
 
         .preview-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            /* 修正: 画面幅が広いときのみ3列表示 */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
             gap: 20px;
             padding-top: 10px;
             flex-grow: 1;
@@ -82,7 +83,8 @@
             padding: 10px 5px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
             text-align: center;
-            overflow: hidden; 
+            /* 修正: コンテナ内で横スクロールを許可し、ページ全体のはみ出しを防ぐ */
+            overflow-x: auto; 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -96,13 +98,14 @@
         }
 
         iframe {
-            width: 100%;
             height: 450px; 
             border: none;
             background-color: white;
+            /* iframeの幅はJSで設定されます */
+            min-width: 300px; /* 最小幅を設定しておくと安心 */
         }
         
-
+        /* レスポンシブ対応 */
         @media (max-width: 1024px) {
             .wrapper {
                 flex-direction: column;
@@ -115,6 +118,10 @@
             .url-input-area {
                 flex-direction: column;
             }
+            /* 画面幅が狭い場合、グリッドを1カラム表示にする */
+            .preview-grid {
+                 grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -122,33 +129,35 @@
 
     <div class="wrapper">
         
-
+        <!-- メインコンテンツ -->
         <div class="main-content">
             <h1>🪟 レスポンシブデザイン確認ツール</h1>
             <p class="text-gray-500 text-center mb-4">WebサイトのURLを入力し、モバイル、タブレット、PCの各サイズでの表示を同時にチェックします。</p>
 
-     
+            <!-- URL入力エリア -->
             <div class="url-input-area">
-                <input type="text" id="urlInput" placeholder="確認したいWebサイトのURLを入力 (例: https://www.google.com)">
+                <input type="text" id="urlInput" placeholder="確認したいWebサイトのURLを入力 (例: https://www.example.com)">
                 <button id="loadButton" onclick="loadUrls()">表示を更新</button>
             </div>
             
             <p id="message" style="color:red; text-align:center; min-height:1.2em;"></p>
 
-            
+            <!-- プレビューグリッド -->
             <div class="preview-grid" id="previewContainer">
                 
-          
+                <!-- モバイルフレーム -->
                 <div class="device-frame" style="border-color: #dc3545; background-color: #dc3545;">
                     <h4>📱 モバイル (375px)</h4>
                     <iframe id="mobileFrame" src="about:blank"></iframe>
                 </div>
                 
+                <!-- タブレットフレーム -->
                 <div class="device-frame" style="border-color: #ffc107; background-color: #ffc107;">
                     <h4> tablet (768px)</h4>
                     <iframe id="tabletFrame" src="about:blank"></iframe>
                 </div>
                 
+                <!-- PCフレーム -->
                 <div class="device-frame" style="border-color: #28a745; background-color: #28a745;">
                     <h4>💻 PC (1200px)</h4>
                     <iframe id="pcFrame" src="about:blank"></iframe>
@@ -162,7 +171,7 @@
             </footer>
         </div>
 
-
+        <!-- サイドバー -->
         <div class="sidebar">
             <h3>便利なツール集</h3>
             <ul id="dynamic-tool-list">
@@ -180,7 +189,9 @@
     </div>
 
     <script>
-
+        /**
+         * URLを検証し、iframeに読み込む
+         */
         function loadUrls() {
             const urlInput = document.getElementById('urlInput');
             let url = urlInput.value.trim();
@@ -192,12 +203,12 @@
                 return;
             }
 
-
+            // プロトコル（http/https）がない場合は自動で追加
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
                 url = 'https://' + url;
             }
 
-  
+            // URLの検証（簡易的）
             try {
                 new URL(url);
             } catch (e) {
@@ -205,7 +216,7 @@
                 return;
             }
 
-   
+            // 各iframeにURLとサイズを設定
             const frames = [
                 { id: 'mobileFrame', width: '375px', url: url }, // iPhone X / Galaxy S9 相当
                 { id: 'tabletFrame', width: '768px', url: url }, // iPad 相当
@@ -214,12 +225,10 @@
 
             frames.forEach(frameData => {
                 const frame = document.getElementById(frameData.id);
-                const frameContainer = frame.parentElement;
-
-         
-                frameContainer.style.width = frameData.width;
+                // iframe要素自体に幅を設定
+                frame.style.width = frameData.width; 
                 
-           
+                // URLの読み込み
                 frame.src = frameData.url;
             });
             
@@ -227,7 +236,7 @@
             messageElement.style.color = '#28a745';
         }
 
- 
+        // --- サイドバーの動的ロードロジック (共通) ---
         const JSON_URL = 'tools.json';
         const TOP_TOOLS_COUNT = 4;
 
@@ -257,7 +266,7 @@
             const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
 
             toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
-         
+                // .html拡張子を考慮
                 const toolHref = tool.href + '.html'; 
                 const currentPathFull = currentPath.includes('.') ? currentPath : currentPath + '.html';
 
@@ -278,11 +287,11 @@
             listContainer.innerHTML = listHtml;
         }
         
-
+        // --- 初期ロード ---
         document.addEventListener('DOMContentLoaded', () => {
             loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list');
             
-
+            // Enterキーで実行できるようにする
             document.getElementById('urlInput').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -290,8 +299,8 @@
                 }
             });
             
-    
-            document.getElementById('urlInput').value = 'https://www.google.com';
+            // 初期値を設定 (iframe埋め込み制限が緩いサイトに変更)
+            document.getElementById('urlInput').value = 'https://example.com';
             loadUrls();
         });
     </script>
