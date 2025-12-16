@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>文字数・行数カウントツール</title>
+    <style>
+        .container { 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 20px; 
+            border: 1px solid #ccc;
+        }
+        textarea { 
+            width: 100%; 
+            height: 200px; 
+            font-size: 16px; 
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .results p {
+            font-size: 1.1em;
+            margin: 8px 0;
+        }
+        .results strong {
+            font-size: 1.2em;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>文字数・行数カウントツール</h1>
+
+        <textarea id="input-text" oninput="countText()"></textarea>
+
+        <div class="results">
+            <h2>カウント結果</h2>
+            <p>全文字数 (空白・改行含む): <strong id="total-count">0</strong> 文字</p>
+            <p>空白・改行を除く文字数: <strong id="pure-count">0</strong> 文字</p>
+            <p>行数: <strong id="line-count">1</strong> 行</p>
+        </div>
+    </div>
+
+    <script>
+        function countText() {
+            // 1. テキストエリアの現在値を取得
+            const text = document.getElementById('input-text').value;
+
+            // 2. 全文字数をカウント
+            const totalCount = text.length;
+            document.getElementById('total-count').textContent = totalCount;
+
+            // 3. 空白・改行を除く文字数をカウント
+            // 正規表現で空白(\s)と改行(\n)をすべて削除（g=全体）
+            const pureText = text.replace(/[\s\n]/g, '');
+            const pureCount = pureText.length;
+            document.getElementById('pure-count').textContent = pureCount;
+
+            // 4. 行数をカウント
+            // テキストを改行文字('\n')で分割し、配列の要素数を取得
+            const lineCount = text.split('\n').length;
+            document.getElementById('line-count').textContent = lineCount;
+        }
+
+        // ページ読み込み時に一度実行し、初期値を設定
+        document.addEventListener('DOMContentLoaded', countText);
+    </script>
+</body>
+</html>
