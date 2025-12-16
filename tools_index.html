@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>全ツール一覧 (便利ツールボックス)</title>
+    <style>
+        body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 900px; margin: 40px auto; background-color: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); }
+        h1 { text-align: center; color: #007bff; border-bottom: 3px solid #b8daff; padding-bottom: 10px; margin-bottom: 30px; }
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .tool-card {
+            background-color: #f8faff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #d6eaff;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .tool-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 123, 255, 0.2);
+        }
+        .tool-card h2 {
+            margin-top: 0;
+            color: #007bff;
+            font-size: 1.4em;
+        }
+        .tool-card p {
+            font-size: 0.9em;
+            color: #555;
+            min-height: 40px; /* 説明の高さ統一 */
+        }
+        .tool-card a {
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+            color: white;
+            background-color: #28a745;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ 全ツール一覧</h1>
+        <p style="text-align: center; margin-bottom: 30px;">現在利用可能なすべての便利なツールをまとめています。</p>
+
+        <div class="tool-grid">
+            
+            <div class="tool-card">
+                <h2>📝 文字数・行数カウント</h2>
+                <p>ブログやSNS投稿のための文字数・読了時間をリアルタイムで測定します。</p>
+                <a href="index.html">ツールを使う</a>
+            </div>
+            <div class="tool-card">
+                <h2>📮 郵便番号・住所検索</h2>
+                <p>郵便番号から、対応する住所を瞬時に検索し表示します。</p>
+                <a href="zipcode_search.html">ツールを使う</a>
+            </div>
+            <div class="tool-card">
+                <h2>🗓️ 西暦・和暦 相互変換</h2>
+                <p>西暦と令和、平成などの和暦を相互に変換します。</p>
+                <a href="wareki_converter.html">ツールを使う</a>
+            </div>
+            <div class="tool-card">
+                <h2>🧮 割り勘計算ツール</h2>
+                <p>合計金額と人数を入力し、端数処理をした一人当たりの金額を計算します。</p>
+                <a href="warikan_tool.html">ツールを使う</a>
+            </div>
+
+            <div class="tool-card">
+                <h2>⏱️ シンプルタイマー</h2>
+                <p>カウントダウンタイマーとストップウォッチ機能を搭載。</p>
+                <a href="timer_tool.html">ツールを使う</a>
+            </div>
+            <div class="tool-card">
+                <h2>⚖️ 法律の全体像ナビ</h2>
+                <p>日本の法律を階層的に分類し、身近な事例と合わせて解説します。</p>
+                <a href="law_navigator.html">ツールを使う</a>
+            </div>
+            <div class="tool-card">
+                <h2>📚 暗記カードメーカー</h2>
+                <p>問題と答えを登録し、ブラウザに保存できるデジタル暗記カードを作成します。</p>
+                <a href="flashcard_tool.html">ツールを使う</a>
+            </div>
+            <div class="tool-card">
+                <h2>📄 文字列比較ツール</h2>
+                <p>2つの文章を比較し、異なっている部分をハイライト表示します。</p>
+                <a href="text_compare_tool.html">ツールを使う</a>
+            </div>
+            
+        </div>
+        <p style="text-align: center; margin-top: 40px;">
+            <a href="index.html" style="color: #007bff;">📝 メインの文字数カウントへ戻る</a>
+        </p>
+    </div>
+</body>
+</html>
