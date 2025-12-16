@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📚 暗記カードメーカー</title>
     <style>
-        /* 共通スタイル */
+
         body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
         .wrapper { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; }
         
-        /* メインコンテンツ */
+
         .main-content {
             flex-grow: 1;
             background-color: #fff;
@@ -19,7 +19,7 @@
         }
         h1 { text-align: center; color: #28a745; border-bottom: 3px solid #c3e6cb; padding-bottom: 10px; }
 
-        /* 入力エリア */
+
         .input-area {
             background-color: #f8f9fa;
             padding: 20px;
@@ -40,7 +40,7 @@
         }
         .add-btn:hover { background-color: #218838; }
 
-        /* カードリストエリア */
+
         .card-list-header {
             display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
         }
@@ -62,7 +62,7 @@
             border-radius: 4px; cursor: pointer; margin-left: 10px;
         }
 
-        /* 学習モード（モーダル） */
+
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
@@ -93,7 +93,7 @@
         .nav-btn { padding: 10px 20px; font-size: 16px; cursor: pointer; border: 1px solid #ccc; background-color: white; border-radius: 4px; }
         .nav-btn:hover { background-color: #ddd; }
 
-        /* サイドバー */
+
         .sidebar { width: 300px; padding: 20px; background-color: #e9ecef; border-radius: 8px; }
         .sidebar h3 { color: #007bff; border-bottom: 2px solid #b8daff; margin-top: 0; }
         .sidebar ul { list-style: none; padding: 0; }
@@ -107,7 +107,7 @@
         <div class="main-content">
             <h1>📚 暗記カードメーカー</h1>
 
-            <!-- 入力フォーム -->
+
             <div class="input-area">
                 <div class="input-group">
                     <label>表面 (問題):</label>
@@ -120,27 +120,23 @@
                 <button class="add-btn" onclick="addCard()">カードを追加する</button>
             </div>
 
-            <!-- リスト表示 -->
+
             <div class="card-list-header">
                 <h2>作成したカード (<span id="card-count">0</span>枚)</h2>
                 <button class="study-btn" onclick="startStudy()">📖 学習スタート</button>
             </div>
             <ul id="card-list">
-                <!-- ここにカードが追加されます -->
+                
             </ul>
         </div>
 
-        <!-- サイドバー -->
+
         <div class="sidebar">
             <h3>便利なツール集</h3>
-            <ul>
-                <li><a href="index.html">📝 文字数・行数カウント</a></li> 
-                <li><a href="zipcode_search.html">📮 郵便番号・住所検索</a></li>
-                <li><a href="wareki_converter.html">🗓️ 西暦・和暦 相互変換</a></li>
-                <li><a href="warikan_tool.html">🧮 割り勘計算ツール</a></li>
-                <li><a href="timer_tool.html">⏱️ シンプルタイマー</a></li>
-                <li><a href="law_navigator.html">⚖️ 法律の全体像ナビ</a></li>
+            <ul id="dynamic-tool-list">
+                <li>ナビゲーションをロード中...</li>
             </ul>
+            
             <h3 style="margin-top: 30px;">使い方</h3>
             <p style="font-size: 0.9em; color: #555;">
                 1. 問題と答えを入力して追加します。<br>
@@ -150,7 +146,7 @@
         </div>
     </div>
 
-    <!-- 学習モード用モーダル -->
+
     <div id="study-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -174,18 +170,17 @@
     </div>
 
     <script>
-        // カードデータを管理する配列
         let cards = [];
         let currentCardIndex = 0;
         let isFlipped = false;
 
-        // ページ読み込み時にデータをロード
+
         document.addEventListener('DOMContentLoaded', () => {
             loadCards();
             renderList();
         });
 
-        // LocalStorageからデータを読み込む
+ 
         function loadCards() {
             const storedCards = localStorage.getItem('myFlashcards');
             if (storedCards) {
@@ -193,12 +188,12 @@
             }
         }
 
-        // LocalStorageにデータを保存する
+
         function saveCards() {
             localStorage.setItem('myFlashcards', JSON.stringify(cards));
         }
 
-        // カードを追加する
+  
         function addCard() {
             const frontInput = document.getElementById('card-front');
             const backInput = document.getElementById('card-back');
@@ -214,13 +209,13 @@
             saveCards();
             renderList();
 
-            // 入力欄をクリア
+
             frontInput.value = '';
             backInput.value = '';
             frontInput.focus();
         }
 
-        // カードを削除する
+
         function deleteCard(index) {
             if (confirm('このカードを削除しますか？')) {
                 cards.splice(index, 1);
@@ -229,7 +224,7 @@
             }
         }
 
-        // リストを描画する
+
         function renderList() {
             const listElement = document.getElementById('card-list');
             const countElement = document.getElementById('card-count');
@@ -255,7 +250,7 @@
             });
         }
 
-        // HTMLエスケープ処理（安全のため）
+
         function escapeHtml(str) {
             if(!str) return "";
             return str.replace(/[&<>"']/g, function(m) {
@@ -269,7 +264,7 @@
             });
         }
 
-        // --- 学習モードの処理 ---
+
 
         function startStudy() {
             if (cards.length === 0) {
@@ -297,7 +292,7 @@
             const hintElement = document.getElementById('flashcard-hint');
             const progressElement = document.getElementById('study-progress');
 
-            // 状態をリセット（表面を表示）
+
             isFlipped = false;
             cardElement.classList.remove('flipped');
             cardElement.style.backgroundColor = '#fff';
@@ -318,12 +313,12 @@
             isFlipped = !isFlipped;
 
             if (isFlipped) {
-                // 裏面（答え）を表示
+
                 textElement.textContent = card.back;
                 hintElement.textContent = "クリックして問題に戻る";
                 cardElement.classList.add('flipped');
             } else {
-                // 表面（問題）を表示
+
                 textElement.textContent = card.front;
                 hintElement.textContent = "クリックして答えを見る";
                 cardElement.classList.remove('flipped');
@@ -349,13 +344,70 @@
             }
         }
         
-        // モーダル外クリックで閉じる
+
         window.onclick = function(event) {
             const modal = document.getElementById('study-modal');
             if (event.target == modal) {
                 closeStudy();
             }
         }
+
+        const JSON_URL = 'tools.json';
+        const TOP_TOOLS_COUNT = 4; 
+
+
+        async function loadAndRenderTools(renderFunction, listId) {
+            try {
+                const response = await fetch(JSON_URL);
+                if (!response.ok) {
+                    throw new Error('ネットワークエラー、またはJSONファイルが見つかりません。');
+                }
+                const toolsData = await response.json();
+                renderFunction(toolsData, listId);
+            } catch (error) {
+                console.error('ツールデータの読み込みに失敗しました:', error);
+                const container = document.getElementById(listId);
+                if (container) {
+                    container.innerHTML = `<li style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</li>`;
+                }
+            }
+        }
+
+  
+        function generateSidebarNav(toolsData, listId = 'dynamic-tool-list') {
+            const listContainer = document.getElementById(listId);
+            if (!listContainer) return;
+
+            let listHtml = '';
+            const totalCount = toolsData.length;
+
+            const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
+
+ 
+            toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
+                const isActive = tool.href === currentPath || (currentPath === '' && tool.href === 'index.html');
+                const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
+                const title = isActive ? `${tool.icon} ${tool.title} (現在地)` : `${tool.icon} ${tool.title}`;
+                
+                listHtml += `<li><a href="${tool.href}" ${activeStyle}>${title}</a></li>`;
+            });
+
+
+            const otherCount = totalCount - TOP_TOOLS_COUNT;
+
+            if (otherCount > 0) {
+                listHtml += `<hr style="margin: 10px 0;">`;
+                listHtml += `<li><a href="tools_index.html" style="font-weight: bold; color: #dc3545;">✨ その他 (${otherCount}件) を見る</a></li>`;
+            }
+
+            listContainer.innerHTML = listHtml;
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list'); 
+            updateCounts();
+        });
     </script>
 </body>
 </html>
