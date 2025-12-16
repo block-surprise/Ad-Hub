@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>割り勘計算ツール</title>
+    <style>
+        body { 
+            margin: 0; 
+            background-color: #f4f7f6;
+            font-family: Arial, sans-serif; 
+        }
+        .wrapper {
+            max-width: 1200px;
+            margin: 20px auto;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .main-content {
+            flex-grow: 1;
+            background-color: #fff;
+            padding: 30px; 
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 { text-align: center; color: #333; }
+
+        .input-group {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f8f8f8;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"], select { 
+            padding: 10px; 
+            font-size: 16px; 
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button { 
+            display: block;
+            width: 100%;
+            padding: 12px; 
+            font-size: 18px; 
+            cursor: pointer; 
+            background-color: #ffc107; 
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            margin-top: 20px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #e0a800;
+        }
+
+        .results {
+            padding: 20px;
+            border: 1px dashed #ffc107;
+            border-radius: 4px;
+            background-color: #fff9e6;
+            text-align: center;
+            margin-top: 30px;
+        }
+        .results h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .results p {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #dc3545; 
+            margin: 10px 0;
+        }
+        #per-person-amount {
+            font-size: 2.5em;
+            color: #007bff; 
+        }
+        #error-message {
+            color: red;
+            font-weight: bold;
+        }
+        
+        .sidebar {
+            width: 300px;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .sidebar h3 {
+            color: #007bff;
+            border-bottom: 2px solid #b8daff;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            padding: 5px;
+            display: block;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .sidebar a:hover {
+            background-color: #d6eaff;
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        
+        <div class="main-content">
+            <h1>🧮 割り勘計算ツール</h1>
+
+            <div class="input-group">
+                <label for="total-amount">合計金額 (円):</label>
+                <input type="number" id="total-amount" min="1" placeholder="例: 12500">
+            </div>
+
+            <div class="input-group">
+                <label for="people-count">参加人数 (人):</label>
+                <input type="number" id="people-count" min="2" placeholder="例: 4">
+            </div>
+
+            <div class="input-group">
+                <label for="rounding-method">端数処理:</label>
+                <select id="rounding-method">
+                    <option value="round">四捨五入 (一般的な割り勘)</option>
+                    <option value="ceil">切り上げ (幹事有利)</option>
+                    <option value="floor">切り捨て (参加者有利)</option>
+                </select>
+            </div>
+
+            <button onclick="calculateWarikan()">計算する</button>
+
+            <div class="results">
+                <h2>計算結果</h2>
+                <div id="error-message"></div>
+                <p>一人当たりの支払額:</p>
+                <div id="per-person-amount">0 円</div>
+                <hr style="width: 50%;">
+                <p>幹事調整額 (過不足): <span id="adjustment-amount">0 円</span></p>
+            </div>
+        </div>
+        
+        <div class="sidebar">
+            <h3>便利なツール集</h3>
+            <ul>
+                <li><a href="count">📝 文字数・行数カウント</a></li> 
+                <li><a href="zipcode_search">📮 郵便番号・住所検索</a></li>
+                <li><a href="wareki_converter">🗓️ 西暦・和暦 相互変換</a></li>
+                <li><a href="#">⏱️ シンプルタイマー</a></li>
+            </ul>
+
+            <h3 style="margin-top: 30px;">割り勘のヒント</h3>
+            <ul style="font-size: 0.9em; list-style-type: square; margin-left: 20px;">
+                <li>端数切り上げは、幹事さんの立て替えが少なく済みます。</li>
+                <li>計算結果をスマホにコピーしてすぐに共有しましょう。</li>
+                <li>基本は10円単位や100円単位で丸めるとスムーズです。</li>
+            </ul>
+        </div>
+        
+    </div>
+
+    <script>
+        function calculateWarikan() {
+            const totalAmount = parseInt(document.getElementById('total-amount').value);
+            const peopleCount = parseInt(document.getElementById('people-count').value);
+            const method = document.getElementById('rounding-method').value;
+            
+            const perPersonElement = document.getElementById('per-person-amount');
+            const adjustmentElement = document.getElementById('adjustment-amount');
+            const errorElement = document.getElementById('error-message');
+
+            errorElement.textContent = '';
+            perPersonElement.textContent = '0 円';
+            adjustmentElement.textContent = '0 円';
+
+            if (isNaN(totalAmount) || totalAmount <= 0) {
+                errorElement.textContent = '合計金額を正しく入力してください。';
+                return;
+            }
+            if (isNaN(peopleCount) || peopleCount < 2) {
+                errorElement.textContent = '参加人数は2人以上で入力してください。';
+                return;
+            }
+
+            const basicAmount = totalAmount / peopleCount;
+            let finalPerPerson = 0;
+
+            switch (method) {
+                case 'round':
+                    finalPerPerson = Math.round(basicAmount / 10) * 10; 
+                    break;
+                case 'ceil':
+                    finalPerPerson = Math.ceil(basicAmount / 10) * 10;
+                    break;
+                case 'floor':
+                    finalPerPerson = Math.floor(basicAmount / 10) * 10;
+                    break;
+                default:
+                    finalPerPerson = Math.round(basicAmount);
+            }
+            
+            const collectedAmount = finalPerPerson * peopleCount;
+            const adjustment = collectedAmount - totalAmount;
+
+            perPersonElement.textContent = `${finalPerPerson.toLocaleString()} 円`;
+            adjustmentElement.textContent = `${adjustment.toLocaleString()} 円`;
+
+            if (adjustment > 0) {
+                adjustmentElement.style.color = 'blue'; 
+            } else if (adjustment < 0) {
+                adjustmentElement.style.color = 'red'; 
+            } else {
+                adjustmentElement.style.color = '#333'; 
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); 
+                        calculateWarikan();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
