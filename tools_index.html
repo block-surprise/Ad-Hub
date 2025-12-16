@@ -25,19 +25,20 @@
             margin-bottom: 30px; 
         }
         
-
+ 
         .tool-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            gap: 20px; 
         }
 
-
+   
         .tool-card-link {
             text-decoration: none; 
             color: inherit;
         }
         
+
         .tool-card {
             background-color: #f8faff;
             padding: 20px;
@@ -85,6 +86,14 @@
             text-align: center;
             grid-column: 1 / -1; 
         }
+        
+
+        @media (max-width: 950px) {
+            .container {
+                margin: 20px 10px; 
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -92,6 +101,7 @@
         <h1>🛠️ 全ツール一覧</h1>
         <p style="text-align: center; margin-bottom: 30px;">現在利用可能なすべての便利なツールをまとめています。</p>
 
+    
         <div class="tool-grid" id="tool-list-container">
             <p>ツールリストをロード中...</p>
         </div>
@@ -104,6 +114,7 @@
     <script>
         const JSON_URL = 'tools.json';
 
+  
         async function loadAndRenderTools() {
             const container = document.getElementById('tool-list-container');
             if (!container) return;
@@ -115,12 +126,15 @@
                 }
                 const toolsData = await response.json();
                 
-
+      
                 container.innerHTML = '';
                 
                 toolsData.forEach(tool => {
+     
+                    const linkHref = tool.href.endsWith('.html') ? tool.href : tool.href + '.html';
+
                     const cardHtml = `
-                        <a href="${tool.href}" class="tool-card-link">
+                        <a href="${linkHref}" class="tool-card-link">
                             <div class="tool-card">
                                 <h2>${tool.icon} ${tool.title}</h2>
                                 <p>${tool.description}</p>
@@ -133,10 +147,9 @@
 
             } catch (error) {
                 console.error('ツールデータの読み込みに失敗しました:', error);
-                container.innerHTML = `<p style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</p>`;
+                container.innerHTML = `<p style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。GitHub Pagesなどにアップロードしてください。</p>`;
             }
         }
-
 
         document.addEventListener('DOMContentLoaded', loadAndRenderTools);
     </script>
