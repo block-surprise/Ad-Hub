@@ -4,17 +4,64 @@
     <meta charset="UTF-8">
     <title>高機能 文字数・行数カウントツール</title>
     <style>
-        /* 基本的なスタイリング */
-        .container { 
-            max-width: 800px; 
-            margin: 20px auto; 
+        /* レイアウトの基本設定 */
+        body { 
+            margin: 0; 
+            background-color: #f4f7f6; /* 背景色を追加 */
+            font-family: Arial, sans-serif; 
+        }
+        .wrapper {
+            max-width: 1200px; /* 全体の幅を広く */
+            margin: 20px auto;
+            display: flex; /* Flexboxで横並びにする */
+            gap: 20px; /* メインとサイドバーの間のスペース */
+        }
+
+        /* メインコンテンツエリア */
+        .main-content {
+            flex-grow: 1; /* 残りのスペースを全て使用 */
+            background-color: #fff;
             padding: 30px; 
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            font-family: Arial, sans-serif;
         }
-        h1 { text-align: center; color: #333; }
+
+        /* サイドバーエリア */
+        .sidebar {
+            width: 300px; /* サイドバーの固定幅 */
+            padding: 20px;
+            background-color: #e9ecef; /* メインと異なる背景色 */
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .sidebar h3 {
+            color: #007bff;
+            border-bottom: 2px solid #b8daff;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            padding: 5px;
+            display: block;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .sidebar a:hover {
+            background-color: #d6eaff;
+            color: #0056b3;
+        }
+
+        /* テキストエリアとカウント結果のスタイル (変更なし) */
         textarea { 
             width: 100%; 
             height: 250px; 
@@ -24,7 +71,7 @@
             border: 2px solid #ccc;
             border-radius: 4px;
             margin-bottom: 20px;
-            resize: vertical; /* 縦方向のみリサイズ可能 */
+            resize: vertical;
         }
         .results h2, .results h3 { 
             border-bottom: 2px solid #eee; 
@@ -40,33 +87,57 @@
         .results strong {
             font-size: 1.2em;
             font-weight: bold;
-            color: #007bff; /* メインカラー */
+            color: #007bff; 
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>文字数・行数カウントツール</h1>
+    <div class="wrapper">
+        
+        <div class="main-content">
+            <h1>文字数・行数カウントツール</h1>
 
-        <textarea id="input-text" oninput="countText()" placeholder="ここにテキストを入力してください..."></textarea>
+            <textarea id="input-text" oninput="countText()" placeholder="ここにテキストを入力してください..."></textarea>
 
-        <div class="results">
-            <h2>📊 基本カウント</h2>
-            <p><span>全文字数 (空白・改行含む):</span> <strong id="total-count">0</strong> <span>文字</span></p>
-            <p><span>空白・改行を除く文字数:</span> <strong id="pure-count">0</strong> <span>文字</span></p>
-            <p><span>行数:</span> <strong id="line-count">1</strong> <span>行</span></p>
-            
-            <hr>
+            <div class="results">
+                <h2>📊 基本カウント</h2>
+                <p><span>全文字数 (空白・改行含む):</span> <strong id="total-count">0</strong> <span>文字</span></p>
+                <p><span>空白・改行を除く文字数:</span> <strong id="pure-count">0</strong> <span>文字</span></p>
+                <p><span>行数:</span> <strong id="line-count">1</strong> <span>行</span></p>
+                
+                <hr>
 
-            <h2>⏱️ 時間と効率</h2>
-            <p><span>推定読了時間 (500字/分換算):</span> <strong id="reading-time">0分 0秒</strong></p>
+                <h2>⏱️ 時間と効率</h2>
+                <p><span>推定読了時間 (500字/分換算):</span> <strong id="reading-time">0分 0秒</strong></p>
 
-            <hr>
+                <hr>
 
-            <h2>🌐 プラットフォーム別チェック</h2>
-            <p><span>X (旧Twitter) (280字):</span> <strong id="limit-x">0 文字</strong></p>
-            <p><span>Google Title (32字目安):</span> <strong id="limit-google-title">0 文字</strong></p>
+                <h2>🌐 プラットフォーム別チェック</h2>
+                <p><span>X (旧Twitter) (280字):</span> <strong id="limit-x">0 文字</strong></p>
+                <p><span>Google Title (32字目安):</span> <strong id="limit-google-title">0 文字</strong></p>
+            </div>
         </div>
+        
+        <div class="sidebar">
+            <h3>便利なツール集</h3>
+            <ul>
+                <li><a href="郵便番号検索のファイル名.html">📮 郵便番号・住所検索</a></li>
+                <li><a href="和暦変換のファイル名.html">🗓️ 西暦・和暦 相互変換</a></li>
+                <li><a href="#">🧮 割り勘計算ツール</a></li>
+                <li><a href="#">⏱️ シンプルタイマー</a></li>
+            </ul>
+
+            <h3 style="margin-top: 30px;">ライティングTIPS</h3>
+            <p style="font-size: 0.9em; color: #555;">
+                伝わりやすい文章を書くヒントです。
+            </p>
+            <ul>
+                <li style="font-size: 0.9em;"><a href="#" style="background: none; padding: 0;">✅ 結論を先に述べる (PREP法)</a></li>
+                <li style="font-size: 0.9em;"><a href="#" style="background: none; padding: 0;">✅ 一文を短く（50文字以内目安）</a></li>
+                <li style="font-size: 0.9em;"><a href="#" style="background: none; padding: 0;">✅ 助詞の連続を避ける</a></li>
+            </ul>
+        </div>
+        
     </div>
 
     <script>
@@ -87,8 +158,6 @@
             const lineCount = text.split('\n').length;
             document.getElementById('line-count').textContent = lineCount;
             
-            // --- 拡張機能 ---
-
             // 5. 読了時間の推定
             const readingSpeed = 500; // 1分間に500文字と仮定
             const readingTimeMinutes = totalCount / readingSpeed;
@@ -112,11 +181,9 @@
                 let statusText = `${item.count} 文字`;
 
                 if (item.count > item.limit) {
-                    // 制限を超えている場合
                     color = 'red';
                     statusText = `${item.count} 文字 (超過: ${Math.abs(remaining)} 文字)`;
                 } else {
-                    // 制限内の場合
                     statusText = `${item.count} 文字 (残り ${remaining} 文字)`;
                 }
 
@@ -124,7 +191,6 @@
             });
         }
 
-        // ページ読み込み時に一度実行し、初期値を設定
         document.addEventListener('DOMContentLoaded', countText);
     </script>
 </body>
