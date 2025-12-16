@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Markdown to HTML 変換ツール</title>
-    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/lib/marked.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/marked.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.6/dist/purify.min.js" defer></script>
     
     <style>
@@ -198,10 +198,10 @@
 
             let rawHtml;
             
-            // ⭐ Markedが未定義の際の安全チェックを強化 ⭐
+            // ロード成功後の実行を前提とするが、念のため最終チェック
             if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
                 console.error("Marked/DOMPurifyが未定義です。CDNのロードに失敗している可能性があります。");
-                rawHtml = `<h2 style="color: red;">🚨 ライブラリロードエラー: MarkedまたはDOMPurifyがロードされていません。ブラウザキャッシュをクリアするか、インターネット接続を確認してください。</h2>`;
+                rawHtml = `<h2 style="color: red;">🚨 ライブラリロードエラー: MarkedまたはDOMPurifyがロードされていません。インターネット接続を確認してください。</h2>`;
             } else {
                 try {
                     rawHtml = await marked.parse(markdownInput);
@@ -211,7 +211,6 @@
                 }
             }
             
-            // DOMPurifyがロードされていればサニタイズ。ロードされていなければ未処理のrawHtmlを使用（リスクあり）
             const safeHtml = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(rawHtml) : rawHtml;
 
             htmlOutput.value = safeHtml;
@@ -308,17 +307,27 @@
         
         
         /**
-         * 初期ロード処理。Markedがロードされているか確認し、初回変換を実行する。
+         * 初期ロード処理。Markedが定義されるのを待ってから初回変換を実行します。
          */
         function initializeTool() {
-
-            loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list');
-
+            // 入力エリアの初期値設定
             const initialMarkdown = "# Markdown to HTML\n\nこのエリアにMarkdownを記述すると、右側にHTMLコードとプレビューがリアルタイムで表示されます。\n\n- リストも\n- **太字**も\n- `コード`も対応しています。\n";
             document.getElementById('markdownInput').value = initialMarkdown;
-            
-            // 初回実行時はデバウンスなしで即座に実行
-            convertMarkdown(); 
+
+            // Markedがロードされるまで待機する関数をポーリング
+            const checkMarkedLoaded = () => {
+                if (typeof marked !== 'undefined') {
+                    // Markedが定義されたら、サイドバーと初回変換を実行
+                    loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list');
+                    convertMarkdown();
+                } else {
+                    // まだ定義されていなければ、100ms後に再度チェック
+                    setTimeout(checkMarkedLoaded, 100);
+                }
+            };
+
+            // チェックを開始
+            checkMarkedLoaded();
         }
 
         document.addEventListener('DOMContentLoaded', initializeTool);
