@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Markdown to HTML 変換ツール</title>
-<script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/lib/marked.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/lib/marked.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.6/dist/purify.min.js" defer></script>
     
     <style>
-
+        /* 共通レイアウトスタイル (変更なし) */
         body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
         .wrapper { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; }
         
@@ -132,7 +132,7 @@
                     <label for="markdownInput" class="block text-lg font-semibold text-gray-700 mb-2">
                         Markdown 入力
                     </label>
-                    <textarea id="markdownInput" oninput="convertMarkdown()" placeholder="# 見出し\n\n**太字** や *斜体* も使えます。"></textarea>
+                    <textarea id="markdownInput" oninput="debouncedConvertMarkdown()" placeholder="# 見出し\n\n**太字** や *斜体* も使えます。"></textarea>
                 </div>
 
                 <div class="tool-area">
@@ -177,35 +177,58 @@
     </div>
 
     <script>
+        // --- Debounce 関数定義 (パフォーマンス改善) ---
+        function debounce(func, delay) {
+            let timeoutId;
+            return function(...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
+            };
+        }
 
+        /**
+         * MarkdownをHTMLに変換し、プレビューとコード出力エリアを更新する (async/awaitを使用)
+         */
         async function convertMarkdown() {
             const markdownInput = document.getElementById('markdownInput').value;
             const htmlOutput = document.getElementById('htmlOutput');
             const htmlPreview = document.getElementById('htmlPreview');
 
             let rawHtml;
-            try {
-                rawHtml = await marked.parse(markdownInput);
-            } catch (error) {
-                console.error("Markedの変換エラー:", error);
-                rawHtml = "Markdownの変換中にエラーが発生しました。";
+            
+            // ⭐ Markedが未定義の際の安全チェックを強化 ⭐
+            if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
+                console.error("Marked/DOMPurifyが未定義です。CDNのロードに失敗している可能性があります。");
+                rawHtml = `<h2 style="color: red;">🚨 ライブラリロードエラー: MarkedまたはDOMPurifyがロードされていません。ブラウザキャッシュをクリアするか、インターネット接続を確認してください。</h2>`;
+            } else {
+                try {
+                    rawHtml = await marked.parse(markdownInput);
+                } catch (error) {
+                    console.error("Markedの変換エラー:", error);
+                    rawHtml = `<h2 style="color: red;">Marked実行中のエラー: ${error.message}</h2>`;
+                }
             }
-
-            const safeHtml = DOMPurify.sanitize(rawHtml);
-
+            
+            // DOMPurifyがロードされていればサニタイズ。ロードされていなければ未処理のrawHtmlを使用（リスクあり）
+            const safeHtml = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(rawHtml) : rawHtml;
 
             htmlOutput.value = safeHtml;
-
-
             htmlPreview.innerHTML = safeHtml;
         }
 
+        // Debounce処理を適用した変換関数 (oninputで利用)
+        const debouncedConvertMarkdown = debounce(convertMarkdown, 300);
+
+        /**
+         * クリップボードにテキストをコピーする (Clipboard APIを使用)
+         */
         function copyToClipboard(elementId) {
             const copyText = document.getElementById(elementId).value;
             const button = document.querySelector(`[onclick="copyToClipboard('${elementId}')"]`);
             const originalText = button.textContent;
             
-
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(copyText).then(() => {
                     button.textContent = "✅ コピー完了！";
@@ -214,10 +237,9 @@
                     }, 1500);
                 }).catch(err => {
                     console.error('コピーに失敗しました:', err);
-                    alert('クリップボードへのコピーに失敗しました。ブラウザのセキュリティ設定を確認してください。');
+                    alert('クリップボードへのコピーに失敗しました。セキュリティ設定を確認してください。');
                 });
             } else {
-
                 const tempTextArea = document.createElement('textarea');
                 tempTextArea.value = copyText;
                 document.body.appendChild(tempTextArea);
@@ -229,7 +251,7 @@
                         button.textContent = originalText;
                     }, 1500);
                 } catch (err) {
-                    alert('クリップボードAPIが利用できず、旧方式でのコピーも失敗しました。手動でコピーしてください。');
+                    alert('コピーに失敗しました。手動でコピーしてください。');
                 } finally {
                     document.body.removeChild(tempTextArea);
                 }
@@ -237,6 +259,7 @@
         }
 
 
+        // --- サイドバーの動的ロードロジック (変更なし) ---
         const JSON_URL = 'tools.json';
         const TOP_TOOLS_COUNT = 4;
 
@@ -284,12 +307,17 @@
         }
         
         
+        /**
+         * 初期ロード処理。Markedがロードされているか確認し、初回変換を実行する。
+         */
         function initializeTool() {
 
             loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list');
 
             const initialMarkdown = "# Markdown to HTML\n\nこのエリアにMarkdownを記述すると、右側にHTMLコードとプレビューがリアルタイムで表示されます。\n\n- リストも\n- **太字**も\n- `コード`も対応しています。\n";
             document.getElementById('markdownInput').value = initialMarkdown;
+            
+            // 初回実行時はデバウンスなしで即座に実行
             convertMarkdown(); 
         }
 
