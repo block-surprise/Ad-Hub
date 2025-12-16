@@ -163,12 +163,9 @@
         
         <div class="sidebar">
             <h3>便利なツール集</h3>
-            <ul>
-                <li><a href="count">📝 文字数・行数カウント</a></li> 
-                <li><a href="zipcode_search">📮 郵便番号・住所検索</a></li>
-                <li><a href="wareki_converter">🗓️ 西暦・和暦 相互変換</a></li>
-                <li><a href="timer_tool">⏱️ シンプルタイマー</a></li>
-            </ul>
+            <ul id="dynamic-tool-list">
+                <li>ナビゲーションをロード中...</li>
+            </ul></ul>
 
             <h3 style="margin-top: 30px;">割り勘のヒント</h3>
             <ul style="font-size: 0.9em; list-style-type: square; margin-left: 20px;">
@@ -244,6 +241,65 @@
                     }
                 });
             });
+        });
+
+        const JSON_URL = 'tools.json';
+        const TOP_TOOLS_COUNT = 4; 
+
+        /**
+
+         */
+        async function loadAndRenderTools(renderFunction, listId) {
+            try {
+                const response = await fetch(JSON_URL);
+                if (!response.ok) {
+                    throw new Error('ネットワークエラー、またはJSONファイルが見つかりません。');
+                }
+                const toolsData = await response.json();
+                renderFunction(toolsData, listId);
+            } catch (error) {
+                console.error('ツールデータの読み込みに失敗しました:', error);
+                const container = document.getElementById(listId);
+                if (container) {
+                    container.innerHTML = `<li style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</li>`;
+                }
+            }
+        }
+
+  
+        function generateSidebarNav(toolsData, listId = 'dynamic-tool-list') {
+            const listContainer = document.getElementById(listId);
+            if (!listContainer) return;
+
+            let listHtml = '';
+            const totalCount = toolsData.length;
+
+            const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
+
+
+            toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
+                const isActive = tool.href === currentPath || (currentPath === '' && tool.href === 'index.html');
+                const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
+                const title = isActive ? `${tool.icon} ${tool.title} (現在地)` : `${tool.icon} ${tool.title}`;
+                
+                listHtml += `<li><a href="${tool.href}" ${activeStyle}>${title}</a></li>`;
+            });
+
+
+            const otherCount = totalCount - TOP_TOOLS_COUNT;
+
+            if (otherCount > 0) {
+                listHtml += `<hr style="margin: 10px 0;">`;
+                listHtml += `<li><a href="tools_index.html" style="font-weight: bold; color: #dc3545;">✨ その他 (${otherCount}件) を見る</a></li>`;
+            }
+
+            listContainer.innerHTML = listHtml;
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list'); 
+            updateCounts();
         });
     </script>
 </body>
