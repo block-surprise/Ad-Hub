@@ -6,7 +6,7 @@
     <title>IPアドレス・ドメイン情報検索ツール</title>
     
     <style>
-        
+        /* 共通レイアウトスタイル (他のツールと統一) */
         body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
         .wrapper { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; }
         
@@ -23,7 +23,7 @@
 
         h1 { text-align: center; color: #333; margin-top: 0; margin-bottom: 20px; }
 
-        
+        /* サイドバーのスタイル */
         .sidebar {
             width: 300px;
             padding: 20px;
@@ -38,7 +38,7 @@
         .sidebar a { text-decoration: none; color: #333; padding: 5px; display: block; border-radius: 4px; transition: background-color 0.2s; }
         .sidebar a:hover { background-color: #d6eaff; color: #0056b3; }
 
-   
+        /* ツール固有のスタイル */
         .search-area {
             display: flex;
             gap: 10px;
@@ -105,7 +105,7 @@
             text-align: center;
         }
 
-       
+        /* レスポンシブ対応 */
         @media (max-width: 1024px) {
             .wrapper {
                 flex-direction: column;
@@ -125,12 +125,12 @@
 
     <div class="wrapper">
         
-  
+        <!-- メインコンテンツ -->
         <div class="main-content">
             <h1>🌐 IPアドレス・ドメイン情報検索ツール</h1>
             <p class="text-gray-500 text-center mb-4">IPアドレスまたはドメイン名を入力すると、その地理情報やネットワーク情報が表示されます。</p>
 
-       
+            <!-- 検索エリア -->
             <div class="search-area">
                 <input type="text" id="queryInput" placeholder="IPアドレスまたはドメインを入力 (例: 8.8.8.8 または google.com)">
                 <button id="searchButton" onclick="searchInfo()">検索</button>
@@ -138,18 +138,18 @@
             
             <p id="message"></p>
 
-            
+            <!-- 結果パネル -->
             <div class="result-panel" id="resultPanel">
                 <p>検索結果がここに表示されます。</p>
             </div>
             
             <footer class="mt-8 text-center text-gray-500 text-sm">
-                <p>※ 本ツールは <a href="http://ip-api.com/" target="_blank">ip-api.com</a> の公開APIを利用しています。</p>
+                <p>※ 本ツールは <a href="https://ip-api.com/" target="_blank">ip-api.com</a> の公開APIを利用しています。</p>
                 <p><a href="tools_index.html" class="text-red-500 hover:text-red-700">← 全ツール一覧に戻る</a></p>
             </footer>
         </div>
 
-
+        <!-- サイドバー -->
         <div class="sidebar">
             <h3>便利なツール集</h3>
             <ul id="dynamic-tool-list">
@@ -166,7 +166,9 @@
     </div>
 
     <script>
-
+        /**
+         * 情報を表示するためのマップ
+         */
         const FIELD_MAP = {
             'query': 'IPアドレス',
             'country': '国',
@@ -180,20 +182,23 @@
             'timezone': 'タイムゾーン'
         };
 
-  
+        /**
+         * IPアドレスまたはドメイン情報を検索する
+         */
         async function searchInfo() {
             const queryInput = document.getElementById('queryInput');
             const resultPanel = document.getElementById('resultPanel');
             const messageElement = document.getElementById('message');
             let query = queryInput.value.trim();
 
-    
+            // クエリがない場合は自分のIPアドレスを検索
             if (!query) {
                 query = ''; // ip-api.com のデフォルトはリクエスト元のIP
                 queryInput.value = '（自分のIPを検索中...）';
             }
             
-            const API_URL = `http://ip-api.com/json/${query}?lang=ja`;
+            // 修正: APIのURLをHTTPSに変更
+            const API_URL = `https://ip-api.com/json/${query}?lang=ja`;
 
             messageElement.textContent = '🔍 情報を検索中...';
             messageElement.style.color = '#007bff';
@@ -204,19 +209,19 @@
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                
+                    // 成功
                     messageElement.textContent = '✅ 検索が完了しました。';
                     messageElement.style.color = '#28a745';
                     renderResults(data);
                 } else {
-              
+                    // 失敗 (無効なクエリなど)
                     messageElement.textContent = `🚨 検索に失敗しました: ${data.message || '無効なクエリです。'}`;
                     messageElement.style.color = '#d9534f';
                     resultPanel.innerHTML = '<p style="text-align:center; color: #d9534f;">検索結果が見つかりませんでした。</p>';
                 }
 
             } catch (e) {
-      
+                // ネットワークエラーなど
                 messageElement.textContent = '🚨 ネットワークエラーが発生しました。時間を置いて再試行してください。';
                 messageElement.style.color = '#d9534f';
                 resultPanel.innerHTML = '<p style="text-align:center; color: #d9534f;">通信に失敗しました。</p>';
@@ -228,7 +233,10 @@
             }
         }
 
-
+        /**
+         * 取得したデータをパネルに表示する
+         * @param {object} data - ip-api.com から返されたJSONデータ
+         */
         function renderResults(data) {
             const panel = document.getElementById('resultPanel');
             let html = '';
@@ -250,7 +258,7 @@
             panel.innerHTML = html;
         }
 
-   
+        // --- サイドバーの動的ロードロジック (共通) ---
         const JSON_URL = 'tools.json';
         const TOP_TOOLS_COUNT = 4;
 
@@ -280,7 +288,7 @@
             const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
 
             toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
-
+                // .html拡張子を考慮
                 const toolHref = tool.href + '.html'; 
                 const currentPathFull = currentPath.includes('.') ? currentPath : currentPath + '.html';
 
@@ -300,10 +308,12 @@
 
             listContainer.innerHTML = listHtml;
         }
-
+        
+        // --- 初期ロード ---
         document.addEventListener('DOMContentLoaded', () => {
             loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list');
-    
+            
+            // Enterキーで実行できるようにする
             document.getElementById('queryInput').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
