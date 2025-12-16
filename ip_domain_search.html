@@ -144,7 +144,7 @@
             </div>
             
             <footer class="mt-8 text-center text-gray-500 text-sm">
-                <p>※ 本ツールは <a href="https://ip-api.com/" target="_blank">ip-api.com</a> の公開APIを利用しています。</p>
+                <p>※ 本ツールは <a href="https://ipwhois.io/" target="_blank">ipwhois.io</a> の公開APIを利用しています。</p>
                 <p><a href="tools_index.html" class="text-red-500 hover:text-red-700">← 全ツール一覧に戻る</a></p>
             </footer>
         </div>
@@ -160,26 +160,27 @@
             <ul style="font-size: 0.9em; list-style-type: square; margin-left: 10px;">
                 <li>✅ 自分のIPアドレスは空欄で検索できます。</li>
                 <li>✅ ドメイン名 (例: `google.com`) も検索可能です。</li>
-                <li>✅ APIには利用制限があります。連打は避けてください。</li>
+                <li>✅ サービスには利用制限があります。連打は避けてください。</li>
             </ul>
         </div>
     </div>
 
     <script>
         /**
-         * 情報を表示するためのマップ
+         * 情報を表示するためのマップ (ipwhois.ioのデータ構造に合わせる)
          */
         const FIELD_MAP = {
-            'query': 'IPアドレス',
+            'ip': 'IPアドレス',
+            'type': 'タイプ',
             'country': '国',
-            'countryCode': '国コード',
-            'regionName': '地域/州',
+            'country_code': '国コード',
+            'region': '地域/州',
             'city': '都市',
             'zip': '郵便番号',
+            'latitude': '緯度',
+            'longitude': '経度',
             'isp': 'プロバイダ (ISP)',
-            'org': '組織名',
-            'as': 'AS番号',
-            'timezone': 'タイムゾーン'
+            'organization': '組織名'
         };
 
         /**
@@ -191,14 +192,14 @@
             const messageElement = document.getElementById('message');
             let query = queryInput.value.trim();
 
-            // クエリがない場合は自分のIPアドレスを検索
             if (!query) {
-                query = ''; // ip-api.com のデフォルトはリクエスト元のIP
+                query = ''; 
                 queryInput.value = '（自分のIPを検索中...）';
             }
             
-            // 修正: APIのURLをHTTPSに変更
-            const API_URL = `https://ip-api.com/json/${query}?lang=ja`;
+            // 修正: ipwhois.io の HTTPS エンドポイントを使用
+            // free APIでは言語設定がないため、英語のデータを利用し、表示時に日本語ラベルを使用
+            const API_URL = `https://ipwhois.io/json/${query}`;
 
             messageElement.textContent = '🔍 情報を検索中...';
             messageElement.style.color = '#007bff';
@@ -208,14 +209,14 @@
                 const response = await fetch(API_URL);
                 const data = await response.json();
 
-                if (data.status === 'success') {
+                if (data.success) {
                     // 成功
                     messageElement.textContent = '✅ 検索が完了しました。';
                     messageElement.style.color = '#28a745';
                     renderResults(data);
                 } else {
-                    // 失敗 (無効なクエリなど)
-                    messageElement.textContent = `🚨 検索に失敗しました: ${data.message || '無効なクエリです。'}`;
+                    // 失敗 (無効なクエリやレート制限など)
+                    messageElement.textContent = `🚨 検索に失敗しました: ${data.message || '無効なクエリまたはAPIエラーです。'}`;
                     messageElement.style.color = '#d9534f';
                     resultPanel.innerHTML = '<p style="text-align:center; color: #d9534f;">検索結果が見つかりませんでした。</p>';
                 }
@@ -235,7 +236,6 @@
 
         /**
          * 取得したデータをパネルに表示する
-         * @param {object} data - ip-api.com から返されたJSONデータ
          */
         function renderResults(data) {
             const panel = document.getElementById('resultPanel');
@@ -244,7 +244,8 @@
             for (const key in FIELD_MAP) {
                 if (data.hasOwnProperty(key)) {
                     const label = FIELD_MAP[key];
-                    const value = data[key] || 'N/A';
+                    // 値を適切に表示。空欄の場合はN/A
+                    const value = (data[key] !== null && data[key] !== undefined && data[key] !== "") ? data[key] : 'N/A';
                     
                     html += `
                         <div class="result-item">
