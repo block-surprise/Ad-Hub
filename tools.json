@@ -1,0 +1,10 @@
+[
+    { "href": "index.html", "icon": "📝", "title": "文字数・行数カウント", "description": "ブログやSNS投稿のための文字数・読了時間をリアルタイムで測定します。" },
+    { "href": "zipcode_search.html", "icon": "📮", "title": "郵便番号・住所検索", "description": "郵便番号から、対応する住所を瞬時に検索し表示します。" },
+    { "href": "wareki_converter.html", "icon": "🗓️", "title": "西暦・和暦 相互変換", "description": "西暦と令和、平成などの和暦を相互に変換します。" },
+    { "href": "warikan_tool.html", "icon": "🧮", "title": "割り勘計算ツール", "description": "合計金額と人数を入力し、端数処理をした一人当たりの金額を計算します。" },
+    { "href": "timer_tool.html", "icon": "⏱️", "title": "シンプルタイマー", "description": "カウントダウンタイマーとストップウォッチ機能を搭載。" },
+    { "href": "law_navigator.html", "icon": "⚖️", "title": "法律の全体像ナビ", "description": "日本の法律を階層的に分類し、身近な事例と合わせて解説します。" },
+    { "href": "flashcard_tool.html", "icon": "📚", "title": "暗記カードメーカー", "description": "問題と答えを登録し、ブラウザに保存できるデジタル暗記カードを作成します。" },
+    { "href": "text_compare_tool.html", "icon": "📄", "title": "文字列比較ツール", "description": "2つの文章を比較し、異なっている部分をハイライト表示します。" }
+]
