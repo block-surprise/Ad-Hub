@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>西暦・和暦 相互変換ツール</title>
     <style>
-        /* 共通のレイアウトスタイル */
         body { 
             margin: 0; 
             background-color: #f4f7f6;
@@ -17,7 +16,6 @@
             gap: 20px;
         }
         
-        /* メインコンテンツエリア */
         .main-content {
             flex-grow: 1;
             background-color: #fff;
@@ -28,7 +26,6 @@
         }
         h1 { text-align: center; color: #333; }
 
-        /* フォームのスタイル */
         .input-group {
             text-align: center;
             padding: 20px 0;
@@ -65,10 +62,9 @@
             background-color: #0056b3;
         }
 
-        /* 結果表示エリア */
         .results {
             padding: 20px;
-            border: 1px dashed #28a745; /* 緑系の枠に変更 */
+            border: 1px dashed #28a745; 
             border-radius: 4px;
             background-color: #f8fff8;
             text-align: center;
@@ -80,13 +76,12 @@
         #result-text {
             font-size: 2.0em;
             font-weight: bold;
-            color: #28a745; /* 結果表示は緑色 */
+            color: #28a745; 
             min-height: 2.0em;
             line-height: 1.2;
             padding-top: 10px;
         }
         
-        /* サイドバーエリア (共通スタイル) */
         .sidebar {
             width: 300px;
             padding: 20px;
@@ -173,7 +168,6 @@
     </div>
 
     <script>
-        // 年号の基準年定義 (開始年)
         const NENGO_START_YEAR = {
             'reiwa': 2019,
             'heisei': 1989,
@@ -182,7 +176,6 @@
             'meiji': 1868
         };
 
-        // 西暦から和暦への変換
         function convertToWareki() {
             const seireki = parseInt(document.getElementById('seireki').value);
             const resultElement = document.getElementById('result-text');
@@ -196,23 +189,18 @@
             let nengoName = "";
             let warekiYear = 0;
 
-            // 令和
             if (seireki >= NENGO_START_YEAR['reiwa']) {
                 nengoName = "令和";
                 warekiYear = seireki - NENGO_START_YEAR['reiwa'] + 1;
-            // 平成
             } else if (seireki >= NENGO_START_YEAR['heisei']) {
                 nengoName = "平成";
                 warekiYear = seireki - NENGO_START_YEAR['heisei'] + 1;
-            // 昭和
             } else if (seireki >= NENGO_START_YEAR['showa']) {
                 nengoName = "昭和";
                 warekiYear = seireki - NENGO_START_YEAR['showa'] + 1;
-            // 大正
             } else if (seireki >= NENGO_START_YEAR['taisho']) {
                 nengoName = "大正";
                 warekiYear = seireki - NENGO_START_YEAR['taisho'] + 1;
-            // 明治
             } else if (seireki >= NENGO_START_YEAR['meiji']) {
                 nengoName = "明治";
                 warekiYear = seireki - NENGO_START_YEAR['meiji'] + 1;
@@ -225,31 +213,46 @@
             resultElement.textContent = result;
         }
 
-        // 和暦から西暦への変換
         function convertToSeireki() {
             const nengoKey = document.getElementById('nenngo').value;
             const warekiYear = parseInt(document.getElementById('wareki-year').value);
             const resultElement = document.getElementById('result-text');
-            const nengoName = document.getElementById('nenngo').options[document.getElementById('nenngo').selectedIndex].text;
 
             if (isNaN(warekiYear) || warekiYear < 1) {
                 resultElement.textContent = "年数を正しく入力してください (1年以降)。";
                 return;
             }
 
-            // 基準年を取得
             const startYear = NENGO_START_YEAR[nengoKey];
-            
-            // 西暦を計算 (基準年 + 年数 - 1)
             const seireki = startYear + warekiYear - 1;
 
             const result = `${seireki} 年`;
             resultElement.textContent = result;
         }
 
-        // 初期表示
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('result-text').textContent = '西暦または和暦を入力して変換してください。';
+            const seirekiInput = document.getElementById('seireki');
+            const warekiYearInput = document.getElementById('wareki-year');
+            const resultElement = document.getElementById('result-text');
+
+      
+            resultElement.textContent = '西暦または和暦を入力して変換してください。';
+
+
+            seirekiInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); 
+                    convertToWareki();
+                }
+            });
+
+        
+            warekiYearInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); 
+                    convertToSeireki();
+                }
+            });
         });
     </script>
 </body>
