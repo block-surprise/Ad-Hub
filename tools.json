@@ -6,5 +6,7 @@
     { "href": "timer_tool", "icon": "⏱️", "title": "シンプルタイマー", "description": "カウントダウンタイマーとストップウォッチ機能を搭載。" },
     { "href": "flashcard_tool", "icon": "📚", "title": "暗記カードメーカー", "description": "問題と答えを登録し、ブラウザに保存できるデジタル暗記カードを作成します。" },
     { "href": "markdown_converter", "icon": "🏷️", "title": "Markdown to HTML 変換", "description": "Markdown形式のテキストをHTMLタグに変換し、リアルタイムでプレビューします。" },
-    { "href": "text_compare_tool", "icon": "📄", "title": "文字列比較ツール", "description": "2つの文章を比較し、異なっている部分をハイライト表示します。" }
+    { "href": "text_compare_tool", "icon": "📄", "title": "文字列比較ツール", "description": "2つの文章を比較し、異なっている部分をハイライト表示します。" },
+    { "href": "ip_domain_search", "icon": "🌐", "title": "IPアドレス・ドメイン情報検索", "description": "IPアドレスやドメインから、地理情報やプロバイダ情報を検索します。" },
+    {  "href": "responsive_checker", "icon": "🪟", "title": "レスポンシブデザイン確認","description": "WebサイトのURLを入力し、モバイル、タブレット、PCの表示を同時にチェックします。" }
 ]
