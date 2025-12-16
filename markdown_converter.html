@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to HTML 変換ツール</title>
+    <!-- Marked (Markdown Parser) CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/lib/marked.min.js"></script>
+    <!-- DOMPurify (Security for sanitizing HTML) CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.6/dist/purify.min.js"></script>
+    
+    <style>
+        /* 共通レイアウトスタイル (他のツールと統一) */
+        body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
+        .wrapper { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; }
+        
+        .main-content {
+            flex-grow: 1;
+            background-color: #fff;
+            padding: 30px; 
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex; /* Flexで子要素を縦に配置 */
+            flex-direction: column;
+        }
+
+        h1 { text-align: center; color: #333; margin-top: 0; margin-bottom: 20px; }
+
+        /* サイドバーのスタイル */
+        .sidebar {
+            width: 300px;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0; /* 幅を固定 */
+        }
+        .sidebar h3 { color: #007bff; border-bottom: 2px solid #b8daff; padding-bottom: 5px; margin-top: 0; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar li { margin-bottom: 10px; }
+        .sidebar a { text-decoration: none; color: #333; padding: 5px; display: block; border-radius: 4px; transition: background-color 0.2s; }
+        .sidebar a:hover { background-color: #d6eaff; color: #0056b3; }
+
+        /* ツール固有のレイアウト (3つのエリアをメインコンテンツ内に配置) */
+        .tool-areas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 3つのカラムを柔軟に設定 */
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        /* 入力/出力エリア */
+        .tool-area {
+            display: flex;
+            flex-direction: column;
+        }
+
+        textarea, #htmlPreview {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: none;
+            min-height: 400px; /* 高さの調整 */
+            flex-grow: 1; /* 親の高さに合わせて伸びる */
+        }
+
+        #htmlOutput { background-color: #f8f8f8; color: #333; }
+        #htmlPreview { 
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        
+        /* ボタンのスタイル */
+        .copy-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .copy-button:hover {
+            background-color: #1e7e34;
+        }
+
+        /* プレビューエリア内のスタイル（重要） */
+        .preview-content h1 { font-size: 2em; border-bottom: 2px solid #ddd; padding-bottom: 0.3em; margin-top: 1em; }
+        .preview-content h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; margin-top: 1em; }
+        .preview-content p { margin-bottom: 1em; line-height: 1.6; }
+        .preview-content ul, .preview-content ol { margin-left: 20px; margin-bottom: 1em; }
+        .preview-content pre { background-color: #f6f8fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .preview-content code { font-family: monospace; background-color: #eee; padding: 2px 4px; border-radius: 3px; }
+        .preview-content pre code { background-color: transparent; padding: 0; }
+        .preview-content blockquote { border-left: 4px solid #ccc; padding-left: 10px; color: #666; margin: 1em 0; }
+
+        /* レスポンシブ対応 (モバイルでは縦に積み重ねる) */
+        @media (max-width: 1024px) {
+            .wrapper {
+                flex-direction: column;
+                margin: 10px;
+                gap: 10px;
+            }
+            .sidebar {
+                width: auto;
+            }
+            .tool-areas {
+                grid-template-columns: 1fr; /* モバイルでは1列にする */
+            }
+            textarea, #htmlPreview {
+                min-height: 200px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        
+        <!-- メインコンテンツ -->
+        <div class="main-content">
+            <h1 class="text-3xl font-extrabold text-blue-600">🏷️ Markdown to HTML 変換ツール</h1>
+            <p class="text-gray-500 text-center mb-4">Markdownテキストを構造化されたHTMLコードに変換し、リアルタイムでプレビューします。</p>
+
+            <!-- ツールエリア (3カラム) -->
+            <div class="tool-areas">
+
+                <!-- 1. Markdown入力エリア -->
+                <div class="tool-area">
+                    <label for="markdownInput" class="block text-lg font-semibold text-gray-700 mb-2">
+                        Markdown 入力
+                    </label>
+                    <textarea id="markdownInput" oninput="convertMarkdown()" placeholder="# 見出し\n\n**太字** や *斜体* も使えます。"></textarea>
+                </div>
+
+                <!-- 2. HTMLコード出力エリア -->
+                <div class="tool-area">
+                    <label for="htmlOutput" class="block text-lg font-semibold text-gray-700 mb-2">
+                        HTML コード出力
+                    </label>
+                    <textarea id="htmlOutput" readonly></textarea>
+                    <button onclick="copyToClipboard('htmlOutput')" class="copy-button">
+                        HTMLをクリップボードにコピー
+                    </button>
+                </div>
+
+                <!-- 3. プレビューエリア -->
+                <div class="tool-area">
+                    <label class="block text-lg font-semibold text-gray-700 mb-2">
+                        リアルタイムプレビュー
+                    </label>
+                    <div id="htmlPreview" class="preview-content">
+                        <!-- プレビュー内容がここに入ります -->
+                        <h1 class="text-2xl font-bold">サンプルプレビュー</h1>
+                        <p>ここに変換されたコンテンツが表示されます。</p>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="mt-8 text-center text-gray-500 text-sm">
+                <p>このツールは <a href="https://marked.js.org/" target="_blank" class="text-blue-500 hover:text-blue-700">Marked</a> および <a href="https://github.com/cure53/dompurify" target="_blank" class="text-blue-500 hover:text-blue-700">DOMPurify</a> を利用しています。</p>
+            </footer>
+        </div>
+
+        <!-- サイドバー -->
+        <div class="sidebar">
+            <h3>便利なツール集</h3>
+            <ul id="dynamic-tool-list">
+                <li>ナビゲーションをロード中...</li>
+            </ul>
+
+            <h3 style="margin-top: 30px;">Markdown TIPS</h3>
+            <ul style="font-size: 0.9em; list-style-type: square; margin-left: 10px;">
+                <li>✅ 行頭に `#` で見出し</li>
+                <li>✅ `**太字**` で強調</li>
+                <li>✅ `-` または `*` でリスト</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // MarkedとDOMPurifyはCDN経由でグローバルに利用可能です
+
+        /**
+         * MarkdownをHTMLに変換し、プレビューとコード出力エリアを更新する
+         */
+        function convertMarkdown() {
+            const markdownInput = document.getElementById('markdownInput').value;
+            const htmlOutput = document.getElementById('htmlOutput');
+            const htmlPreview = document.getElementById('htmlPreview');
+            
+            // 1. MarkdownをHTMLに変換 (Markedを使用)
+            // Markedの設定をカスタマイズしたい場合はここに追加
+            let rawHtml = marked.parse(markdownInput);
+            
+            // 2. HTMLをサニタイズ (DOMPurifyを使用)
+            const safeHtml = DOMPurify.sanitize(rawHtml);
+
+            // 3. HTMLコード出力エリアを更新
+            htmlOutput.value = safeHtml;
+
+            // 4. プレビューエリアを更新
+            htmlPreview.innerHTML = safeHtml;
+        }
+
+        /**
+         * クリップボードにテキストをコピーする
+         * @param {string} elementId - コピー対象のtextarea要素のID
+         */
+        function copyToClipboard(elementId) {
+            const copyText = document.getElementById(elementId);
+            
+            // テキストエリアを選択
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // モバイル用
+
+            // クリップボードにコピー
+            try {
+                document.execCommand('copy');
+                const button = document.querySelector(`[onclick="copyToClipboard('${elementId}')"]`);
+                const originalText = button.textContent;
+                button.textContent = "✅ コピー完了！";
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 1500);
+            } catch (err) {
+                console.error('コピーに失敗しました:', err);
+            }
+        }
+
+        // --- サイドバーの動的ロードロジック (共通) ---
+        const JSON_URL = 'tools.json';
+        const TOP_TOOLS_COUNT = 4;
+
+        async function loadAndRenderTools(renderFunction, listId) {
+            try {
+                const response = await fetch(JSON_URL);
+                if (!response.ok) {
+                    throw new Error('ネットワークエラー、またはJSONファイルが見つかりません。');
+                }
+                const toolsData = await response.json();
+                renderFunction(toolsData, listId);
+            } catch (error) {
+                console.error('ツールデータの読み込みに失敗しました:', error);
+                const container = document.getElementById(listId);
+                if (container) {
+                    container.innerHTML = `<li style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</li>`;
+                }
+            }
+        }
+
+        function generateSidebarNav(toolsData, listId = 'dynamic-tool-list') {
+            const listContainer = document.getElementById(listId);
+            if (!listContainer) return;
+
+            let listHtml = '';
+            const totalCount = toolsData.length;
+            const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
+
+            toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
+                const isActive = tool.href === currentPath || (currentPath === '' && tool.href === 'index.html');
+                // スタイルシートを使わないため、インラインスタイルを付与
+                const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
+                const title = isActive ? `${tool.icon} ${tool.title} (現在地)` : `${tool.icon} ${tool.title}`;
+                
+                listHtml += `<li><a href="${tool.href}" ${activeStyle}>${title}</a></li>`;
+            });
+
+            const otherCount = totalCount - TOP_TOOLS_COUNT;
+
+            if (otherCount > 0) {
+                listHtml += `<hr style="margin: 10px 0;">`;
+                listHtml += `<li><a href="tools_index.html" style="font-weight: bold; color: #dc3545;">✨ その他 (${otherCount}件) を見る</a></li>`;
+            }
+
+            listContainer.innerHTML = listHtml;
+        }
+        
+        // --- 初期ロード ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // サイドバーをロード
+            loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list');
+
+            // ツール機能の初期化
+            const initialMarkdown = "# Markdown to HTML\n\nこのエリアにMarkdownを記述すると、右側にHTMLコードとプレビューがリアルタイムで表示されます。\n\n- リストも\n- **太字**も\n- `コード`も対応しています。\n";
+            document.getElementById('markdownInput').value = initialMarkdown;
+            convertMarkdown();
+        });
+    </script>
+</body>
+</html>
