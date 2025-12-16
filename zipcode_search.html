@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>郵便番号・住所検索ツール</title>
     <style>
-        /* 共通のレイアウトスタイル */
         body { 
             margin: 0; 
             background-color: #f4f7f6;
@@ -17,7 +16,6 @@
             gap: 20px;
         }
         
-        /* メインコンテンツエリア */
         .main-content {
             flex-grow: 1;
             background-color: #fff;
@@ -28,7 +26,6 @@
         }
         h1 { text-align: center; color: #333; }
 
-        /* フォームのスタイル */
         .search-area {
             text-align: center;
             padding: 20px 0;
@@ -57,7 +54,6 @@
             background-color: #0056b3;
         }
 
-        /* 結果表示エリア */
         .results {
             padding: 20px;
             border: 1px dashed #007bff;
@@ -79,7 +75,6 @@
             font-weight: bold;
         }
         
-        /* サイドバーエリア (共通スタイル) */
         .sidebar {
             width: 300px;
             padding: 20px;
@@ -129,7 +124,7 @@
 
             <div class="results">
                 <h2>検索結果</h2>
-                <div id="address-result">郵便番号を入力して「検索」ボタンを押してください。</div>
+                <div id="address-result">...ここに住所が表示されます...</div>
                 <p id="error-message"></p>
             </div>
         </div>
@@ -137,8 +132,8 @@
         <div class="sidebar">
             <h3>便利なツール集</h3>
             <ul>
-                <li><a href="index.html">📝 文字数・行数カウント</a></li> 
-                <li><a href="wareki_converter.html">🗓️ 西暦・和暦 相互変換</a></li>
+                <li><a href="count">📝 文字数・行数カウント</a></li> 
+                <li><a href="wareki_converter">🗓️ 西暦・和暦 相互変換</a></li>
                 <li><a href="#">🧮 割り勘計算ツール</a></li> 
                 <li><a href="#">⏱️ シンプルタイマー</a></li>
             </ul>
@@ -153,17 +148,15 @@
 
     <script>
         async function searchAddress() {
-            // 1. 入力された郵便番号を取得
             const zipcode = document.getElementById('zipcode').value;
             const resultElement = document.getElementById('address-result');
             const errorElement = document.getElementById('error-message');
 
-            // 表示をリセット
             resultElement.textContent = '検索中...';
             errorElement.textContent = '';
             resultElement.style.color = '#007bff'; 
 
-            // 2. 郵便番号の形式チェック（7桁の数字か）
+    
             if (!/^\d{7}$/.test(zipcode)) {
                 errorElement.textContent = '郵便番号はハイフンなしの7桁で入力してください。';
                 resultElement.textContent = '検索できませんでした。';
@@ -171,38 +164,33 @@
                 return;
             }
 
-            // 3. 正しいAPIのURLを構築 (修正済み)
             const API_URL = `https://zipcloud.ibsnet.co.jp/api/search?zipcode=${zipcode}`;
 
             try {
-                // 4. APIにリクエストを送信
+                
                 const response = await fetch(API_URL);
                 const data = await response.json();
 
-                // 5. データのチェックと結果の表示
                 if (data.status === 200) {
                     if (data.results) {
-                        // 成功
+                    
                         const address = data.results[0];
                         const fullAddress = `${address.pref}${address.address1}${address.address2}`;
                         
                         resultElement.textContent = fullAddress;
                         resultElement.style.color = '#333'; 
                     } else {
-                        // 郵便番号が見つからなかった場合
                         errorElement.textContent = `郵便番号「${zipcode}」に対応する住所が見つかりませんでした。`;
                         resultElement.textContent = '該当する住所がありません。';
                         resultElement.style.color = '#d9534f';
                     }
                 } else {
-                    // API側でエラーが発生した場合
                     errorElement.textContent = `APIエラーが発生しました。ステータス: ${data.status}`;
                     resultElement.textContent = '検索エラーが発生しました。';
                     resultElement.style.color = '#d9534f';
                 }
 
             } catch (e) {
-                // ネットワークエラーなど予期せぬエラー
                 errorElement.textContent = 'ネットワークエラー、またはAPIとの通信に失敗しました。';
                 resultElement.textContent = '検索エラーが発生しました。';
                 resultElement.style.color = '#d9534f';
@@ -210,10 +198,21 @@
             }
         }
 
-        // 初期表示の設定
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('address-result').textContent = '郵便番号を入力して「検索」ボタンを押してください。';
-            document.getElementById('address-result').style.color = '#333';
+            const zipcodeInput = document.getElementById('zipcode');
+            const resultElement = document.getElementById('address-result');
+
+
+            resultElement.textContent = '郵便番号を入力して「検索」ボタンを押してください。';
+            resultElement.style.color = '#333';
+
+
+            zipcodeInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); 
+                    searchAddress();
+                }
+            });
         });
     </script>
 </body>
