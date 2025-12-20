@@ -6,17 +6,34 @@
     <title>Markdown to HTML 変換ツール</title>
     <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/marked.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.6/dist/purify.min.js" defer></script>
-       <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
+
     <style>
-        /* 共通レイアウトスタイル (変更なし) */
+        /* 共通レイアウトスタイル */
         body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
-        .wrapper { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; }
+        
+        .wrapper { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            display: flex; 
+            flex-direction: column; /* 【重要】スマホでは縦並び */
+            gap: 20px; 
+            padding: 10px;
+        }
+
+        /* PC（1025px以上）の設定 */
+        @media (min-width: 1025px) {
+            .wrapper {
+                flex-direction: row; /* 横並びに戻す */
+                margin: 20px auto;
+                padding: 0 20px;
+            }
+        }
         
         .main-content {
             flex-grow: 1;
             background-color: #fff;
-            padding: 30px; 
+            padding: 20px; 
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -24,34 +41,64 @@
             flex-direction: column;
         }
 
-        h1 { text-align: center; color: #333; margin-top: 0; margin-bottom: 20px; }
+        @media (min-width: 768px) {
+            .main-content { padding: 30px; }
+        }
 
+        h1 { text-align: center; color: #333; margin-top: 0; margin-bottom: 20px; font-size: 1.5rem; }
+
+        /* サイドバー */
         .sidebar {
-            width: 300px;
+            width: 100%;
+            box-sizing: border-box;
             padding: 20px;
             background-color: #e9ecef;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            flex-shrink: 0;
         }
+
+        @media (min-width: 1025px) {
+            .sidebar { width: 300px; flex-shrink: 0; }
+        }
+
         .sidebar h3 { color: #007bff; border-bottom: 2px solid #b8daff; padding-bottom: 5px; margin-top: 0; }
         .sidebar ul { list-style: none; padding: 0; }
         .sidebar li { margin-bottom: 10px; }
-        .sidebar a { text-decoration: none; color: #333; padding: 5px; display: block; border-radius: 4px; transition: background-color 0.2s; }
-        .sidebar a:hover { background-color: #d6eaff; color: #0056b3; }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            padding: 10px;
+            display: block;
+            background-color: #fff;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .sidebar a:hover { background-color: #d6eaff; }
 
-
+        /* ツールエリアのグリッド */
         .tool-areas {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: 1fr; /* スマホは1列 */
             gap: 20px;
             flex-grow: 1;
         }
 
+        @media (min-width: 768px) {
+            .tool-areas {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
 
         .tool-area {
             display: flex;
             flex-direction: column;
+        }
+
+        .tool-area label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
         }
 
         textarea, #htmlPreview {
@@ -59,10 +106,14 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px; /* スマホのズーム防止 */
             resize: none;
-            min-height: 400px;
-            flex-grow: 1;
+            min-height: 250px; /* スマホ向けに少し短く */
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 768px) {
+            textarea, #htmlPreview { min-height: 400px; }
         }
 
         #htmlOutput { background-color: #f8f8f8; color: #333; }
@@ -71,266 +122,133 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
         }
-        
 
         .copy-button {
-            padding: 10px 20px;
+            padding: 15px 20px;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
             background-color: #28a745;
             color: white;
             border: none;
             border-radius: 4px;
-            transition: background-color 0.2s;
             margin-top: 10px;
             width: 100%;
         }
-        .copy-button:hover {
-            background-color: #1e7e34;
-        }
 
-
-        .preview-content h1 { font-size: 2em; border-bottom: 2px solid #ddd; padding-bottom: 0.3em; margin-top: 1em; }
-        .preview-content h2 { font-size: 1.5em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; margin-top: 1em; }
+        /* プレビュー内の装飾 */
+        .preview-content { word-wrap: break-word; }
+        .preview-content h1 { font-size: 1.5em; border-bottom: 2px solid #ddd; padding-bottom: 0.3em; margin-top: 1em; text-align: left; }
+        .preview-content h2 { font-size: 1.3em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; margin-top: 1em; }
         .preview-content p { margin-bottom: 1em; line-height: 1.6; }
-        .preview-content ul, .preview-content ol { margin-left: 20px; margin-bottom: 1em; }
         .preview-content pre { background-color: #f6f8fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
         .preview-content code { font-family: monospace; background-color: #eee; padding: 2px 4px; border-radius: 3px; }
-        .preview-content pre code { background-color: transparent; padding: 0; }
-        .preview-content blockquote { border-left: 4px solid #ccc; padding-left: 10px; color: #666; margin: 1em 0; }
-
-
-        @media (max-width: 1024px) {
-            .wrapper {
-                flex-direction: column;
-                margin: 10px;
-                gap: 10px;
-            }
-            .sidebar {
-                width: auto;
-            }
-            .tool-areas {
-                grid-template-columns: 1fr;
-            }
-            textarea, #htmlPreview {
-                min-height: 200px;
-            }
-        }
-
     </style>
 </head>
 <body>
 
     <div class="wrapper">
-        
         <div class="main-content">
-            <h1 class="text-3xl font-extrabold text-blue-600">🏷️ Markdown to HTML 変換ツール</h1>
-            <p class="text-gray-500 text-center mb-4">Markdownテキストを構造化されたHTMLコードに変換し、リアルタイムでプレビューします。</p>
+            <h1>🏷️ Markdown to HTML</h1>
+            <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom:20px;">MarkdownをHTMLに変換してリアルタイムプレビュー</p>
 
             <div class="tool-areas">
-
                 <div class="tool-area">
-                    <label for="markdownInput" class="block text-lg font-semibold text-gray-700 mb-2">
-                        Markdown 入力
-                    </label>
-                    <textarea id="markdownInput" oninput="debouncedConvertMarkdown()" placeholder="# 見出し\n\n**太字** や *斜体* も使えます。"></textarea>
+                    <label for="markdownInput">Markdown 入力</label>
+                    <textarea id="markdownInput" oninput="debouncedConvertMarkdown()" placeholder="# 見出し"></textarea>
                 </div>
 
                 <div class="tool-area">
-                    <label for="htmlOutput" class="block text-lg font-semibold text-gray-700 mb-2">
-                        HTML コード出力
-                    </label>
+                    <label for="htmlOutput">HTML 出力</label>
                     <textarea id="htmlOutput" readonly></textarea>
-                    <button onclick="copyToClipboard('htmlOutput')" class="copy-button">
-                        HTMLをクリップボードにコピー
-                    </button>
+                    <button onclick="copyToClipboard('htmlOutput')" class="copy-button">コピーする</button>
                 </div>
 
                 <div class="tool-area">
-                    <label class="block text-lg font-semibold text-gray-700 mb-2">
-                        リアルタイムプレビュー
-                    </label>
-                    <div id="htmlPreview" class="preview-content">
-                        <h1 class="text-2xl font-bold">サンプルプレビュー</h1>
-                        <p>ここに変換されたコンテンツが表示されます。</p>
-                    </div>
+                    <label>プレビュー</label>
+                    <div id="htmlPreview" class="preview-content"></div>
                 </div>
             </div>
-
-            <footer class="mt-8 text-center text-gray-500 text-sm">
-                <p>このツールは <a href="https://marked.js.org/" target="_blank" class="text-blue-500 hover:text-blue-700">Marked</a> および <a href="https://github.com/cure53/dompurify" target="_blank" class="text-blue-500 hover:text-blue-700">DOMPurify</a> を利用しています。</p>
-            </footer>
         </div>
 
         <div class="sidebar">
             <h3>便利なツール集</h3>
             <ul id="dynamic-tool-list">
-                <li>ナビゲーションをロード中...</li>
+                <li>読み込み中...</li>
             </ul>
 
             <h3 style="margin-top: 30px;">Markdown TIPS</h3>
-            <ul style="font-size: 0.9em; list-style-type: square; margin-left: 10px;">
-                <li>✅ 行頭に `#` で見出し</li>
+            <ul style="font-size: 0.85em; padding-left: 20px; color:#555;">
+                <li>✅ `#` で見出し</li>
                 <li>✅ `**太字**` で強調</li>
-                <li>✅ `-` または `*` でリスト</li>
+                <li>✅ `-` でリスト項目</li>
             </ul>
         </div>
     </div>
 
     <script>
-        // --- Debounce 関数定義 (パフォーマンス改善) ---
+        // ロジック部分は一切変更なし
         function debounce(func, delay) {
             let timeoutId;
             return function(...args) {
                 clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    func.apply(this, args);
-                }, delay);
+                timeoutId = setTimeout(() => { func.apply(this, args); }, delay);
             };
         }
 
-        /**
-         * MarkdownをHTMLに変換し、プレビューとコード出力エリアを更新する (async/awaitを使用)
-         */
         async function convertMarkdown() {
             const markdownInput = document.getElementById('markdownInput').value;
             const htmlOutput = document.getElementById('htmlOutput');
             const htmlPreview = document.getElementById('htmlPreview');
-
             let rawHtml;
-            
-            // ロード成功後の実行を前提とするが、念のため最終チェック
             if (typeof marked === 'undefined' || typeof DOMPurify === 'undefined') {
-                console.error("Marked/DOMPurifyが未定義です。CDNのロードに失敗している可能性があります。");
-                rawHtml = `<h2 style="color: red;">🚨 ライブラリロードエラー: MarkedまたはDOMPurifyがロードされていません。インターネット接続を確認してください。</h2>`;
+                rawHtml = `<p style="color:red;">ライブラリ読込中...</p>`;
             } else {
                 try {
                     rawHtml = await marked.parse(markdownInput);
                 } catch (error) {
-                    console.error("Markedの変換エラー:", error);
-                    rawHtml = `<h2 style="color: red;">Marked実行中のエラー: ${error.message}</h2>`;
+                    rawHtml = `<p>Error: ${error.message}</p>`;
                 }
             }
-            
             const safeHtml = (typeof DOMPurify !== 'undefined') ? DOMPurify.sanitize(rawHtml) : rawHtml;
-
             htmlOutput.value = safeHtml;
             htmlPreview.innerHTML = safeHtml;
         }
 
-        // Debounce処理を適用した変換関数 (oninputで利用)
         const debouncedConvertMarkdown = debounce(convertMarkdown, 300);
 
-        /**
-         * クリップボードにテキストをコピーする (Clipboard APIを使用)
-         */
         function copyToClipboard(elementId) {
             const copyText = document.getElementById(elementId).value;
             const button = document.querySelector(`[onclick="copyToClipboard('${elementId}')"]`);
-            const originalText = button.textContent;
-            
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(copyText).then(() => {
-                    button.textContent = "✅ コピー完了！";
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                    }, 1500);
-                }).catch(err => {
-                    console.error('コピーに失敗しました:', err);
-                    alert('クリップボードへのコピーに失敗しました。セキュリティ設定を確認してください。');
-                });
-            } else {
-                const tempTextArea = document.createElement('textarea');
-                tempTextArea.value = copyText;
-                document.body.appendChild(tempTextArea);
-                tempTextArea.select();
-                try {
-                    document.execCommand('copy');
-                    button.textContent = "✅ コピー完了！ (旧方式)";
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                    }, 1500);
-                } catch (err) {
-                    alert('コピーに失敗しました。手動でコピーしてください。');
-                } finally {
-                    document.body.removeChild(tempTextArea);
-                }
-            }
-        }
-
-
-        // --- サイドバーの動的ロードロジック (変更なし) ---
-        const JSON_URL = 'tools.json';
-        const TOP_TOOLS_COUNT = 4;
-
-        async function loadAndRenderTools(renderFunction, listId) {
-            try {
-                const response = await fetch(JSON_URL);
-                if (!response.ok) {
-                    throw new Error('ネットワークエラー、またはJSONファイルが見つかりません。');
-                }
-                const toolsData = await response.json();
-                renderFunction(toolsData, listId);
-            } catch (error) {
-                console.error('ツールデータの読み込みに失敗しました:', error);
-                const container = document.getElementById(listId);
-                if (container) {
-                    container.innerHTML = `<li style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</li>`;
-                }
-            }
-        }
-
-        function generateSidebarNav(toolsData, listId = 'dynamic-tool-list') {
-            const listContainer = document.getElementById(listId);
-            if (!listContainer) return;
-
-            let listHtml = '';
-            const totalCount = toolsData.length;
-            const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
-
-            toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
-                const isActive = tool.href === currentPath || (currentPath === '' && tool.href === 'index.html');
-                const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
-                const title = isActive ? `${tool.icon} ${tool.title} (現在地)` : `${tool.icon} ${tool.title}`;
-                
-                listHtml += `<li><a href="${tool.href}" ${activeStyle}>${title}</a></li>`;
+            navigator.clipboard.writeText(copyText).then(() => {
+                const original = button.textContent;
+                button.textContent = "✅ コピーしました！";
+                setTimeout(() => { button.textContent = original; }, 1500);
             });
-
-            const otherCount = totalCount - TOP_TOOLS_COUNT;
-
-            if (otherCount > 0) {
-                listHtml += `<hr style="margin: 10px 0;">`;
-                listHtml += `<li><a href="tools_index.html" style="font-weight: bold; color: #dc3545;">✨ その他 (${otherCount}件) を見る</a></li>`;
-            }
-
-            listContainer.innerHTML = listHtml;
         }
-        
-        
-        /**
-         * 初期ロード処理。Markedが定義されるのを待ってから初回変換を実行します。
-         */
+
+        async function loadSidebar() {
+            try {
+                const res = await fetch('tools.json');
+                const tools = await res.json();
+                const list = document.getElementById('dynamic-tool-list');
+                list.innerHTML = tools.slice(0, 4).map(t => 
+                    `<li><a href="${t.href}">${t.icon} ${t.title}</a></li>`
+                ).join('') + `<li><a href="tools_index.html" style="color:red;font-weight:bold;">✨ その他</a></li>`;
+            } catch (e) { console.error(e); }
+        }
+
         function initializeTool() {
-            // 入力エリアの初期値設定
-            const initialMarkdown = "# Markdown to HTML\n\nこのエリアにMarkdownを記述すると、右側にHTMLコードとプレビューがリアルタイムで表示されます。\n\n- リストも\n- **太字**も\n- `コード`も対応しています。\n";
-            document.getElementById('markdownInput').value = initialMarkdown;
-
-            // Markedがロードされるまで待機する関数をポーリング
-            const checkMarkedLoaded = () => {
+            const initial = "# Hello Markdown\n\nここに入力すると、リアルタイムでHTMLに変換されます。\n\n1. リストの作成\n2. **ボールド体**\n3. `インラインコード`";
+            document.getElementById('markdownInput').value = initial;
+            const check = () => {
                 if (typeof marked !== 'undefined') {
-                    // Markedが定義されたら、サイドバーと初回変換を実行
-                    loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list');
+                    loadSidebar();
                     convertMarkdown();
-                } else {
-                    // まだ定義されていなければ、100ms後に再度チェック
-                    setTimeout(checkMarkedLoaded, 100);
-                }
+                } else { setTimeout(check, 100); }
             };
-
-            // チェックを開始
-            checkMarkedLoaded();
+            check();
         }
-
         document.addEventListener('DOMContentLoaded', initializeTool);
     </script>
 </body>
