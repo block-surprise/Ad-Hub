@@ -2,19 +2,11 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>全ツール一覧 (便利ツールボックス)</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
     <meta name="google-adsense-account" content="ca-pub-3571574988222927">
     <style>
-        body { 
-            margin: 0; 
-            background-color: #f4f7f6; 
-            font-family: Arial, sans-serif; 
-            color: #333; 
-            /* スマホ時にナビバーで隠れないよう余白を追加 */
-            padding-bottom: 80px; 
-        }
+        body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
 
         .container { 
             max-width: 900px; 
@@ -27,7 +19,7 @@
 
         h1 { 
             text-align: center; 
-            color: #0077cc; 
+            color: #007bff; 
             border-bottom: 3px solid #b8daff; 
             padding-bottom: 10px; 
             margin-bottom: 30px; 
@@ -53,6 +45,7 @@
             display: flex; 
             flex-direction: column;
             height: 100%;
+            /* スマホではみ出さないための追加 */
             box-sizing: border-box;
         }
 
@@ -63,7 +56,7 @@
 
         .tool-card h2 {
             margin-top: 0;
-            color: #0077cc;
+            color: #007bff;
             font-size: 1.4em;
             margin-bottom: 10px;
         }
@@ -87,31 +80,25 @@
             text-align: center;
         }
 
-        /* ナビゲーションバーが読み込まれる場所への設定 */
-        #nav-placeholder {
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            z-index: 2147483647 !important; /* 最前面 */
-            background-color: #ffffff;      /* 透け防止 */
+        #tool-list-container p {
+            text-align: center;
+            grid-column: 1 / -1; 
         }
 
-        /* --- スマホ対応レスポンシブ --- */
+        /* パソコンでの状態は維持しつつ、スマホ対応 */
         @media (max-width: 950px) {
             .container {
                 margin: 20px 10px; 
                 padding: 20px;
             }
-            h1 { font-size: 1.5rem; }
         }
 
+        /* 画面がさらに狭いスマホ用の追加（横揺れ防止） */
         @media (max-width: 480px) {
-            /* 1カラムにしてカードを押しやすくする */
             .tool-grid {
                 grid-template-columns: 1fr;
             }
-            .tool-card {
+            .container {
                 padding: 15px;
             }
         }
@@ -127,11 +114,9 @@
         </div>
         
         <p style="text-align: center; margin-top: 40px;">
-            <a href="index.html" style="color: #0077cc;">📝 メインの文字数カウントへ戻る</a>
+            <a href="index.html" style="color: #007bff;">📝 メインの文字数カウントへ戻る</a>
         </p>
     </div>
-
-    <div id="nav-placeholder"></div>
 
     <script>
         const JSON_URL = 'tools.json';
@@ -151,6 +136,7 @@
                 
                 toolsData.forEach(tool => {
                     const linkHref = tool.href.endsWith('.html') ? tool.href : tool.href + '.html';
+
                     const cardHtml = `
                         <a href="${linkHref}" class="tool-card-link">
                             <div class="tool-card">
@@ -165,16 +151,9 @@
 
             } catch (error) {
                 console.error('ツールデータの読み込みに失敗しました:', error);
-                container.innerHTML = `<p style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。GitHub Pagesなどにアップロードしてください。</p>`;
+                container.innerHTML = `<p style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</p>`;
             }
         }
-
-        // nav.htmlの読み込み（他ページと共通の仕組み）
-        fetch("nav.html")
-          .then(res => res.text())
-          .then(html => {
-            document.getElementById("nav-placeholder").innerHTML = html;
-          });
 
         document.addEventListener('DOMContentLoaded', loadAndRenderTools);
     </script>
