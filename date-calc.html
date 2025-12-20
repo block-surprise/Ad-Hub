@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>日付計算ツール | DateCalc</title>
 
-  <!-- AdSense（審査OK：headで読み込み） -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
 
   <style>
@@ -31,7 +30,10 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--fg);
-      padding: 2rem;
+      padding: 1rem; /* スマホ向けに少し狭める */
+    }
+    @media (min-width: 768px) {
+        body { padding: 2rem; }
     }
     h1 {
       font-size: 1.6rem;
@@ -48,15 +50,23 @@
     /* レイアウト */
     .layout {
       display: grid;
-      grid-template-columns: 240px minmax(0, 640px) 240px;
-      gap: 2rem;
+      grid-template-columns: 1fr; /* デフォルト（スマホ）は1列 */
+      gap: 1.5rem;
       align-items: start;
       max-width: 1200px;
       margin: 0 auto;
     }
+
+    @media (min-width: 980px) {
+      .layout {
+        grid-template-columns: 240px minmax(0, 640px) 240px;
+      }
+    }
+
     .sidebar {
       font-size: 0.95rem;
       opacity: 0.95;
+      min-width: 0; /* これがないとはみ出しの原因になります */
     }
     .sidebar .block {
       background: var(--card);
@@ -84,7 +94,7 @@
       margin-top: 1rem;
     }
     input, select, button {
-      font-size: 1rem;
+      font-size: 16px; /* スマホズーム防止のため16px推奨 */
       padding: 0.5rem;
       margin-top: 0.3rem;
       width: 100%;
@@ -97,6 +107,7 @@
       margin-top: 1.2rem;
       cursor: pointer;
       border-radius: 4px;
+      font-weight: bold;
     }
     button:hover { filter: brightness(1.05); }
     .hint {
@@ -107,16 +118,25 @@
     .result {
       margin-top: 1.6rem;
       font-size: 1.1rem;
+      padding: 1rem;
+      background: var(--bg);
+      border-radius: 4px;
     }
 
-    /* 広告側 */
+    /* 広告側：はみ出し防止のキモ */
     .ad-wrap {
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden; /* コンテナからはみ出す広告をカット */
       text-align: center;
     }
-    .ad-note {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-top: 0.5rem;
+    
+    /* アドセンスユニット自体にはみ出し防止をかける */
+    .adsbygoogle {
+        display: block;
+        width: 100% !important;
+        height: auto !important;
+        overflow: hidden !important;
     }
 
     /* フッター */
@@ -127,12 +147,8 @@
       color: var(--muted);
     }
 
-    /* レスポンシブ */
+    /* レスポンシブ並び替え */
     @media (max-width: 980px) {
-      .layout {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
       .sidebar { order: 2; }
       .sidebar.right { order: 3; }
       .card { order: 1; }
@@ -141,77 +157,41 @@
 </head>
 <body>
   <div class="layout">
-    <!-- 左：文章（使い方・豆知識・詩的な一文・注意事項） -->
     <aside class="sidebar left">
       <div class="block">
         <h3>このツールについて</h3>
         <p>
-          日付にまつわる「ちょっと知りたい」を、静かに解いていくための小さな道具です。<br>
-          ○日後はいつか、ふたつの日付の間に何日あるのか。余計なものは置かず、必要な答えだけを。
+          日付にまつわる「ちょっと知りたい」を解くための小さな道具です。
         </p>
-      </div>
-      <div class="block">
-        <h3>使い方</h3>
-        <ul>
-          <li>開始日を選びます。</li>
-          <li>日数を入力します（例：30 または -10）。</li>
-          <li>「計算する」をクリックします。</li>
-        </ul>
-        <p class="hint">「日数差を計算」モードでは、開始日と終了日を選んでください。</p>
       </div>
       <div class="block">
         <h3>豆知識</h3>
         <ul>
-          <li>うるう年は原則4年ごと。西暦が400の倍数はうるう年、100の倍数は平年。</li>
-          <li>1日は 86,400 秒。日数差はミリ秒差を日秒で割って算出しています。</li>
-          <li>月をまたぐ日付加算は、JSのDateが自動で繰り上げ・繰り下げします。</li>
+          <li>1日は 86,400 秒です。</li>
+          <li>JSのDateは月跨ぎを自動計算します。</li>
         </ul>
-      </div>
-      <div class="block">
-        <h3>Tips</h3>
-        <ul>
-          <li>負の値で「何日前」も計算できます（例：-7）。</li>
-          <li>結果は曜日付きで表示。スケジュールの見通しに便利です。</li>
-          <li>祝日表示やコピー機能は、今後のアップデートで追加予定。</li>
-        </ul>
-      </div>
-      <div class="block">
-        <p style="font-style: italic; opacity:0.85;">
-          時は静かに流れます。<br>
-          いま、この瞬間から数えられる未来も過去も、ほどよい距離で。
-        </p>
-      </div>
-      <div class="block">
-        <h3>注意事項</h3>
-        <p>
-          計算はクライアント端末のタイムゾーンに依存します。<br>
-          厳密な会計・法務用途では、公式カレンダーや専門システムでの確認をおすすめします。
-        </p>
       </div>
     </aside>
 
-    <!-- 中央：本体カード -->
     <main class="card" aria-label="日付計算ツール">
       <h1>日付計算ツール</h1>
       <p class="description">
-        「○日後はいつ？」「この2つの日付の間は何日？」そんな疑問に、すぐ答えを返します。<br>
-        必要なことだけ、静かに、正確に。あなたの時間の感覚を少し整えるために。
+        「○日後はいつ？」「日数差は？」を、正確に表示します。
       </p>
 
       <label>モード選択:
-        <select id="mode" aria-label="モード選択">
+        <select id="mode">
           <option value="add">○日後を計算</option>
           <option value="diff">日数差を計算</option>
         </select>
       </label>
-      <p class="hint">日付を足すか、差を調べるかを選んでください。</p>
 
       <div id="input-add">
         <label>開始日:
           <input type="date" id="startDate" />
         </label>
         <label>日数（±）:
-          <input type="number" id="days" placeholder="例: 30 または -10" />
+          <input type="number" id="days" placeholder="例: 30" />
         </label>
       </div>
 
@@ -229,19 +209,18 @@
       <div class="result" id="result" aria-live="polite"></div>
     </main>
 
-    <!-- 右：広告（審査対応） -->
     <aside class="sidebar right">
       <div class="block ad-wrap">
-<!-- 日付計算ツール -->
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-3571574988222927"
-     data-ad-slot="2823043802"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+        <div class="ad-note">Advertisement</div>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-3571574988222927"
+             data-ad-slot="2823043802"
+             data-ad-format="auto"
+             data-full-width-responsive="false"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
       </div>
     </aside>
   </div>
@@ -270,23 +249,22 @@
         const start = document.getElementById('startDate').value;
         const days = parseInt(document.getElementById('days').value, 10);
         if (!start || isNaN(days)) {
-          resultDiv.textContent = '開始日と日数を入力してください。';
+          resultDiv.textContent = '値を入力してください。';
           return;
         }
         const date = new Date(start);
         date.setDate(date.getDate() + days);
         const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-        const formatted = date.toLocaleDateString('ja-JP', options);
-        resultDiv.innerHTML = `<strong>${days}日後:</strong><br>${formatted}`;
+        resultDiv.innerHTML = `<strong>${days}日後:</strong><br>${date.toLocaleDateString('ja-JP', options)}`;
       } else {
         const fromVal = document.getElementById('fromDate').value;
         const toVal = document.getElementById('toDate').value;
-        const from = new Date(fromVal);
-        const to = new Date(toVal);
-        if (!fromVal || !toVal || isNaN(from) || isNaN(to)) {
-          resultDiv.textContent = '両方の日付を入力してください。';
+        if (!fromVal || !toVal) {
+          resultDiv.textContent = '日付を選択してください。';
           return;
         }
+        const from = new Date(fromVal);
+        const to = new Date(toVal);
         const diff = Math.floor((to - from) / (1000 * 60 * 60 * 24));
         resultDiv.innerHTML = `<strong>日数差:</strong><br>${diff}日間`;
       }
