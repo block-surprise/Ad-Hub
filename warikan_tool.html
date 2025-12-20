@@ -2,57 +2,80 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>割り勘計算ツール</title>
-     <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
+
+    <meta name="google-adsense-account" content="ca-pub-3571574988222927">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
+
     <style>
         body { 
             margin: 0; 
             background-color: #f4f7f6;
             font-family: Arial, sans-serif; 
+            line-height: 1.6;
         }
         .wrapper {
             max-width: 1200px;
-            margin: 20px auto;
+            margin: 0 auto;
+            padding: 10px;
             display: flex;
+            flex-direction: column; /* スマホでは縦並び */
             gap: 20px;
+        }
+
+        /* パソコン（768px以上）の設定 */
+        @media (min-width: 768px) {
+            .wrapper {
+                flex-direction: row; /* 横並びに戻す */
+                margin: 20px auto;
+                padding: 20px;
+            }
         }
         
         .main-content {
             flex-grow: 1;
             background-color: #fff;
-            padding: 30px; 
+            padding: 20px; 
             border: 1px solid #ddd;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        h1 { text-align: center; color: #333; }
+
+        @media (min-width: 768px) {
+            .main-content { padding: 30px; }
+        }
+
+        h1 { text-align: center; color: #333; font-size: 1.5rem; }
 
         .input-group {
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 4px;
             background-color: #f8f8f8;
         }
         .input-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
         }
+
         input[type="number"], select { 
-            padding: 10px; 
-            font-size: 16px; 
+            padding: 12px; 
+            font-size: 16px; /* スマホのズーム防止 */
             width: 100%;
             box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+
         button { 
             display: block;
             width: 100%;
-            padding: 12px; 
+            padding: 15px; 
             font-size: 18px; 
+            font-weight: bold;
             cursor: pointer; 
             background-color: #ffc107; 
             color: #333;
@@ -61,9 +84,7 @@
             margin-top: 20px;
             transition: background-color 0.2s;
         }
-        button:hover {
-            background-color: #e0a800;
-        }
+        button:hover { background-color: #e0a800; }
 
         .results {
             padding: 20px;
@@ -71,81 +92,68 @@
             border-radius: 4px;
             background-color: #fff9e6;
             text-align: center;
-            margin-top: 30px;
+            margin-top: 25px;
         }
-        .results h2 {
-            color: #333;
-            margin-top: 0;
-        }
-        .results p {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #dc3545; 
+        .results p { font-size: 1.1em; font-weight: bold; margin: 10px 0; }
+        
+        #per-person-amount {
+            font-size: 2rem;
+            color: #007bff; 
+            display: block;
             margin: 10px 0;
         }
-        #per-person-amount {
-            font-size: 2.5em;
-            color: #007bff; 
-        }
-        #error-message {
-            color: red;
-            font-weight: bold;
-        }
+        #error-message { color: red; font-weight: bold; margin-bottom: 10px; }
         
+        /* サイドバー */
         .sidebar {
-            width: 300px;
+            width: 100%;
+            box-sizing: border-box;
             padding: 20px;
             background-color: #e9ecef;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
+        @media (min-width: 768px) {
+            .sidebar { width: 300px; }
+        }
+
         .sidebar h3 {
             color: #007bff;
             border-bottom: 2px solid #b8daff;
             padding-bottom: 5px;
             margin-top: 0;
         }
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-        }
-        .sidebar li {
-            margin-bottom: 10px;
-        }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar li { margin-bottom: 10px; }
         .sidebar a {
             text-decoration: none;
             color: #333;
-            padding: 5px;
+            padding: 12px;
             display: block;
+            background-color: #fff;
             border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-        .sidebar a:hover {
-            background-color: #d6eaff;
-            color: #0056b3;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        
         <div class="main-content">
             <h1>🧮 割り勘計算ツール</h1>
 
             <div class="input-group">
                 <label for="total-amount">合計金額 (円):</label>
-                <input type="number" id="total-amount" min="1" placeholder="例: 12500">
+                <input type="number" id="total-amount" inputmode="numeric" min="1" placeholder="例: 12500">
             </div>
 
             <div class="input-group">
                 <label for="people-count">参加人数 (人):</label>
-                <input type="number" id="people-count" min="2" placeholder="例: 4">
+                <input type="number" id="people-count" inputmode="numeric" min="2" placeholder="例: 4">
             </div>
 
             <div class="input-group">
                 <label for="rounding-method">端数処理:</label>
                 <select id="rounding-method">
-                    <option value="round">四捨五入 (一般的な割り勘)</option>
+                    <option value="round">四捨五入 (一般的)</option>
                     <option value="ceil">切り上げ (幹事有利)</option>
                     <option value="floor">切り捨て (参加者有利)</option>
                 </select>
@@ -158,150 +166,73 @@
                 <div id="error-message"></div>
                 <p>一人当たりの支払額:</p>
                 <div id="per-person-amount">0 円</div>
-                <hr style="width: 50%;">
-                <p>幹事調整額 (過不足): <span id="adjustment-amount">0 円</span></p>
+                <hr style="width: 50%; border: 0; border-top: 1px solid #ccc;">
+                <p>幹事調整額: <span id="adjustment-amount">0 円</span></p>
             </div>
         </div>
         
         <div class="sidebar">
             <h3>便利なツール集</h3>
             <ul id="dynamic-tool-list">
-                <li>ナビゲーションをロード中...</li>
-            </ul></ul>
+                <li>読み込み中...</li>
+            </ul>
 
             <h3 style="margin-top: 30px;">割り勘のヒント</h3>
-            <ul style="font-size: 0.9em; list-style-type: square; margin-left: 20px;">
-                <li>端数切り上げは、幹事さんの立て替えが少なく済みます。</li>
-                <li>計算結果をスマホにコピーしてすぐに共有しましょう。</li>
-                <li>基本は10円単位や100円単位で丸めるとスムーズです。</li>
+            <ul style="font-size: 0.9em; padding-left: 20px;">
+                <li>端数切り上げは、幹事の立て替え負担を減らせます。</li>
+                <li>「計算する」ボタンはEnterキーでも反応します。</li>
             </ul>
         </div>
-        
     </div>
 
     <script>
         function calculateWarikan() {
-            const totalAmount = parseInt(document.getElementById('total-amount').value);
-            const peopleCount = parseInt(document.getElementById('people-count').value);
+            const total = parseInt(document.getElementById('total-amount').value);
+            const people = parseInt(document.getElementById('people-count').value);
             const method = document.getElementById('rounding-method').value;
             
-            const perPersonElement = document.getElementById('per-person-amount');
-            const adjustmentElement = document.getElementById('adjustment-amount');
-            const errorElement = document.getElementById('error-message');
+            const perPersonDisplay = document.getElementById('per-person-amount');
+            const adjDisplay = document.getElementById('adjustment-amount');
+            const errorDisplay = document.getElementById('error-message');
 
-            errorElement.textContent = '';
-            perPersonElement.textContent = '0 円';
-            adjustmentElement.textContent = '0 円';
+            errorDisplay.textContent = '';
 
-            if (isNaN(totalAmount) || totalAmount <= 0) {
-                errorElement.textContent = '合計金額を正しく入力してください。';
-                return;
-            }
-            if (isNaN(peopleCount) || peopleCount < 2) {
-                errorElement.textContent = '参加人数は2人以上で入力してください。';
+            if (!total || total <= 0 || !people || people < 2) {
+                errorDisplay.textContent = '金額と人数（2人以上）を正しく入力してください。';
                 return;
             }
 
-            const basicAmount = totalAmount / peopleCount;
-            let finalPerPerson = 0;
+            const basic = total / people;
+            let final = 0;
 
-            switch (method) {
-                case 'round':
-                    finalPerPerson = Math.round(basicAmount / 10) * 10; 
-                    break;
-                case 'ceil':
-                    finalPerPerson = Math.ceil(basicAmount / 10) * 10;
-                    break;
-                case 'floor':
-                    finalPerPerson = Math.floor(basicAmount / 10) * 10;
-                    break;
-                default:
-                    finalPerPerson = Math.round(basicAmount);
-            }
+            if (method === 'round') final = Math.round(basic / 10) * 10;
+            else if (method === 'ceil') final = Math.ceil(basic / 10) * 10;
+            else final = Math.floor(basic / 10) * 10;
             
-            const collectedAmount = finalPerPerson * peopleCount;
-            const adjustment = collectedAmount - totalAmount;
+            const adj = (final * people) - total;
 
-            perPersonElement.textContent = `${finalPerPerson.toLocaleString()} 円`;
-            adjustmentElement.textContent = `${adjustment.toLocaleString()} 円`;
-
-            if (adjustment > 0) {
-                adjustmentElement.style.color = 'blue'; 
-            } else if (adjustment < 0) {
-                adjustmentElement.style.color = 'red'; 
-            } else {
-                adjustmentElement.style.color = '#333'; 
-            }
+            perPersonDisplay.textContent = `${final.toLocaleString()} 円`;
+            adjDisplay.textContent = `${adj.toLocaleString()} 円`;
+            adjDisplay.style.color = adj > 0 ? 'blue' : (adj < 0 ? 'red' : '#333');
         }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('input[type="number"]').forEach(input => {
-                input.addEventListener('keydown', (event) => {
-                    if (event.key === 'Enter') {
-                        event.preventDefault(); 
-                        calculateWarikan();
-                    }
-                });
-            });
-        });
 
-        const JSON_URL = 'tools.json';
-        const TOP_TOOLS_COUNT = 4; 
-
-        /**
-
-         */
-        async function loadAndRenderTools(renderFunction, listId) {
+        // サイドバー読み込み
+        async function loadSidebar() {
             try {
-                const response = await fetch(JSON_URL);
-                if (!response.ok) {
-                    throw new Error('ネットワークエラー、またはJSONファイルが見つかりません。');
-                }
-                const toolsData = await response.json();
-                renderFunction(toolsData, listId);
-            } catch (error) {
-                console.error('ツールデータの読み込みに失敗しました:', error);
-                const container = document.getElementById(listId);
-                if (container) {
-                    container.innerHTML = `<li style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</li>`;
-                }
+                const res = await fetch('tools.json');
+                const tools = await res.json();
+                document.getElementById('dynamic-tool-list').innerHTML = tools.slice(0, 4).map(t => 
+                    `<li><a href="${t.href}">${t.icon} ${t.title}</a></li>`
+                ).join('') + `<li><a href="tools_index.html" style="color:#dc3545; font-weight:bold;">✨ その他を見る</a></li>`;
+            } catch (e) {
+                document.getElementById('dynamic-tool-list').innerHTML = '<li>読み込み失敗</li>';
             }
         }
-
-  
-        function generateSidebarNav(toolsData, listId = 'dynamic-tool-list') {
-            const listContainer = document.getElementById(listId);
-            if (!listContainer) return;
-
-            let listHtml = '';
-            const totalCount = toolsData.length;
-
-            const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
-
-
-            toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
-                const isActive = tool.href === currentPath || (currentPath === '' && tool.href === 'index.html');
-                const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
-                const title = isActive ? `${tool.icon} ${tool.title} (現在地)` : `${tool.icon} ${tool.title}`;
-                
-                listHtml += `<li><a href="${tool.href}" ${activeStyle}>${title}</a></li>`;
-            });
-
-
-            const otherCount = totalCount - TOP_TOOLS_COUNT;
-
-            if (otherCount > 0) {
-                listHtml += `<hr style="margin: 10px 0;">`;
-                listHtml += `<li><a href="tools_index.html" style="font-weight: bold; color: #dc3545;">✨ その他 (${otherCount}件) を見る</a></li>`;
-            }
-
-            listContainer.innerHTML = listHtml;
-        }
-
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list'); 
-            updateCounts();
+        window.addEventListener('DOMContentLoaded', loadSidebar);
+        
+        // Enterキー対応
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') calculateWarikan();
         });
     </script>
 </body>
