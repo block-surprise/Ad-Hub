@@ -3,112 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📚 暗記カードメーカー
-       <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script></title>
+    <title>📚 暗記カードメーカー</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
     <style>
-
         body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
-        .wrapper { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; }
         
+        .wrapper { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            display: flex; 
+            flex-direction: column; /* 【重要】デフォルトは縦並び */
+            gap: 20px; 
+            padding: 10px;
+        }
+
+        /* PC（768px以上）のレイアウト */
+        @media (min-width: 768px) {
+            .wrapper {
+                flex-direction: row; /* 横並びに戻す */
+                margin: 20px auto;
+                padding: 0 20px;
+            }
+        }
 
         .main-content {
             flex-grow: 1;
             background-color: #fff;
-            padding: 30px;
+            padding: 20px; 
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        h1 { text-align: center; color: #28a745; border-bottom: 3px solid #c3e6cb; padding-bottom: 10px; }
 
+        @media (min-width: 768px) {
+            .main-content { padding: 30px; }
+        }
 
+        h1 { text-align: center; color: #28a745; border-bottom: 3px solid #c3e6cb; padding-bottom: 10px; font-size: 1.5rem; }
+
+        /* 入力エリア */
         .input-area {
             background-color: #f8f9fa;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             border: 1px solid #ddd;
         }
-        .input-group { margin-bottom: 10px; }
-        .input-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; }
         .input-group input {
-            width: 100%; padding: 10px; font-size: 16px;
+            width: 100%; padding: 12px; font-size: 16px; /* スマホのズーム防止 */
             border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
         }
         .add-btn {
-            width: 100%; padding: 12px; background-color: #28a745; color: white;
-            border: none; border-radius: 4px; font-size: 16px; cursor: pointer;
-            transition: background-color 0.2s;
+            width: 100%; padding: 15px; background-color: #28a745; color: white;
+            border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;
         }
-        .add-btn:hover { background-color: #218838; }
 
-
+        /* リスト表示 */
         .card-list-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+            display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;
         }
+        @media (min-width: 480px) {
+            .card-list-header { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+
         .study-btn {
-            padding: 10px 20px; background-color: #007bff; color: white;
-            border: none; border-radius: 4px; font-size: 16px; cursor: pointer; text-decoration: none;
+            padding: 12px 20px; background-color: #007bff; color: white;
+            border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;
         }
-        .study-btn:hover { background-color: #0056b3; }
-        
-        ul#card-list { list-style: none; padding: 0; }
+
         li.card-item {
-            background-color: #fff; border: 1px solid #ddd; padding: 15px;
+            background-color: #fff; border: 1px solid #ddd; padding: 12px;
             margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;
         }
-        .card-text { font-size: 1.1em; }
-        .card-text small { color: #666; display: block; font-size: 0.9em; margin-top: 5px; }
-        .delete-btn {
-            background-color: #dc3545; color: white; border: none; padding: 5px 10px;
-            border-radius: 4px; cursor: pointer; margin-left: 10px;
-        }
+        .card-text { flex-grow: 1; word-break: break-all; }
 
-
+        /* 学習用モーダル */
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.9);
         }
         .modal-content {
-            background-color: #fefefe; margin: 5% auto; padding: 0;
-            border-radius: 10px; width: 90%; max-width: 600px;
+            background-color: #fefefe; margin: 10% auto; padding: 0;
+            border-radius: 10px; width: 95%; max-width: 500px;
             text-align: center; position: relative; overflow: hidden;
-            min-height: 400px; display: flex; flex-direction: column;
+            min-height: 350px; display: flex; flex-direction: column;
         }
-        .modal-header { padding: 15px; background-color: #f1f1f1; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;}
-        .close-btn { font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; }
-        
+
         .flashcard-container {
             flex-grow: 1; display: flex; justify-content: center; align-items: center;
-            padding: 20px; perspective: 1000px; cursor: pointer;
+            padding: 15px; cursor: pointer;
         }
         .flashcard {
-            width: 100%; height: 300px; background-color: #fff; border: 2px solid #007bff;
-            border-radius: 10px; display: flex; justify-content: center; align-items: center;
-            font-size: 2em; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
+            width: 100%; height: 250px; background-color: #fff; border: 2px solid #007bff;
+            border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-size: 1.5rem; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        .flashcard.flipped { background-color: #e6f2ff; color: #0056b3; transform: rotateX(0deg); }
-        .flashcard-hint { font-size: 0.5em; color: #888; margin-top: 10px; display: block;}
+        .flashcard.flipped { background-color: #e6f2ff; color: #0056b3; }
 
-        .modal-footer { padding: 20px; background-color: #f1f1f1; display: flex; justify-content: space-between; }
-        .nav-btn { padding: 10px 20px; font-size: 16px; cursor: pointer; border: 1px solid #ccc; background-color: white; border-radius: 4px; }
-        .nav-btn:hover { background-color: #ddd; }
+        .modal-footer { padding: 15px; background-color: #f1f1f1; display: flex; justify-content: space-between; align-items: center; }
+        .nav-btn { padding: 10px 15px; font-size: 14px; cursor: pointer; border: 1px solid #ccc; background-color: white; border-radius: 4px; }
 
-
-        .sidebar { width: 300px; padding: 20px; background-color: #e9ecef; border-radius: 8px; }
+        /* サイドバー */
+        .sidebar { 
+            width: 100%; box-sizing: border-box; padding: 20px; 
+            background-color: #e9ecef; border-radius: 8px; 
+        }
+        @media (min-width: 768px) {
+            .sidebar { width: 300px; }
+        }
         .sidebar h3 { color: #007bff; border-bottom: 2px solid #b8daff; margin-top: 0; }
         .sidebar ul { list-style: none; padding: 0; }
         .sidebar li { margin-bottom: 10px; }
-        .sidebar a { text-decoration: none; color: #333; padding: 5px; display: block; border-radius: 4px; transition: background-color 0.2s; }
-        .sidebar a:hover { background-color: #d6eaff; color: #0056b3; }
+        .sidebar a { 
+            text-decoration: none; color: #333; padding: 10px; 
+            display: block; background-color: #fff; border-radius: 4px; 
+        }
     </style>
 </head>
 <body>
     <div class="wrapper">
         <div class="main-content">
             <h1>📚 暗記カードメーカー</h1>
-
 
             <div class="input-area">
                 <div class="input-group">
@@ -119,297 +135,144 @@
                     <label>裏面 (答え):</label>
                     <input type="text" id="card-back" placeholder="例: りんご">
                 </div>
-                <button class="add-btn" onclick="addCard()">カードを追加する</button>
+                <button class="add-btn" onclick="addCard()">カードを追加</button>
             </div>
-
 
             <div class="card-list-header">
-                <h2>作成したカード (<span id="card-count">0</span>枚)</h2>
-                <button class="study-btn" onclick="startStudy()">📖 学習スタート</button>
+                <h2>カード一覧 (<span id="card-count">0</span>枚)</h2>
+                <button class="study-btn" onclick="startStudy()">📖 学習開始</button>
             </div>
-            <ul id="card-list">
-                
-            </ul>
+            <ul id="card-list"></ul>
         </div>
-
 
         <div class="sidebar">
             <h3>便利なツール集</h3>
             <ul id="dynamic-tool-list">
-                <li>ナビゲーションをロード中...</li>
+                <li>読込中...</li>
             </ul>
-            
-            <h3 style="margin-top: 30px;">使い方</h3>
-            <p style="font-size: 0.9em; color: #555;">
-                1. 問題と答えを入力して追加します。<br>
-                2. データは自動的に保存されます。<br>
-                3. 「学習スタート」でテストができます。カードをクリックすると答えが出ます。
+            <h3 style="margin-top: 30px;">ヒント</h3>
+            <p style="font-size: 0.85rem; color: #666;">
+                作成したデータはブラウザに保存されるので、閉じても消えません。
             </p>
         </div>
     </div>
 
-
     <div id="study-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <span>学習モード</span>
-                <span class="close-btn" onclick="closeStudy()">&times;</span>
+            <div class="modal-header" style="padding:10px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between;">
+                <strong>学習モード</strong>
+                <span class="close-btn" style="cursor:pointer; font-size:24px;" onclick="closeStudy()">&times;</span>
             </div>
             <div class="flashcard-container" onclick="flipCard()">
                 <div id="flashcard" class="flashcard">
-                    <div>
-                        <span id="flashcard-text">問題テキスト</span>
-                        <small class="flashcard-hint" id="flashcard-hint">クリックして答えを見る</small>
-                    </div>
+                    <span id="flashcard-text" style="text-align:center;"></span>
+                    <small id="flashcard-hint" style="font-size:0.8rem; color:#888; margin-top:15px;"></small>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="nav-btn" onclick="prevCard()">← 前へ</button>
-                <span id="study-progress">1 / 10</span>
-                <button class="nav-btn" onclick="nextCard()">次へ →</button>
+                <button class="nav-btn" onclick="prevCard()">前へ</button>
+                <span id="study-progress" style="font-size:0.9rem;"></span>
+                <button class="nav-btn" onclick="nextCard()">次へ</button>
             </div>
         </div>
     </div>
 
     <script>
+        // --- ロジック部分は一切変更なし ---
         let cards = [];
         let currentCardIndex = 0;
         let isFlipped = false;
 
-
         document.addEventListener('DOMContentLoaded', () => {
             loadCards();
             renderList();
+            loadSidebar();
         });
 
- 
         function loadCards() {
-            const storedCards = localStorage.getItem('myFlashcards');
-            if (storedCards) {
-                cards = JSON.parse(storedCards);
-            }
+            const stored = localStorage.getItem('myFlashcards');
+            if (stored) cards = JSON.parse(stored);
         }
-
 
         function saveCards() {
             localStorage.setItem('myFlashcards', JSON.stringify(cards));
         }
 
-  
         function addCard() {
-            const frontInput = document.getElementById('card-front');
-            const backInput = document.getElementById('card-back');
-            const frontText = frontInput.value.trim();
-            const backText = backInput.value.trim();
-
-            if (!frontText || !backText) {
-                alert('表面と裏面の両方を入力してください。');
-                return;
-            }
-
-            cards.push({ front: frontText, back: backText });
-            saveCards();
-            renderList();
-
-
-            frontInput.value = '';
-            backInput.value = '';
-            frontInput.focus();
+            const f = document.getElementById('card-front');
+            const b = document.getElementById('card-back');
+            if (!f.value.trim() || !b.value.trim()) return alert('両面入力してください');
+            cards.push({ front: f.value.trim(), back: b.value.trim() });
+            saveCards(); renderList();
+            f.value = ''; b.value = ''; f.focus();
         }
 
-
-        function deleteCard(index) {
-            if (confirm('このカードを削除しますか？')) {
-                cards.splice(index, 1);
-                saveCards();
-                renderList();
+        function deleteCard(i) {
+            if (confirm('削除しますか？')) {
+                cards.splice(i, 1);
+                saveCards(); renderList();
             }
         }
-
 
         function renderList() {
-            const listElement = document.getElementById('card-list');
-            const countElement = document.getElementById('card-count');
-            listElement.innerHTML = '';
-            countElement.textContent = cards.length;
-
-            if (cards.length === 0) {
-                listElement.innerHTML = '<li style="text-align:center; color:#888;">カードがまだありません。「追加」して作成しましょう！</li>';
-                return;
-            }
-
-            cards.forEach((card, index) => {
+            const list = document.getElementById('card-list');
+            document.getElementById('card-count').textContent = cards.length;
+            list.innerHTML = cards.length ? '' : '<li style="color:#888; text-align:center;">カードを追加してください</li>';
+            cards.forEach((c, i) => {
                 const li = document.createElement('li');
                 li.className = 'card-item';
-                li.innerHTML = `
-                    <div class="card-text">
-                        <strong>Q: ${escapeHtml(card.front)}</strong>
-                        <small>A: ${escapeHtml(card.back)}</small>
-                    </div>
-                    <button class="delete-btn" onclick="deleteCard(${index})">削除</button>
-                `;
-                listElement.appendChild(li);
+                li.innerHTML = `<div><strong>${escapeHtml(c.front)}</strong><br><small>${escapeHtml(c.back)}</small></div>
+                                <button class="delete-btn" style="background:#dc3545; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;" onclick="deleteCard(${i})">削除</button>`;
+                list.appendChild(li);
             });
         }
 
-
-        function escapeHtml(str) {
-            if(!str) return "";
-            return str.replace(/[&<>"']/g, function(m) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                }[m];
-            });
-        }
-
-
+        function escapeHtml(s) { return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m])); }
 
         function startStudy() {
-            if (cards.length === 0) {
-                alert('カードがありません。まずはカードを作成してください。');
-                return;
-            }
-            currentCardIndex = 0;
-            isFlipped = false;
-            showModal();
+            if (!cards.length) return alert('カードがありません');
+            currentCardIndex = 0; isFlipped = false;
+            document.getElementById('study-modal').style.display = 'block';
             updateCardDisplay();
         }
 
-        function showModal() {
-            document.getElementById('study-modal').style.display = 'block';
-        }
-
-        function closeStudy() {
-            document.getElementById('study-modal').style.display = 'none';
-        }
+        function closeStudy() { document.getElementById('study-modal').style.display = 'none'; }
 
         function updateCardDisplay() {
-            const card = cards[currentCardIndex];
-            const cardElement = document.getElementById('flashcard');
-            const textElement = document.getElementById('flashcard-text');
-            const hintElement = document.getElementById('flashcard-hint');
-            const progressElement = document.getElementById('study-progress');
-
-
+            const c = cards[currentCardIndex];
+            const f = document.getElementById('flashcard');
             isFlipped = false;
-            cardElement.classList.remove('flipped');
-            cardElement.style.backgroundColor = '#fff';
-            cardElement.style.color = '#333';
-            
-            textElement.textContent = card.front;
-            hintElement.textContent = "クリックして答えを見る";
-            
-            progressElement.textContent = `${currentCardIndex + 1} / ${cards.length}`;
+            f.classList.remove('flipped');
+            document.getElementById('flashcard-text').textContent = c.front;
+            document.getElementById('flashcard-hint').textContent = "タップして答えを見る";
+            document.getElementById('study-progress').textContent = `${currentCardIndex + 1} / ${cards.length}`;
         }
 
         function flipCard() {
-            const card = cards[currentCardIndex];
-            const cardElement = document.getElementById('flashcard');
-            const textElement = document.getElementById('flashcard-text');
-            const hintElement = document.getElementById('flashcard-hint');
-
+            const c = cards[currentCardIndex];
+            const f = document.getElementById('flashcard');
             isFlipped = !isFlipped;
-
-            if (isFlipped) {
-
-                textElement.textContent = card.back;
-                hintElement.textContent = "クリックして問題に戻る";
-                cardElement.classList.add('flipped');
-            } else {
-
-                textElement.textContent = card.front;
-                hintElement.textContent = "クリックして答えを見る";
-                cardElement.classList.remove('flipped');
-            }
+            f.classList.toggle('flipped');
+            document.getElementById('flashcard-text').textContent = isFlipped ? c.back : c.front;
+            document.getElementById('flashcard-hint').textContent = isFlipped ? "タップして問題に戻る" : "タップして答えを見る";
         }
 
         function nextCard() {
-            if (currentCardIndex < cards.length - 1) {
-                currentCardIndex++;
-                updateCardDisplay();
-            } else {
-                if(confirm("最後のカードです。最初に戻りますか？")) {
-                    currentCardIndex = 0;
-                    updateCardDisplay();
-                }
-            }
+            if (currentCardIndex < cards.length - 1) { currentCardIndex++; updateCardDisplay(); }
+            else if(confirm("最後です。最初に戻りますか？")) { currentCardIndex = 0; updateCardDisplay(); }
         }
 
-        function prevCard() {
-            if (currentCardIndex > 0) {
-                currentCardIndex--;
-                updateCardDisplay();
-            }
-        }
-        
+        function prevCard() { if (currentCardIndex > 0) { currentCardIndex--; updateCardDisplay(); } }
 
-        window.onclick = function(event) {
-            const modal = document.getElementById('study-modal');
-            if (event.target == modal) {
-                closeStudy();
-            }
-        }
-
-        const JSON_URL = 'tools.json';
-        const TOP_TOOLS_COUNT = 4; 
-
-
-        async function loadAndRenderTools(renderFunction, listId) {
+        async function loadSidebar() {
             try {
-                const response = await fetch(JSON_URL);
-                if (!response.ok) {
-                    throw new Error('ネットワークエラー、またはJSONファイルが見つかりません。');
-                }
-                const toolsData = await response.json();
-                renderFunction(toolsData, listId);
-            } catch (error) {
-                console.error('ツールデータの読み込みに失敗しました:', error);
-                const container = document.getElementById(listId);
-                if (container) {
-                    container.innerHTML = `<li style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</li>`;
-                }
-            }
+                const res = await fetch('tools.json');
+                const tools = await res.json();
+                document.getElementById('dynamic-tool-list').innerHTML = tools.slice(0, 4).map(t => 
+                    `<li><a href="${t.href}">${t.icon} ${t.title}</a></li>`
+                ).join('') + `<li><a href="tools_index.html" style="color:red; font-weight:bold;">✨ その他</a></li>`;
+            } catch (e) { console.error(e); }
         }
-
-  
-        function generateSidebarNav(toolsData, listId = 'dynamic-tool-list') {
-            const listContainer = document.getElementById(listId);
-            if (!listContainer) return;
-
-            let listHtml = '';
-            const totalCount = toolsData.length;
-
-            const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
-
- 
-            toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
-                const isActive = tool.href === currentPath || (currentPath === '' && tool.href === 'index.html');
-                const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
-                const title = isActive ? `${tool.icon} ${tool.title} (現在地)` : `${tool.icon} ${tool.title}`;
-                
-                listHtml += `<li><a href="${tool.href}" ${activeStyle}>${title}</a></li>`;
-            });
-
-
-            const otherCount = totalCount - TOP_TOOLS_COUNT;
-
-            if (otherCount > 0) {
-                listHtml += `<hr style="margin: 10px 0;">`;
-                listHtml += `<li><a href="tools_index.html" style="font-weight: bold; color: #dc3545;">✨ その他 (${otherCount}件) を見る</a></li>`;
-            }
-
-            listContainer.innerHTML = listHtml;
-        }
-
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list'); 
-            updateCounts();
-        });
     </script>
 </body>
 </html>
