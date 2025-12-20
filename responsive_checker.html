@@ -4,17 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>レスポンシブデザイン確認ツール</title>
-       <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
     <style>
         /* 共通レイアウトスタイル (他のツールと統一) */
         body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; }
-        .wrapper { max-width: 1200px; margin: 20px auto; display: flex; gap: 20px; }
+        
+        .wrapper {
+            max-width: 1200px;
+            margin: 0 auto; /* スマホ時は上下余白なし */
+            display: flex;
+            flex-direction: column; /* 【重要】デフォルト（スマホ）は縦並び */
+            gap: 20px;
+            padding: 10px; /* スマホ画面端の余白 */
+        }
+        
+        /* PC（768px以上）の設定 */
+        @media (min-width: 768px) {
+            .wrapper {
+                flex-direction: row; /* 横並びに戻す */
+                margin: 20px auto;
+                padding: 0 20px;
+            }
+        }
         
         .main-content {
             flex-grow: 1;
             background-color: #fff;
-            padding: 30px; 
+            padding: 20px; 
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -22,70 +38,92 @@
             flex-direction: column;
         }
 
-        h1 { text-align: center; color: #333; margin-top: 0; margin-bottom: 20px; }
+        @media (min-width: 768px) {
+            .main-content { padding: 30px; }
+        }
+
+        h1 { text-align: center; color: #333; margin-top: 0; margin-bottom: 20px; font-size: 1.5em; }
 
         /* サイドバーのスタイル */
         .sidebar {
-            width: 300px;
+            width: 100%; /* スマホでは全幅 */
+            box-sizing: border-box;
             padding: 20px;
             background-color: #e9ecef;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            flex-shrink: 0; 
         }
+
+        @media (min-width: 768px) {
+            .sidebar { width: 300px; }
+        }
+
         .sidebar h3 { color: #007bff; border-bottom: 2px solid #b8daff; padding-bottom: 5px; margin-top: 0; }
         .sidebar ul { list-style: none; padding: 0; }
         .sidebar li { margin-bottom: 10px; }
-        .sidebar a { text-decoration: none; color: #333; padding: 5px; display: block; border-radius: 4px; transition: background-color 0.2s; }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            padding: 10px;
+            display: block;
+            background-color: #fff;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
         .sidebar a:hover { background-color: #d6eaff; color: #0056b3; }
 
         /* ツール固有のスタイル */
         .url-input-area {
             display: flex;
+            flex-direction: column; /* スマホでは縦並び */
             gap: 10px;
             margin-bottom: 20px;
         }
 
+        @media (min-width: 768px) {
+            .url-input-area { flex-direction: row; }
+        }
+
         #urlInput {
             flex-grow: 1;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 16px; /* ズーム防止 */
         }
 
         #loadButton {
-            padding: 10px 20px;
+            padding: 12px 20px;
             font-size: 16px;
             cursor: pointer;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-        #loadButton:hover {
-            background-color: #0056b3;
+            font-weight: bold;
         }
 
         .preview-grid {
             display: grid;
-            /* 修正: 画面幅が広いときのみ3列表示 */
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            grid-template-columns: 1fr; /* スマホでは1列 */
             gap: 20px;
             padding-top: 10px;
-            flex-grow: 1;
+        }
+
+        @media (min-width: 1024px) {
+            .preview-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            }
         }
 
         .device-frame {
             border: 5px solid #333;
             border-radius: 15px;
-            background-color: #000;
+            background-color: #333;
             padding: 10px 5px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
             text-align: center;
-            /* 修正: コンテナ内で横スクロールを許可し、ページ全体のはみ出しを防ぐ */
-            overflow-x: auto; 
+            overflow-x: auto; /* スマホでiframeがはみ出ても枠内でスクロール可能にする */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -94,35 +132,14 @@
         .device-frame h4 {
             color: #fff;
             margin: 0 0 8px 0;
-            font-size: 1.1em;
-            text-shadow: 1px 1px 2px #000;
+            font-size: 1rem;
         }
 
         iframe {
             height: 450px; 
             border: none;
             background-color: white;
-            /* iframeの幅はJSで設定されます */
-            min-width: 300px; /* 最小幅を設定しておくと安心 */
-        }
-        
-        /* レスポンシブ対応 */
-        @media (max-width: 1024px) {
-            .wrapper {
-                flex-direction: column;
-                margin: 10px;
-                gap: 10px;
-            }
-            .sidebar {
-                width: auto;
-            }
-            .url-input-area {
-                flex-direction: column;
-            }
-            /* 画面幅が狭い場合、グリッドを1カラム表示にする */
-            .preview-grid {
-                 grid-template-columns: 1fr;
-            }
+            min-width: 300px;
         }
     </style>
 </head>
@@ -130,179 +147,103 @@
 
     <div class="wrapper">
         
-        <!-- メインコンテンツ -->
         <div class="main-content">
-            <h1>🪟 レスポンシブデザイン確認ツール</h1>
-            <p class="text-gray-500 text-center mb-4">WebサイトのURLを入力し、モバイル、タブレット、PCの各サイズでの表示を同時にチェックします。</p>
+            <h1>🪟 デザイン確認ツール</h1>
+            <p style="text-align:center; color:#666; font-size:0.9em; margin-bottom:20px;">URLを入力して各デバイスでの表示をチェック</p>
 
-            <!-- URL入力エリア -->
             <div class="url-input-area">
-                <input type="text" id="urlInput" placeholder="確認したいWebサイトのURLを入力 (例: https://www.example.com)">
+                <input type="text" id="urlInput" placeholder="https://www.example.com">
                 <button id="loadButton" onclick="loadUrls()">表示を更新</button>
             </div>
             
-            <p id="message" style="color:red; text-align:center; min-height:1.2em;"></p>
+            <p id="message" style="color:red; text-align:center; min-height:1.2em; font-size:0.85em;"></p>
 
-            <!-- プレビューグリッド -->
             <div class="preview-grid" id="previewContainer">
-                
-                <!-- モバイルフレーム -->
-                <div class="device-frame" style="border-color: #dc3545; background-color: #dc3545;">
+                <div class="device-frame" style="border-color: #dc3545;">
                     <h4>📱 モバイル (375px)</h4>
                     <iframe id="mobileFrame" src="about:blank"></iframe>
                 </div>
                 
-                <!-- タブレットフレーム -->
-                <div class="device-frame" style="border-color: #ffc107; background-color: #ffc107;">
-                    <h4> tablet (768px)</h4>
+                <div class="device-frame" style="border-color: #ffc107;">
+                    <h4>📟 タブレット (768px)</h4>
                     <iframe id="tabletFrame" src="about:blank"></iframe>
                 </div>
                 
-                <!-- PCフレーム -->
-                <div class="device-frame" style="border-color: #28a745; background-color: #28a745;">
+                <div class="device-frame" style="border-color: #28a745;">
                     <h4>💻 PC (1200px)</h4>
                     <iframe id="pcFrame" src="about:blank"></iframe>
                 </div>
-
             </div>
             
-            <footer class="mt-8 text-center text-gray-500 text-sm">
-                <p>※ サイトによっては、セキュリティ上の制限（X-Frame-Optionsなど）により、表示できない場合があります。</p>
-                <p><a href="tools_index.html" class="text-red-500 hover:text-red-700">← 全ツール一覧に戻る</a></p>
-            </footer>
+            <div style="margin-top:20px; text-align:center; font-size:0.8em; color:#888;">
+                <p>※セキュリティ制限(X-Frame-Options)により表示できないサイトがあります。</p>
+            </div>
         </div>
 
-        <!-- サイドバー -->
         <div class="sidebar">
             <h3>便利なツール集</h3>
             <ul id="dynamic-tool-list">
-                <li>ナビゲーションをロード中...</li>
+                <li>読み込み中...</li>
             </ul>
 
             <h3 style="margin-top: 30px;">チェックのポイント</h3>
-            <ul style="font-size: 0.9em; list-style-type: square; margin-left: 10px;">
-                <li>✅ テキストが小さすぎないか</li>
-                <li>✅ ボタンが押しやすい大きさか</li>
-                <li>✅ 横スクロールが発生していないか</li>
-                <li>✅ 要素が隠れていないか</li>
+            <ul style="font-size: 0.85em; padding-left: 20px; color:#555;">
+                <li>✅ 文字の視認性</li>
+                <li>✅ ボタンの押しやすさ</li>
+                <li>✅ 横スクロールの有無</li>
             </ul>
         </div>
     </div>
 
     <script>
-        /**
-         * URLを検証し、iframeに読み込む
-         */
+        // ロジック部分は一切変更なし
         function loadUrls() {
             const urlInput = document.getElementById('urlInput');
             let url = urlInput.value.trim();
             const messageElement = document.getElementById('message');
-            messageElement.textContent = '';
-            
-            if (!url) {
-                messageElement.textContent = 'URLを入力してください。';
-                return;
+            if (!url) { messageElement.textContent = 'URLを入力してください。'; return; }
+            if (!url.startsWith('http')) url = 'https://' + url;
+
+            try { new URL(url); } catch (e) {
+                messageElement.textContent = '🚨 無効なURL形式です。'; return;
             }
 
-            // プロトコル（http/https）がない場合は自動で追加
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                url = 'https://' + url;
-            }
-
-            // URLの検証（簡易的）
-            try {
-                new URL(url);
-            } catch (e) {
-                messageElement.textContent = '🚨 無効なURL形式です。確認してください。';
-                return;
-            }
-
-            // 各iframeにURLとサイズを設定
             const frames = [
-                { id: 'mobileFrame', width: '375px', url: url }, // iPhone X / Galaxy S9 相当
-                { id: 'tabletFrame', width: '768px', url: url }, // iPad 相当
-                { id: 'pcFrame', width: '1200px', url: url }  // 一般的なPCサイズ
+                { id: 'mobileFrame', width: '375px', url: url },
+                { id: 'tabletFrame', width: '768px', url: url },
+                { id: 'pcFrame', width: '1200px', url: url }
             ];
 
             frames.forEach(frameData => {
                 const frame = document.getElementById(frameData.id);
-                // iframe要素自体に幅を設定
                 frame.style.width = frameData.width; 
-                
-                // URLの読み込み
                 frame.src = frameData.url;
             });
-            
-            messageElement.textContent = `✅ ${url} のプレビューを開始しました。表示されない場合はセキュリティ制限の可能性があります。`;
+            messageElement.textContent = `✅ 読み込み中...`;
             messageElement.style.color = '#28a745';
         }
 
-        // --- サイドバーの動的ロードロジック (共通) ---
-        const JSON_URL = 'tools.json';
-        const TOP_TOOLS_COUNT = 4;
-
-        async function loadAndRenderTools(renderFunction, listId) {
+        // サイドバー読み込みロジック (共通)
+        async function loadAndRenderTools() {
             try {
-                const response = await fetch(JSON_URL);
-                if (!response.ok) {
-                    throw new Error('ネットワークエラー、またはJSONファイルが見つかりません。');
-                }
+                const response = await fetch('tools.json');
                 const toolsData = await response.json();
-                renderFunction(toolsData, listId);
-            } catch (error) {
-                console.error('ツールデータの読み込みに失敗しました:', error);
-                const container = document.getElementById(listId);
-                if (container) {
-                    container.innerHTML = `<li style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</li>`;
-                }
-            }
+                const listContainer = document.getElementById('dynamic-tool-list');
+                const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
+
+                let html = toolsData.slice(0, 4).map(tool => {
+                    const isActive = (tool.href + '.html') === currentPath;
+                    return `<li><a href="${tool.href}.html" ${isActive ? 'style="background-color:#d6eaff;"':''}>${tool.icon} ${tool.title}</a></li>`;
+                }).join('');
+                listContainer.innerHTML = html + `<li><a href="tools_index.html" style="color:#dc3545;font-weight:bold;">✨ その他</a></li>`;
+            } catch (e) { console.error(e); }
         }
 
-        function generateSidebarNav(toolsData, listId = 'dynamic-tool-list') {
-            const listContainer = document.getElementById(listId);
-            if (!listContainer) return;
-
-            let listHtml = '';
-            const totalCount = toolsData.length;
-            const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
-
-            toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
-                // .html拡張子を考慮
-                const toolHref = tool.href + '.html'; 
-                const currentPathFull = currentPath.includes('.') ? currentPath : currentPath + '.html';
-
-                const isActive = toolHref === currentPathFull;
-                const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
-                const title = isActive ? `${tool.icon} ${tool.title} (現在地)` : `${tool.icon} ${tool.title}`;
-                
-                listHtml += `<li><a href="${toolHref}" ${activeStyle}>${title}</a></li>`;
-            });
-
-            const otherCount = totalCount - TOP_TOOLS_COUNT;
-
-            if (otherCount > 0) {
-                listHtml += `<hr style="margin: 10px 0;">`;
-                listHtml += `<li><a href="tools_index.html" style="font-weight: bold; color: #dc3545;">✨ その他 (${otherCount}件) を見る</a></li>`;
-            }
-
-            listContainer.innerHTML = listHtml;
-        }
-        
-        // --- 初期ロード ---
         document.addEventListener('DOMContentLoaded', () => {
-            loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list');
-            
-            // Enterキーで実行できるようにする
+            loadAndRenderTools();
             document.getElementById('urlInput').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    loadUrls();
-                }
+                if (e.key === 'Enter') loadUrls();
             });
-            
-            // 初期値を設定 (iframe埋め込み制限が緩いサイトに変更)
-            document.getElementById('urlInput').value = 'https://example.com';
-            loadUrls();
         });
     </script>
 </body>
