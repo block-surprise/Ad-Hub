@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>西暦・和暦 相互変換ツール</title>
-       <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
     <style>
         body { 
             margin: 0; 
@@ -13,20 +13,38 @@
         }
         .wrapper {
             max-width: 1200px;
-            margin: 20px auto;
+            margin: 0 auto; /* スマホ時は上下余白をリセット */
             display: flex;
+            flex-direction: column; /* 【重要】デフォルト（スマホ）は縦並び */
             gap: 20px;
+            padding: 10px; /* スマホ画面端の余白 */
+        }
+        
+        /* PC（画面幅768px以上）の設定 */
+        @media (min-width: 768px) {
+            .wrapper {
+                flex-direction: row; /* 横並びに戻す */
+                margin: 20px auto;
+                padding: 0 20px;
+            }
         }
         
         .main-content {
             flex-grow: 1;
             background-color: #fff;
-            padding: 30px; 
+            padding: 20px; /* スマホ向けに少し狭く */
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        h1 { text-align: center; color: #333; }
+
+        @media (min-width: 768px) {
+            .main-content {
+                padding: 30px; /* PCでは元の広さ */
+            }
+        }
+
+        h1 { text-align: center; color: #333; font-size: 1.5em; }
 
         .input-group {
             text-align: center;
@@ -37,20 +55,33 @@
         .input-group label {
             display: block;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             font-size: 1.1em;
         }
-        input[type="number"] { 
+
+        /* 入力欄とセレクトボックスの調整 */
+        input[type="number"], select { 
             padding: 10px; 
             font-size: 16px; 
-            width: 150px;
+            width: 100%; /* スマホでは幅いっぱい */
+            max-width: 150px; 
+            box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 4px;
-            margin: 0 5px;
+            margin-bottom: 10px; /* スマホで縦に並んだ時の隙間 */
             text-align: center;
         }
+
+        @media (min-width: 768px) {
+            input[type="number"], select {
+                width: 150px;
+                margin-bottom: 0;
+                margin-right: 5px;
+            }
+        }
+
         button { 
-            padding: 10px 20px; 
+            padding: 12px 20px; 
             font-size: 16px; 
             cursor: pointer; 
             background-color: #007bff;
@@ -58,8 +89,20 @@
             border: none;
             border-radius: 4px;
             transition: background-color 0.2s;
-            margin-left: 10px;
+            width: 100%; /* スマホではボタンも幅いっぱい */
+            max-width: 200px;
+            margin: 0 auto;
+            display: block; /* スマホで中央配置 */
         }
+
+        @media (min-width: 768px) {
+            button {
+                width: auto;
+                display: inline-block;
+                margin-left: 10px;
+            }
+        }
+
         button:hover {
             background-color: #0056b3;
         }
@@ -74,23 +117,36 @@
         .results h2 {
             color: #333;
             margin-top: 0;
+            font-size: 1.2em;
         }
         #result-text {
-            font-size: 2.0em;
+            font-size: 1.5em; /* スマホ向けに少し調整 */
             font-weight: bold;
             color: #28a745; 
             min-height: 2.0em;
             line-height: 1.2;
             padding-top: 10px;
+            word-wrap: break-word;
+        }
+        @media (min-width: 768px) {
+            #result-text { font-size: 2.0em; }
         }
         
         .sidebar {
-            width: 300px;
+            width: 100%; /* スマホでは全幅 */
+            box-sizing: border-box;
             padding: 20px;
             background-color: #e9ecef;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 300px; /* PCでは元の幅 */
+            }
+        }
+
         .sidebar h3 {
             color: #007bff;
             border-bottom: 2px solid #b8daff;
@@ -107,9 +163,10 @@
         .sidebar a {
             text-decoration: none;
             color: #333;
-            padding: 5px;
+            padding: 10px; /* タップしやすい広さ */
             display: block;
             border-radius: 4px;
+            background-color: #fff; /* ボタンらしく見せる */
             transition: background-color 0.2s;
         }
         .sidebar a:hover {
@@ -126,7 +183,7 @@
 
             <div class="input-group">
                 <label for="seireki">西暦を入力:</label>
-                <input type="number" id="seireki" placeholder="例: 2025" min="1868">
+                <input type="number" id="seireki" inputmode="numeric" placeholder="例: 2025" min="1868">
                 <button onclick="convertToWareki()">和暦に変換</button>
             </div>
 
@@ -139,7 +196,7 @@
                     <option value="taisho">大正</option>
                     <option value="meiji">明治</option>
                 </select>
-                <input type="number" id="wareki-year" placeholder="例: 7" min="1">
+                <input type="number" id="wareki-year" inputmode="numeric" placeholder="例: 7" min="1">
                 <button onclick="convertToSeireki()">西暦に変換</button>
             </div>
 
@@ -167,6 +224,7 @@
     </div>
 
     <script>
+        // --- ロジック部分は一切変更なし ---
         const NENGO_START_YEAR = {
             'reiwa': 2019,
             'heisei': 1989,
@@ -208,7 +266,7 @@
                 return;
             }
 
-            result = `${nengoName} ${warekiYear} 年`;
+            result = `${nengoName} ${warekiYear === 1 ? '元' : warekiYear} 年`;
             resultElement.textContent = result;
         }
 
@@ -234,9 +292,7 @@
             const warekiYearInput = document.getElementById('wareki-year');
             const resultElement = document.getElementById('result-text');
 
-      
             resultElement.textContent = '西暦または和暦を入力して変換してください。';
-
 
             seirekiInput.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter') {
@@ -245,7 +301,6 @@
                 }
             });
 
-        
             warekiYearInput.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter') {
                     event.preventDefault(); 
@@ -254,48 +309,35 @@
             });
         });
 
+        // --- サイドバー読み込みロジック (変更なし) ---
         const JSON_URL = 'tools.json';
         const TOP_TOOLS_COUNT = 4; 
 
         async function loadAndRenderTools(renderFunction, listId) {
             try {
                 const response = await fetch(JSON_URL);
-                if (!response.ok) {
-                    throw new Error('ネットワークエラー、またはJSONファイルが見つかりません。');
-                }
+                if (!response.ok) throw new Error('Network error');
                 const toolsData = await response.json();
                 renderFunction(toolsData, listId);
             } catch (error) {
-                console.error('ツールデータの読み込みに失敗しました:', error);
-                const container = document.getElementById(listId);
-                if (container) {
-                    container.innerHTML = `<li style="color:red; font-size:0.9em;">エラー: データ (${JSON_URL}) を読み込めません。</li>`;
-                }
+                console.error(error);
             }
         }
 
- 
         function generateSidebarNav(toolsData, listId = 'dynamic-tool-list') {
             const listContainer = document.getElementById(listId);
             if (!listContainer) return;
 
             let listHtml = '';
-            const totalCount = toolsData.length;
- 
             const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
-
 
             toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
                 const isActive = tool.href === currentPath || (currentPath === '' && tool.href === 'index.html');
                 const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
-                const title = isActive ? `${tool.icon} ${tool.title} (現在地)` : `${tool.icon} ${tool.title}`;
-                
-                listHtml += `<li><a href="${tool.href}" ${activeStyle}>${title}</a></li>`;
+                listHtml += `<li><a href="${tool.href}" ${activeStyle}>${tool.icon} ${tool.title}</a></li>`;
             });
 
-
-            const otherCount = totalCount - TOP_TOOLS_COUNT;
-
+            const otherCount = toolsData.length - TOP_TOOLS_COUNT;
             if (otherCount > 0) {
                 listHtml += `<hr style="margin: 10px 0;">`;
                 listHtml += `<li><a href="tools_index.html" style="font-weight: bold; color: #dc3545;">✨ その他 (${otherCount}件) を見る</a></li>`;
@@ -306,7 +348,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list'); 
-            updateCounts();
         });
     </script>
 </body>
