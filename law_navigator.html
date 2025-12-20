@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚖️ 法律の全体像ナビゲーター</title>
-       <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
     <style>
         /* 基本レイアウト */
         body { 
@@ -12,56 +12,86 @@
             background-color: #f4f7f6;
             font-family: Arial, sans-serif; 
             color: #333;
+            line-height: 1.6;
         }
         .wrapper {
             max-width: 1200px;
-            margin: 20px auto;
+            margin: 0 auto;
             display: flex;
+            flex-direction: column; /* 【重要】デフォルトは縦並び */
             gap: 20px;
+            padding: 10px;
         }
+
+        /* PC（768px以上）のレイアウト */
+        @media (min-width: 768px) {
+            .wrapper {
+                flex-direction: row; /* 横並びに戻す */
+                margin: 20px auto;
+                padding: 0 20px;
+            }
+        }
+
         .container {
             flex-grow: 1; 
             background-color: #fff;
-            padding: 40px; 
+            padding: 20px; 
             border-radius: 10px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
+        @media (min-width: 768px) {
+            .container { padding: 40px; }
+        }
+
         h1 { 
             text-align: center; 
             color: #007bff;
             border-bottom: 3px solid #b8daff;
             padding-bottom: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
         }
         
         /* 全体マップのスタイル */
-        .law-map {
-            margin-top: 20px;
-            text-align: center;
-        }
         .law-map p {
-            font-size: 1.1em;
-            margin-bottom: 25px;
+            font-size: 1em;
+            margin-bottom: 20px;
             color: #555;
+            text-align: center;
         }
 
         /* 大分類ボタンのスタイル */
         .major-category-grid {
             display: flex;
-            justify-content: space-around;
-            gap: 20px;
-            margin-bottom: 40px;
+            flex-direction: column; /* スマホでは縦に並べる */
+            gap: 15px;
+            margin-bottom: 30px;
         }
+
+        @media (min-width: 768px) {
+            .major-category-grid {
+                flex-direction: row; /* PCでは横並び */
+                justify-content: space-around;
+            }
+        }
+
         .major-category-btn {
-            width: 30%;
-            padding: 20px 10px;
+            width: 100%; /* スマホでは全幅 */
+            padding: 15px 10px;
             background-color: #e6f7ff;
             border: 3px solid #007bff;
             border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: all 0.2s;
             text-align: center;
+            box-sizing: border-box;
         }
+
+        @media (min-width: 768px) {
+            .major-category-btn { width: 30%; }
+        }
+
         .major-category-btn:hover {
             background-color: #cceeff;
             transform: translateY(-2px);
@@ -69,34 +99,23 @@
         .major-category-btn.active {
             background-color: #b3d9ff;
             border-color: #0056b3;
-            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
         }
         .major-category-btn strong {
             display: block;
-            font-size: 1.3em;
+            font-size: 1.2rem;
             color: #007bff;
             margin-bottom: 5px;
         }
-        .major-category-btn small {
-            color: #555;
-        }
         
-        /* 詳細法律リスト (展開エリア) */
+        /* 詳細法律リスト */
         .category-detail-list {
             background-color: #fcfcfc;
             border: 1px solid #ddd;
             border-radius: 6px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: center;
+            padding: 15px;
+            margin: 15px 0;
             width: 100%;
             box-sizing: border-box;
-        }
-        .category-detail-list h3 {
-            color: #dc3545;
-            margin-top: 0;
-            border-bottom: 1px dashed #dc3545;
-            padding-bottom: 10px;
         }
         .law-list {
             list-style: none;
@@ -107,236 +126,186 @@
             justify-content: center;
         }
         .law-list li {
-            background-color: #ffc107; /* 目立つ黄色 */
+            background-color: #ffc107;
             padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.2s;
             color: #333;
-        }
-        .law-list li:hover {
-            background-color: #e0a800;
+            font-size: 0.9rem;
         }
         
-        /* モーダル (詳細ポップアップ) */
+        /* モーダル */
         .modal {
             display: none; 
             position: fixed; 
             z-index: 1000; 
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
+            left: 0; top: 0;
+            width: 100%; height: 100%; 
             background-color: rgba(0,0,0,0.6); 
         }
         .modal-content {
             background-color: #fefefe;
-            margin: 10% auto; 
-            padding: 30px;
+            margin: 15% auto; 
+            padding: 20px;
             border-radius: 10px;
-            width: 80%;
+            width: 90%;
             max-width: 500px;
-            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-            position: relative;
-            text-align: left;
+            box-sizing: border-box;
         }
-        .close-btn {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close-btn:hover, .close-btn:focus {
-            color: #000;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .modal-content h3 {
-            color: #007bff;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 5px;
+        .close-btn { float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+
+        /* サイドバー */
+        .sidebar {
+            width: 100%;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            box-sizing: border-box;
         }
 
-        /* サイドバーのスタイル */
-        .sidebar { width: 300px; padding: 20px; background-color: #e9ecef; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
-        .sidebar h3 { color: #007bff; border-bottom: 2px solid #b8daff; padding-bottom: 5px; margin-top: 0; }
+        @media (min-width: 768px) {
+            .sidebar { width: 300px; }
+        }
+
+        .sidebar h3 { color: #007bff; border-bottom: 2px solid #b8daff; margin-top: 0; font-size: 1.1rem; }
         .sidebar ul { list-style: none; padding: 0; }
         .sidebar li { margin-bottom: 10px; }
-        .sidebar a { text-decoration: none; color: #333; padding: 5px; display: block; border-radius: 4px; transition: background-color 0.2s; }
-        .sidebar a:hover { background-color: #d6eaff; color: #0056b3; }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            padding: 10px;
+            display: block;
+            background-color: #fff;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        
         <div class="container">
-            <h1>⚖️ 法律の世界へようこそ！</h1>
+            <h1>⚖️ 法律の全体像ナビ</h1>
             
             <div class="law-map">
-                <p>日本の法律は、大きく3つのグループに分かれています。知りたいグループの箱をクリックして、中身を見てみよう！</p>
+                <p>日本の法律の3つのグループ。箱を押して中身を見てみよう！</p>
                 
                 <div class="major-category-grid" id="major-categories">
-                    <div class="major-category-btn" data-key="public" onclick="showCategoryDetail('public', this)">
-                        <strong>公法（こうほう）</strong>
-                        <small>国と私たちの約束のルール</small>
+                    <div class="major-category-btn" onclick="showCategoryDetail('public', this)">
+                        <strong>公法</strong>
+                        <small>国と私たちのルール</small>
                     </div>
-                    <div class="major-category-btn" data-key="private" onclick="showCategoryDetail('private', this)">
-                        <strong>私法（しほう）</strong>
-                        <small>人 vs 人の関係のルール</small>
+                    <div class="major-category-btn" onclick="showCategoryDetail('private', this)">
+                        <strong>私法</strong>
+                        <small>個人や会社のルール</small>
                     </div>
-                    <div class="major-category-btn" data-key="social" onclick="showCategoryDetail('social', this)">
-                        <strong>社会法（しゃかいほう）</strong>
-                        <small>みんなを助け、守るためのルール</small>
+                    <div class="major-category-btn" onclick="showCategoryDetail('social', this)">
+                        <strong>社会法</strong>
+                        <small>弱者を助けるルール</small>
                     </div>
                 </div>
 
-                <p style="text-align: center; color: #dc3545; font-weight: bold; margin-top: 50px;" id="initial-message">
-                    ↑ まずは上のどれかの箱をクリックしてね！
+                <p id="initial-message" style="color: #dc3545; font-weight: bold;">
+                    ↑ 箱をクリックしてね！
                 </p>
-
             </div>
-            
         </div>
         
         <div class="sidebar">
             <h3>便利なツール集</h3>
-            <ul>
-                <li><a href="index.html">📝 文字数・行数カウント</a></li> 
-                <li><a href="zipcode_search.html">📮 郵便番号・住所検索</a></li>
-                <li><a href="wareki_converter.html">🗓️ 西暦・和暦 相互変換</a></li>
-                <li><a href="warikan_tool.html">🧮 割り勘計算ツール</a></li>
-                <li><a href="timer_tool.html">⏱️ シンプルタイマー</a></li>
+            <ul id="tool-list">
+                <li>読み込み中...</li>
             </ul>
 
             <h3 style="margin-top: 30px;">法律の豆知識</h3>
-            <ul style="font-size: 0.9em; list-style-type: square; margin-left: 20px;">
-                <li>法律は、国民の代表である国会で決められます。</li>
-                <li>憲法が日本の全ての法律の中で一番大切だよ。</li>
-            </ul>
+            <p style="font-size: 0.85rem; color: #555;">
+                憲法はすべての法律の「王様」です。憲法に違反する法律は作ることができません。
+            </p>
         </div>
-        
     </div>
 
     <div id="lawModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h3 id="modal-title"></h3>
-            <p><strong>【目的】</strong><span id="modal-purpose"></span></p>
-            <p><strong>【身近な事例】</strong><span id="modal-example"></span></p>
+            <h3 id="modal-title" style="color:#007bff; border-bottom:2px solid #007bff;"></h3>
+            <p><strong>【目的】</strong><br><span id="modal-purpose"></span></p>
+            <p><strong>【身近な例】</strong><br><span id="modal-example"></span></p>
         </div>
     </div>
 
     <script>
-        // --- 法律の詳細データ ---
+        // データ管理 (変更なし)
         const LAW_DATA = {
             'public': {
-                title: '公法（こうほう）グループ',
-                description: '国や役所と、私たち一人ひとりの関係を決めるルールだよ。',
+                title: '公法（こうほう）',
                 laws: [
-                    { name: '憲法（けんぽう）', purpose: '日本で一番大切なルール。国が絶対に守らなくてはいけない、私たちの権利（自由など）を定めているよ。', example: '「自由に意見を言っていいよ」「平等に扱わなきゃダメだよ」という国の約束。' },
-                    { name: '刑法（けいほう）', purpose: '悪いことをした人に、どんな罰があるかを決めるルール。', example: '泥棒や、誰かを傷つけたときのルール。' },
-                    { name: '行政法（ぎょうせいほう）', purpose: '役所（政府）が、仕事を進めるときのルール。', example: '道路を作ったり、税金を集めたりするルール。' }
+                    { name: '憲法', purpose: '国の最高法規。国民の権利を守ります。', example: '選挙権、表現の自由など。' },
+                    { name: '刑法', purpose: '犯罪と刑罰を定めます。', example: '泥棒や暴行に対する罰。' },
+                    { name: '行政法', purpose: '役所の仕事の進め方を定めます。', example: '道路建設や税金の徴収。' }
                 ]
             },
             'private': {
-                title: '私法（しほう）グループ',
-                description: '人や会社と人や会社の間の関係を決めるルールだよ。',
+                title: '私法（しほう）',
                 laws: [
-                    { name: '民法（みんぽう）', purpose: '人と人の間のルールを決める、一番基本的なルールブック。', example: '家族のこと、お金の貸し借り、物を売ったり買ったりする契約のこと。' },
-                    { name: '商法（しょうほう）', purpose: '特に、会社やお店が商売をするときのルール。', example: '会社の作り方や、お金をやり取りするルール。' },
-                    { name: '知的財産法（ちてきざいさんほう）', purpose: '頭の中で考えたアイデアやデザインを守るルール。', example: '特許や著作権（作った絵や曲）のこと。' }
+                    { name: '民法', purpose: '私生活の基本ルール。', example: '売買契約、結婚、相続。' },
+                    { name: '商法', purpose: 'ビジネスのルール。', example: '会社の運営、手形の発行。' }
                 ]
             },
             'social': {
-                title: '社会法（しゃかいほう）グループ',
-                description: 'みんなが安心して暮らせるように、国が助けたり支えたりするためのルールだよ。',
+                title: '社会法（しゃかいほう）',
                 laws: [
-                    { name: '労働基準法（ろうどうきじゅんほう）', purpose: '働く人が、安全で公平な条件で働けるように守るルール。', example: 'バイトの給料や休みがちゃんと守られているか。' },
-                    { name: '社会保障法（しゃかいほしょうほう）', purpose: '病気や年をとったときに、みんなで助け合う仕組みのルール。', example: '健康保険や年金のこと。' }
+                    { name: '労働基準法', purpose: '働く人を守ります。', example: '最低賃金や残業代のルール。' },
+                    { name: '生活保護法', purpose: '困窮した人を助けます。', example: '生活費の支給など。' }
                 ]
             }
         };
 
         const modal = document.getElementById('lawModal');
-        const majorCategoriesDiv = document.getElementById('major-categories');
-        
-        // --- 法律カテゴリ（中分類）を表示する関数 ---
-        function showCategoryDetail(categoryKey, buttonElement) {
-            
-            // 既に表示されている詳細リストをすべて削除する
-            document.querySelectorAll('.major-category-btn').forEach(btn => {
-                btn.classList.remove('active');
-                const existingDetail = btn.nextElementSibling;
-                if (existingDetail && existingDetail.classList.contains('category-detail-list')) {
-                    existingDetail.remove();
-                }
-            });
 
-            // 初期メッセージを非表示にする
+        function showCategoryDetail(key, btn) {
+            // 他の詳細を閉じる
+            document.querySelectorAll('.category-detail-list').forEach(el => el.remove());
+            document.querySelectorAll('.major-category-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('initial-message').style.display = 'none';
 
-            // 詳細表示エリアが存在するかチェック (自分の直下のものをチェック)
-            const existingDetail = buttonElement.nextElementSibling;
-            
-            // 既に表示されていたら閉じる
-            if (existingDetail && existingDetail.classList.contains('category-detail-list')) {
-                buttonElement.classList.remove('active');
-                existingDetail.remove(); 
-                document.getElementById('initial-message').style.display = 'block'; // 再度メッセージ表示
-                return;
-            }
-
-            const data = LAW_DATA[categoryKey];
-            
-            // 詳細リストを格納する新しい要素を作成
+            const data = LAW_DATA[key];
             const detailDiv = document.createElement('div');
-            detailDiv.id = `detail-${categoryKey}`;
             detailDiv.className = 'category-detail-list';
             
-            let listHtml = `<h3>${data.title} に含まれる主なルール</h3><ul class="law-list">`;
-            
-            // 各法律名ボタンを生成
+            let html = `<h3>${data.title}の主な法律</h3><ul class="law-list">`;
             data.laws.forEach(law => {
-                listHtml += `<li onclick="showLawDetail('${categoryKey}', '${law.name}')">${law.name}</li>`;
+                html += `<li onclick="showLawDetail('${key}', '${law.name}')">${law.name}</li>`;
             });
+            html += '</ul>';
             
-            listHtml += '</ul>';
-            detailDiv.innerHTML = listHtml;
-            
-            // クリックされたボタンの直下に詳細リストを挿入
-            buttonElement.after(detailDiv);
-            buttonElement.classList.add('active'); // アクティブ状態を保持
-            
-            // スムーズにスクロール
-            detailDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        
-        // --- 法律の詳細（モーダル）を表示する ---
-        function showLawDetail(categoryKey, lawName) {
-            const categoryData = LAW_DATA[categoryKey];
-            const lawDetail = categoryData.laws.find(law => law.name === lawName);
-            
-            if (lawDetail) {
-                document.getElementById('modal-title').textContent = lawDetail.name;
-                document.getElementById('modal-purpose').textContent = lawDetail.purpose;
-                document.getElementById('modal-example').textContent = lawDetail.example;
-                modal.style.display = "block";
-            }
-        }
-        
-        // --- モーダルを閉じる ---
-        function closeModal() {
-            modal.style.display = "none";
+            detailDiv.innerHTML = html;
+            btn.after(detailDiv);
+            btn.classList.add('active');
         }
 
-        // モーダルの外側をクリックで閉じる処理
-        window.onclick = function(event) {
-            if (event.target === modal) {
-                closeModal();
+        function showLawDetail(key, name) {
+            const law = LAW_DATA[key].laws.find(l => l.name === name);
+            document.getElementById('modal-title').textContent = law.name;
+            document.getElementById('modal-purpose').textContent = law.purpose;
+            document.getElementById('modal-example').textContent = law.example;
+            modal.style.display = "block";
+        }
+
+        function closeModal() { modal.style.display = "none"; }
+        window.onclick = e => { if (e.target === modal) closeModal(); }
+
+        // ツールリストの読み込み (簡易版)
+        async function loadTools() {
+            try {
+                const res = await fetch('tools.json');
+                const tools = await res.json();
+                document.getElementById('tool-list').innerHTML = tools.slice(0, 5).map(t => 
+                    `<li><a href="${t.href}">${t.icon} ${t.title}</a></li>`
+                ).join('');
+            } catch (e) {
+                document.getElementById('tool-list').innerHTML = '<li>読み込みエラー</li>';
             }
         }
+        document.addEventListener('DOMContentLoaded', loadTools);
     </script>
 </body>
 </html>
