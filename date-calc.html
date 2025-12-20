@@ -158,19 +158,97 @@
 <body>
   <div class="layout">
     <aside class="sidebar left">
+
       <div class="block">
+
         <h3>このツールについて</h3>
+
         <p>
-          日付にまつわる「ちょっと知りたい」を解くための小さな道具です。
+
+          日付にまつわる「ちょっと知りたい」を、静かに解いていくための小さな道具です。<br>
+
+          ○日後はいつか、ふたつの日付の間に何日あるのか。余計なものは置かず、必要な答えだけを。
+
         </p>
+
       </div>
+
       <div class="block">
-        <h3>豆知識</h3>
+
+        <h3>使い方</h3>
+
         <ul>
-          <li>1日は 86,400 秒です。</li>
-          <li>JSのDateは月跨ぎを自動計算します。</li>
+
+          <li>開始日を選びます。</li>
+
+          <li>日数を入力します（例：30 または -10）。</li>
+
+          <li>「計算する」をクリックします。</li>
+
         </ul>
+
+        <p class="hint">「日数差を計算」モードでは、開始日と終了日を選んでください。</p>
+
       </div>
+
+      <div class="block">
+
+        <h3>豆知識</h3>
+
+        <ul>
+
+          <li>うるう年は原則4年ごと。西暦が400の倍数はうるう年、100の倍数は平年。</li>
+
+          <li>1日は 86,400 秒。日数差はミリ秒差を日秒で割って算出しています。</li>
+
+          <li>月をまたぐ日付加算は、JSのDateが自動で繰り上げ・繰り下げします。</li>
+
+        </ul>
+
+      </div>
+
+      <div class="block">
+
+        <h3>Tips</h3>
+
+        <ul>
+
+          <li>負の値で「何日前」も計算できます（例：-7）。</li>
+
+          <li>結果は曜日付きで表示。スケジュールの見通しに便利です。</li>
+
+          <li>祝日表示やコピー機能は、今後のアップデートで追加予定。</li>
+
+        </ul>
+
+      </div>
+
+      <div class="block">
+
+        <p style="font-style: italic; opacity:0.85;">
+
+          時は静かに流れます。<br>
+
+          いま、この瞬間から数えられる未来も過去も、ほどよい距離で。
+
+        </p>
+
+      </div>
+
+      <div class="block">
+
+        <h3>注意事項</h3>
+
+        <p>
+
+          計算はクライアント端末のタイムゾーンに依存します。<br>
+
+          厳密な会計・法務用途では、公式カレンダーや専門システムでの確認をおすすめします。
+
+        </p>
+
+      </div>
+
     </aside>
 
     <main class="card" aria-label="日付計算ツール">
@@ -211,7 +289,6 @@
 
     <aside class="sidebar right">
       <div class="block ad-wrap">
-        <div class="ad-note">Advertisement</div>
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-3571574988222927"
