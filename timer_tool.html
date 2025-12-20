@@ -3,329 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>シンプルタイマー・ストップウォッチ</title>
+    <title>全ツール一覧 (便利ツールボックス)</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
     <style>
-        body { 
-            margin: 0; 
-            background-color: #f4f7f6;
-            font-family: Arial, sans-serif; 
-        }
-        .wrapper {
-            max-width: 1200px;
-            margin: 0 auto; /* スマホ時は上下余白をリセット */
-            display: flex;
-            flex-direction: column; /* 【重要】デフォルト（スマホ）は縦並び */
-            gap: 20px;
-            padding: 10px; /* スマホ画面端の余白 */
-        }
-        
-        /* PC（画面幅768px以上）の設定 */
-        @media (min-width: 768px) {
-            .wrapper {
-                flex-direction: row; /* 横並びに戻す */
-                margin: 20px auto;
-                padding: 0 20px;
-            }
-        }
-        
-        .main-content {
-            flex-grow: 1;
-            background-color: #fff;
-            padding: 20px; /* スマホ向けに少し狭く */
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        body { margin: 0; background-color: #f4f7f6; font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
+
+        .container { 
+            max-width: 900px; 
+            margin: 20px auto; /* スマホでは上下余白を少し減らす */
+            background-color: #fff; 
+            padding: 20px; /* スマホ向けにパディングを縮小 */
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
         }
 
         @media (min-width: 768px) {
-            .main-content {
-                padding: 30px; /* PCでは元の広さ */
+            .container {
+                margin: 40px auto;
+                padding: 40px;
             }
         }
 
-        h1 { text-align: center; color: #333; font-size: 1.5em; }
-      
-        .tool-section {
-            background-color: #f0f0f5;
+        h1 { 
+            text-align: center; 
+            color: #007bff; 
+            border-bottom: 3px solid #b8daff; 
+            padding-bottom: 10px; 
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+        }
+        
+        /* ツールグリッドの設定 */
+        .tool-grid {
+            display: grid;
+            /* スマホでは1列、幅が広くなると自動で複数列に */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px; 
+        }
+
+        .tool-card-link {
+            text-decoration: none; 
+            color: inherit;
+        }
+
+        .tool-card {
+            background-color: #f8faff;
             padding: 20px;
-            margin-bottom: 30px;
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        /* 時刻表示のレスポンシブ調整 */
-        .display {
-            font-size: 3em; /* スマホでは少し小さく（はみ出し防止） */
-            font-weight: bold;
-            margin: 15px 0;
-            color: #333;
-            font-family: 'Courier New', Courier, monospace; /* 数字が動かないフォント */
-        }
-
-        @media (min-width: 768px) {
-            .display { font-size: 4em; }
-        }
-
-        .control-buttons button {
-            padding: 12px 20px;
-            margin: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-            min-width: 120px; /* スマホで押しやすく少し広く */
-            font-weight: bold;
-        }
-        .start-btn { background-color: #28a745; color: white; }
-        .pause-btn { background-color: #ffc107; color: #333; }
-        .reset-btn { background-color: #dc3545; color: white; }
-        .control-buttons button:hover { opacity: 0.8; }
-        
-        /* タイマーの入力欄調整 */
-        input[type="number"] {
-            padding: 10px;
-            font-size: 1.2em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .sidebar {
-            width: 100%; /* スマホでは全幅 */
+            border-radius: 8px;
+            border: 1px solid #d6eaff;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; 
+            flex-direction: column;
+            height: 100%;
             box-sizing: border-box;
-            padding: 20px;
-            background-color: #e9ecef;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        @media (min-width: 768px) {
-            .sidebar {
-                width: 300px; /* PCでは固定幅 */
+        /* PCでのホバー効果 */
+        @media (hover: hover) {
+            .tool-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 10px rgba(0, 123, 255, 0.2);
             }
         }
 
-        .sidebar h3 {
-            color: #007bff;
-            border-bottom: 2px solid #b8daff;
-            padding-bottom: 5px;
+        .tool-card h2 {
             margin-top: 0;
+            color: #007bff;
+            font-size: 1.3rem;
+            margin-bottom: 8px;
         }
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
+
+        .tool-card p {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 15px;
+            flex-grow: 1; 
         }
-        .sidebar li {
-            margin-bottom: 10px;
-        }
-        .sidebar a {
-            text-decoration: none;
-            color: #333;
-            padding: 10px;
+
+        .tool-link-button {
             display: block;
-            border-radius: 4px;
-            background-color: #fff;
-            transition: background-color 0.2s;
+            text-decoration: none;
+            color: white;
+            background-color: #28a745;
+            padding: 12px 15px; /* スマホで押しやすい高さ */
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1rem;
         }
-        .sidebar a:hover {
-            background-color: #d6eaff;
-            color: #0056b3;
+
+        /* 戻るリンクの調整 */
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+            padding-bottom: 20px;
+        }
+
+        @media (max-width: 500px) {
+            h1 { font-size: 1.4rem; }
+            .container { margin: 10px; }
         }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        
-        <div class="main-content">
-            <h1>⏱️ シンプルタイマー・ストップウォッチ</h1>
+    <div class="container">
+        <h1>🛠️ 全ツール一覧</h1>
+        <p style="text-align: center; margin-bottom: 25px; font-size: 0.95rem; color: #666;">
+            日々の作業を少し便利にするツールをまとめています。
+        </p>
 
-            <div class="tool-section">
-                <h2>ストップウォッチ</h2>
-                <div id="stopwatch-display" class="display">00:00:00</div>
-                <div class="control-buttons">
-                    <button class="start-btn" id="sw-start-pause" onclick="startPauseStopwatch()">スタート</button>
-                    <button class="reset-btn" onclick="resetStopwatch()">リセット</button>
-                </div>
-            </div>
-            
-            <hr>
-
-            <div class="tool-section">
-                <h2>タイマー</h2>
-                <div>
-                    <input type="number" id="timer-minutes" inputmode="numeric" min="0" max="59" value="0" style="width: 60px; text-align: center;"> 分
-                    <input type="number" id="timer-seconds" inputmode="numeric" min="0" max="59" value="5" style="width: 60px; text-align: center;"> 秒
-                </div>
-                <div id="timer-display" class="display">00:00</div>
-                <div class="control-buttons">
-                    <button class="start-btn" id="timer-start-pause" onclick="startPauseTimer()">スタート</button>
-                    <button class="reset-btn" onclick="resetTimer()">リセット</button>
-                </div>
-                <div id="timer-message" style="color: red; margin-top: 10px; font-weight: bold;"></div>
-            </div>
-
+        <div class="tool-grid" id="tool-list-container">
+            <p>ツールリストをロード中...</p>
         </div>
         
-        <div class="sidebar">
-            <h3>便利なツール集</h3>
-            <ul id="dynamic-tool-list">
-                <li>ナビゲーションをロード中...</li>
-            </ul>
-
-            <h3 style="margin-top: 30px;">利用シーン</h3>
-            <ul style="font-size: 0.9em; list-style-type: square; margin-left: 20px;">
-                <li>集中作業の時間計測 (ポモドーロ)</li>
-                <li>料理の残り時間管理</li>
-                <li>フィットネスやインターバルトレーニング</li>
-            </ul>
+        <div class="back-link">
+            <a href="index.html" style="color: #007bff; text-decoration: none; font-weight: bold;">← 文字数カウントへ戻る</a>
         </div>
-        
     </div>
 
     <script>
-        // --- ロジック部分は一切変更なし ---
-        function formatTime(totalSeconds) {
-            const h = Math.floor(totalSeconds / 3600);
-            const m = Math.floor((totalSeconds % 3600) / 60);
-            const s = totalSeconds % 60;
-            const paddedH = h.toString().padStart(2, '0');
-            const paddedM = m.toString().padStart(2, '0');
-            const paddedS = s.toString().padStart(2, '0');
-            return h > 0 ? `${paddedH}:${paddedM}:${paddedS}` : `${paddedM}:${paddedS}`;
-        }
-        
-        let stopwatchInterval;
-        let stopwatchSeconds = 0;
-        let isStopwatchRunning = false;
-        const swDisplay = document.getElementById('stopwatch-display');
-        const swButton = document.getElementById('sw-start-pause');
-
-        function startPauseStopwatch() {
-            if (isStopwatchRunning) {
-                clearInterval(stopwatchInterval);
-                swButton.textContent = '再開';
-                swButton.classList.remove('pause-btn');
-                swButton.classList.add('start-btn');
-            } else {
-                stopwatchInterval = setInterval(() => {
-                    stopwatchSeconds++;
-                    swDisplay.textContent = formatTime(stopwatchSeconds);
-                }, 1000);
-                swButton.textContent = '一時停止';
-                swButton.classList.remove('start-btn');
-                swButton.classList.add('pause-btn');
-            }
-            isStopwatchRunning = !isStopwatchRunning;
-        }
-
-        function resetStopwatch() {
-            clearInterval(stopwatchInterval);
-            stopwatchSeconds = 0;
-            isStopwatchRunning = false;
-            swDisplay.textContent = '00:00:00';
-            swButton.textContent = 'スタート';
-            swButton.classList.remove('pause-btn');
-            swButton.classList.add('start-btn');
-        }
-
-        let timerInterval;
-        let timerSecondsLeft;
-        let isTimerRunning = false;
-        const timerDisplay = document.getElementById('timer-display');
-        const timerButton = document.getElementById('timer-start-pause');
-        const timerMsg = document.getElementById('timer-message');
-        const timerMinInput = document.getElementById('timer-minutes');
-        const timerSecInput = document.getElementById('timer-seconds');
-        
-        function initializeTimer() {
-            const min = parseInt(timerMinInput.value) || 0;
-            const sec = parseInt(timerSecInput.value) || 0;
-            timerSecondsLeft = (min * 60) + sec;
-            timerDisplay.textContent = formatTime(timerSecondsLeft);
-            timerMsg.textContent = '';
-        }
-
-        function startPauseTimer() {
-            if (timerSecondsLeft <= 0) {
-                 timerMsg.textContent = "時間を設定してください。";
-                 return;
-            }
-            if (isTimerRunning) {
-                clearInterval(timerInterval);
-                timerButton.textContent = '再開';
-                timerButton.classList.remove('pause-btn');
-                timerButton.classList.add('start-btn');
-            } else {
-                if (!timerInterval) initializeTimer();
-                timerInterval = setInterval(() => {
-                    timerSecondsLeft--;
-                    timerDisplay.textContent = formatTime(timerSecondsLeft);
-                    if (timerSecondsLeft <= 0) {
-                        clearInterval(timerInterval);
-                        isTimerRunning = false;
-                        timerMsg.textContent = "時間です！";
-                        timerButton.textContent = 'スタート';
-                        timerButton.classList.remove('pause-btn');
-                        timerButton.classList.add('start-btn');
-                    }
-                }, 1000);
-                timerButton.textContent = '一時停止';
-                timerButton.classList.remove('start-btn');
-                timerButton.classList.add('pause-btn');
-            }
-            isTimerRunning = !isTimerRunning;
-        }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            isTimerRunning = false;
-            initializeTimer();
-            timerButton.textContent = 'スタート';
-            timerButton.classList.remove('pause-btn');
-            timerButton.classList.add('start-btn');
-            timerMsg.textContent = '';
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeTimer();
-            timerMinInput.addEventListener('input', resetTimer);
-            timerSecInput.addEventListener('input', resetTimer);
-        });
-
         const JSON_URL = 'tools.json';
-        const TOP_TOOLS_COUNT = 4;
-        async function loadAndRenderTools(renderFunction, listId) {
+
+        async function loadAndRenderTools() {
+            const container = document.getElementById('tool-list-container');
+            if (!container) return;
+            
             try {
                 const response = await fetch(JSON_URL);
+                if (!response.ok) {
+                    throw new Error('ネットワークエラー');
+                }
                 const toolsData = await response.json();
-                renderFunction(toolsData, listId);
+                
+                container.innerHTML = '';
+                
+                toolsData.forEach(tool => {
+                    // 拡張子.htmlの自動付与（重複防止）
+                    const linkHref = tool.href.endsWith('.html') ? tool.href : tool.href + '.html';
+
+                    const cardHtml = `
+                        <a href="${linkHref}" class="tool-card-link">
+                            <div class="tool-card">
+                                <h2>${tool.icon} ${tool.title}</h2>
+                                <p>${tool.description || ''}</p>
+                                <span class="tool-link-button">ツールを使う</span>
+                            </div>
+                        </a>
+                    `;
+                    container.innerHTML += cardHtml;
+                });
+
             } catch (error) {
                 console.error(error);
+                container.innerHTML = `<p style="color:red; font-size:0.9em;">リストの読み込みに失敗しました。</p>`;
             }
         }
 
-        function generateSidebarNav(toolsData, listId = 'dynamic-tool-list') {
-            const listContainer = document.getElementById(listId);
-            if (!listContainer) return;
-            let listHtml = '';
-            const currentPath = window.location.pathname.split('/').pop() || 'index.html'; 
-            toolsData.slice(0, TOP_TOOLS_COUNT).forEach(tool => {
-                const isActive = tool.href === currentPath || (currentPath === '' && tool.href === 'index.html');
-                const activeStyle = isActive ? 'style="background-color: #d6eaff; color: #0056b3;"' : '';
-                listHtml += `<li><a href="${tool.href}" ${activeStyle}>${tool.icon} ${tool.title}</a></li>`;
-            });
-            const otherCount = toolsData.length - TOP_TOOLS_COUNT;
-            if (otherCount > 0) {
-                listHtml += `<hr style="margin: 10px 0;">`;
-                listHtml += `<li><a href="tools_index.html" style="font-weight: bold; color: #dc3545;">✨ その他 (${otherCount}件)</a></li>`;
-            }
-            listContainer.innerHTML = listHtml;
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAndRenderTools(generateSidebarNav, 'dynamic-tool-list'); 
-        });
+        document.addEventListener('DOMContentLoaded', loadAndRenderTools);
     </script>
 </body>
 </html>
