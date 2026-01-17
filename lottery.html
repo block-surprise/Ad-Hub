@@ -2,131 +2,156 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>LOTTERY SYSTEM - PRO EDITION</title>
+    <title>PREMIUM LOTTERY SHOW</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --main-color: #ffffff;
-            --bg-color: #000000;
+            --gold: #d4af37;
+            --panel-bg: #1a1a1a;
         }
         body {
-            background-color: var(--bg-color);
-            color: var(--main-color);
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Sans', sans-serif;
+            background-color: #000;
+            color: white;
+            font-family: 'Oswald', sans-serif; /* インパクトのあるフォント */
             margin: 0; overflow: hidden;
-            display: flex; justify-content: center; align-items: center; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
         }
 
-        /* 空間の奥行きを出す背景 */
-        .stage {
-            position: relative; width: 100%; text-align: center; z-index: 10;
+        /* 抽選リールの外枠 */
+        .slot-machine {
+            position: relative;
+            width: 80%;
+            height: 250px;
+            border-top: 4px solid var(--gold);
+            border-bottom: 4px solid var(--gold);
+            background: linear-gradient(180deg, #000 0%, #222 50%, #000 100%);
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
         }
 
-        /* 抽選中の文字。あえて少し小さめから、決定時に巨大化させる */
-        #winner-name {
-            font-size: 5vw; font-weight: 900; letter-spacing: 0.1em;
-            transition: all 0.3s ease;
+        /* 名前が並ぶコンテナ */
+        #reel {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            transition: transform 0s cubic-bezier(0.1, 0, 0, 1);
+            will-change: transform;
+        }
+
+        .name-item {
+            height: 250px;
+            line-height: 250px;
+            font-size: 8rem;
+            font-weight: bold;
+            text-align: center;
             text-transform: uppercase;
+            letter-spacing: 5px;
+            white-space: nowrap;
         }
 
-        /* 決定時のスタイル */
-        .announcing {
-            font-size: 12vw !important;
-            filter: drop-shadow(0 0 50px rgba(255,255,255,0.8));
-            letter-spacing: 0.3em !important;
+        /* 中央のガイド線 */
+        .pointer {
+            position: absolute;
+            top: 50%; width: 100%; height: 2px;
+            background: rgba(212, 175, 55, 0.5);
+            transform: translateY(-50%);
+            z-index: 5;
         }
 
-        /* 下部の操作系は徹底的に隠す */
-        .ui-layer {
-            position: fixed; bottom: 40px; width: 100%;
-            display: flex; justify-content: center; gap: 20px;
-            opacity: 0; transition: opacity 0.5s;
+        /* 操作パネル */
+        .ui { margin-top: 50px; z-index: 10; }
+        #draw-btn {
+            background: var(--gold); border: none; color: black;
+            padding: 20px 60px; font-size: 1.5rem; font-weight: bold;
+            cursor: pointer; border-radius: 5px; transition: 0.3s;
         }
-        body:hover .ui-layer { opacity: 1; } /* マウスを乗せた時だけ見える */
+        #draw-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--gold); }
+        #draw-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
 
-        button {
-            background: none; border: 1px solid #444; color: #888;
-            padding: 10px 30px; border-radius: 5px; cursor: pointer;
-            font-size: 0.8rem; letter-spacing: 0.2em; transition: 0.3s;
-        }
-        button:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,0.1); }
-
-        /* 入力用パネル（左からスライド） */
-        #input-panel {
-            position: fixed; left: -400px; top: 0; width: 350px; height: 100%;
-            background: #111; padding: 40px; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 100; border-right: 1px solid #333;
-        }
-        #input-panel.open { left: 0; }
-        textarea {
-            width: 100%; height: 70%; background: #000; color: #fff;
-            border: 1px solid #333; padding: 15px; font-size: 1rem;
-        }
+        /* 設定エリア（左下に小さく） */
+        .config { position: fixed; bottom: 10px; left: 10px; opacity: 0.2; }
+        .config:hover { opacity: 1; }
+        textarea { width: 200px; height: 100px; background: #222; color: #fff; border: 1px solid #444; }
     </style>
 </head>
 <body>
 
-<div id="input-panel">
-    <h2 style="font-size: 1rem; color: #666;">CANDIDATE LIST</h2>
-    <textarea id="name-list" placeholder="名前を1行ずつ...">
-GUEST 001
-GUEST 002
-GUEST 003
-GUEST 004
-GUEST 005</textarea>
-    <button onclick="togglePanel()" style="margin-top: 20px; width: 100%;">CLOSE</button>
+<div class="slot-machine">
+    <div class="pointer"></div>
+    <div id="reel">
+        <div class="name-item">LOTTERY</div>
+    </div>
 </div>
 
-<div class="stage">
-    <div id="winner-name">READY</div>
+<div class="ui">
+    <button id="draw-btn" onclick="spin()">START SPIN</button>
 </div>
 
-<div class="ui-layer">
-    <button onclick="togglePanel()">EDIT LIST</button>
-    <button id="start-btn" onclick="runLottery()">DRAW</button>
+<div class="config">
+    <textarea id="names-list">
+TAKAOKA
+SATO
+SUZUKI
+ICHIKAWA
+YAMAMOTO
+NAKAMURA
+KOBAYASHI
+TAKAHASHI</textarea>
 </div>
 
 <script>
-    function togglePanel() {
-        document.getElementById('input-panel').classList.toggle('open');
-    }
+    const ITEM_HEIGHT = 250;
 
-    function runLottery() {
-        const list = document.getElementById('name-list').value.split('\n').filter(n => n.trim() !== "");
-        if (list.length < 1) return;
+    function spin() {
+        const btn = document.getElementById('draw-btn');
+        const reel = document.getElementById('reel');
+        const listText = document.getElementById('names-list').value.trim();
+        let names = listText.split('\n').filter(n => n.trim() !== "");
 
-        const display = document.getElementById('winner-name');
-        const startBtn = document.getElementById('start-btn');
+        if (names.length < 1) return;
         
-        startBtn.disabled = true;
-        display.classList.remove('announcing');
+        btn.disabled = true;
+
+        // リール用の配列を作成（ループして見えるように多めに配置）
+        const displayNames = [...names];
+        while (displayNames.length < 50) {
+            displayNames.push(...names);
+        }
         
-        let duration = 5000; // 5秒かけてじっくり演出
-        let start = Date.now();
+        // 当選者を決める
+        const winnerIndex = Math.floor(Math.random() * names.length);
+        // 最終的な停止位置（下の方にある当選者の位置）を計算
+        const stopIndex = displayNames.length - names.length + winnerIndex;
+        
+        // リールを初期化
+        reel.innerHTML = '';
+        displayNames.forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'name-item';
+            div.innerText = name;
+            reel.appendChild(div);
+        });
 
-        const roll = () => {
-            const diff = Date.now() - start;
-            const progress = diff / duration;
-            
-            // ランダムに名前を表示（徐々にスローダウン）
-            display.innerText = list[Math.floor(Math.random() * list.length)];
+        // アニメーション設定
+        reel.style.transition = 'none';
+        reel.style.transform = 'translateY(0)';
 
-            if (diff < duration) {
-                // イージング：最後の方にいくほど極端に遅くする
-                let delay = 30 + Math.pow(progress, 5) * 800;
-                setTimeout(roll, delay);
-            } else {
-                // 決定！
-                display.classList.add('announcing');
-                confetti({
-                    particleCount: 200, spread: 80, origin: { y: 0.6 },
-                    colors: ['#ffffff', '#aaaaaa', '#444444']
-                });
-                startBtn.disabled = false;
-                startBtn.innerText = "RE-DRAW";
-            }
-        };
-        roll();
+        // わずかな遅延のあと回転開始
+        setTimeout(() => {
+            reel.style.transition = 'transform 6s cubic-bezier(0.15, 0, 0.05, 1)';
+            const y = -(stopIndex * ITEM_HEIGHT);
+            reel.style.transform = `translateY(${y}px)`;
+        }, 50);
+
+        // 終了時
+        setTimeout(() => {
+            confetti({
+                particleCount: 250, spread: 100, origin: { y: 0.6 },
+                colors: ['#d4af37', '#ffffff', '#aa8e2d']
+            });
+            btn.disabled = false;
+            btn.innerText = "RE-SPIN";
+        }, 6100);
     }
 </script>
 </body>
