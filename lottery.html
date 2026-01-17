@@ -2,146 +2,69 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>ULTIMATE LOTTERY - SECURE & WEIGHTED</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THE CHOSEN PRO</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --gold: #d4af37; --bg: #000; --admin: #111; }
-        body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; display: flex; height: 100vh; overflow: hidden; }
-
-        /* 管理パネル（隠し） */
-        #admin-panel {
-            width: 0; background: var(--admin); border-right: 0px solid #333;
-            transition: 0.5s; overflow: hidden; display: flex; flex-direction: column; white-space: nowrap;
+        :root {
+            --accent: #007AFF; /* Apple風ブルー */
+            --bg: #000000;
+            --glass: rgba(28, 28, 30, 0.8);
         }
-        #admin-panel.open { width: 350px; border-right: 1px solid #333; padding: 20px; }
-        
-        textarea { flex-grow: 1; background: #000; color: #0f0; border: 1px solid #333; padding: 10px; font-family: monospace; font-size: 14px; }
-        .help { font-size: 11px; color: #888; margin-top: 5px; white-space: normal; }
-
-        /* メイン画面 */
-        .stage { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .slot-container {
-            width: 80%; height: 200px; border: 2px solid var(--gold); border-radius: 10px;
-            overflow: hidden; position: relative; background: linear-gradient(180deg, #000 0%, #111 50%, #000 100%);
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0; background: var(--bg); color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden; height: 100vh; display: flex; flex-direction: column;
         }
-        #reel { position: absolute; width: 100%; top: 0; transition: transform 0s cubic-bezier(0.1, 0, 0.05, 1); }
-        .name-item { height: 200px; line-height: 200px; font-size: 6rem; font-weight: 900; text-align: center; }
 
-        /* ボタンと鍵 */
-        #draw-btn {
-            margin-top: 50px; background: var(--gold); border: none; padding: 20px 60px;
-            font-size: 1.5rem; font-weight: bold; border-radius: 50px; cursor: pointer;
+        /* メインステージ */
+        .stage {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; position: relative;
         }
-        #lock-btn { position: fixed; bottom: 20px; left: 20px; background: none; border: none; color: #222; cursor: pointer; font-size: 20px; z-index: 100; }
-        #lock-btn:hover { color: #555; }
 
-        .history { height: 100px; overflow-y: auto; background: #000; border: 1px solid #222; margin-top: 10px; padding: 5px; font-size: 12px; }
-    </style>
-</head>
-<body>
-
-<button id="lock-btn" onclick="askPassword()">⚙️</button>
-
-<div id="admin-panel">
-    <h3>ADMIN SETTINGS</h3>
-    <label>抽選リスト（名前,比率）</label>
-    <textarea id="names-input">
-特等 豪華ハワイ旅行,1
-1等 高級肉セット,3
-2等 参加賞のティッシュ,20
-運試し田中さん,10</textarea>
-    <div class="help">※「名前,10」のように書くと当たりやすさが10倍になります。</div>
-
-    <div style="margin-top:15px">
-        <input type="checkbox" id="auto-remove">
-        <label for="auto-remove">当選者をリストから削除</label>
-    </div>
-
-    <div class="history" id="history-log">履歴なし</div>
-    <button onclick="askPassword()" style="margin-top:10px">パネルを閉じる</button>
-</div>
-
-<div class="stage">
-    <div class="slot-container">
-        <div id="reel"><div class="name-item">READY</div></div>
-    </div>
-    <button id="draw-btn" onclick="spin()">START</button>
-</div>
-
-<script>
-    const PASS = "1234"; // ★ここにパスコードを設定してください
-    let isAdminOpen = false;
-
-    function askPassword() {
-        if (!isAdminOpen) {
-            const res = prompt("パスコードを入力してください:");
-            if (res === PASS) {
-                document.getElementById('admin-panel').classList.add('open');
-                isAdminOpen = true;
-            } else {
-                alert("認証失敗");
-            }
-        } else {
-            document.getElementById('admin-panel').classList.remove('open');
-            isAdminOpen = false;
+        /* スマホ・PC両対応のスロット表示 */
+        .slot-window {
+            width: 100%; max-width: 600px; height: 160px;
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+            background: linear-gradient(180deg, #000 0%, #111 50%, #000 100%);
+            position: relative; overflow: hidden;
+            box-shadow: 0 0 40px rgba(0,0,0,1), 0 0 20px rgba(0,122,255,0.2);
         }
-    }
+        .slot-window::after {
+            content: ""; position: absolute; top: 50%; left: 0; width: 100%; height: 2px;
+            background: var(--accent); transform: translateY(-50%); opacity: 0.5; pointer-events: none;
+        }
 
-    function spin() {
-        const btn = document.getElementById('draw-btn');
-        const reel = document.getElementById('reel');
-        const input = document.getElementById('names-input').value;
-        const autoRemove = document.getElementById('auto-remove').checked;
+        #reel {
+            position: absolute; width: 100%; top: 0;
+            transition: transform 0s cubic-bezier(0.15, 0, 0, 1);
+        }
+        .name-card {
+            height: 160px; line-height: 160px; text-align: center;
+            font-size: clamp(1.8rem, 8vw, 4.5rem); font-weight: 800;
+            letter-spacing: -1px; white-space: nowrap; padding: 0 20px;
+        }
 
-        // 確率計算用データのパース
-        let candidates = [];
-        input.split('\n').forEach(line => {
-            const [name, weight] = line.split(',');
-            if (name) {
-                const w = parseInt(weight) || 1;
-                for(let i=0; i<w; i++) candidates.push(name.trim());
-            }
-        });
+        /* スタイリッシュな設定パネル (モーダル) */
+        #settings-modal {
+            position: fixed; inset: 0; background: var(--bg);
+            z-index: 1000; transform: translateY(100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px; overflow-y: auto;
+        }
+        #settings-modal.open { transform: translateY(0); }
 
-        if (candidates.length === 0) return alert("リストが空です");
+        .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .settings-header h2 { margin: 0; font-size: 1.5rem; }
 
-        btn.disabled = true;
-        
-        // 演出用のリール作成（シャッフル）
-        let displayList = [];
-        for(let i=0; i<50; i++) displayList.push(candidates[Math.floor(Math.random() * candidates.length)]);
-        
-        const winner = candidates[Math.floor(Math.random() * candidates.length)];
-        displayList.push(winner); // 最後に当選者
+        .form-group { background: #1c1c1e; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+        label { display: block; color: #8e8e93; font-size: 0.8rem; margin-bottom: 8px; text-transform: uppercase; }
+        textarea {
+            width: 100%; height: 200px; background: transparent; border: none;
+            color: white; font-size: 1rem; outline: none; resize: none;
+        }
 
-        reel.innerHTML = '';
-        displayList.forEach(name => {
-            const div = document.createElement('div');
-            div.className = 'name-item';
-            div.innerText = name;
-            reel.appendChild(div);
-        });
-
-        reel.style.transition = 'none';
-        reel.style.transform = 'translateY(0)';
-
-        setTimeout(() => {
-            reel.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0, 1)';
-            reel.style.transform = `translateY(${- (displayList.length - 1) * 200}px)`;
-        }, 50);
-
-        setTimeout(() => {
-            confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
-            document.getElementById('history-log').prepend(document.createElement('div').innerText = "当選: " + winner);
-            
-            if (autoRemove) {
-                const lines = document.getElementById('names-input').value.split('\n');
-                const newLines = lines.filter(line => !line.startsWith(winner + ","));
-                document.getElementById('names-input').value = newLines.join('\n');
-            }
-            btn.disabled = false;
-        }, 6500);
-    }
-</script>
-</body>
-</html>
+        /* スタイリッシュボタン */
+        .btn-main {
+            background: var(--accent); color: white; border: none; border-radius:
