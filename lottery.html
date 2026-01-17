@@ -67,4 +67,142 @@
 
         /* スタイリッシュボタン */
         .btn-main {
-            background: var(--accent); color: white; border: none; border-radius:
+            background: var(--accent); color: white; border: none; border-radius: 100px;
+            padding: 18px 60px; font-size: 1.2rem; font-weight: 600; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 10px 20px rgba(0,122,255,0.3);
+        }
+        .btn-main:active { transform: scale(0.95); opacity: 0.8; }
+        .btn-main:disabled { background: #3a3a3c; box-shadow: none; color: #8e8e93; }
+
+        .btn-close { background: #3a3a3c; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; }
+        .config-icon { position: fixed; top: 20px; right: 20px; font-size: 24px; opacity: 0.3; cursor: pointer; padding: 10px; }
+
+        /* 履歴・フッター */
+        .history-tag {
+            margin-top: 30px; font-size: 0.9rem; color: #8e8e93; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="config-icon" onclick="openSettings()">⚙️</div>
+
+<div class="stage">
+    <div class="slot-window">
+        <div id="reel">
+            <div class="name-card">TAP START</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 60px;">
+        <button id="draw-btn" class="btn-main" onclick="run()">START</button>
+    </div>
+    
+    <div id="last-winner" class="history-tag">READY TO DRAW</div>
+</div>
+
+<div id="settings-modal">
+    <div class="settings-header">
+        <h2>SETTINGS</h2>
+        <button class="btn-close" onclick="closeSettings()">DONE</button>
+    </div>
+
+    <div class="form-group">
+        <label>Lottery List (Name,Weight)</label>
+        <textarea id="list-input">
+iPhone 15 Pro,1
+AirPods Pro,3
+Gift Card ¥5000,5
+Special Thanks,15
+Try Again,10</textarea>
+    </div>
+
+    <div class="form-group" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Remove Winner After Draw</span>
+        <input type="checkbox" id="remove-check" style="width:20px; height:20px;">
+    </div>
+
+    <div style="color: #444; font-size: 0.7rem; padding: 10px;">
+        Passcode is: 0000
+    </div>
+</div>
+
+<script>
+    const PASS = "0000";
+    const CARD_HEIGHT = 160;
+    let isDrawing = false;
+
+    function openSettings() {
+        const p = prompt("Enter Access Code:");
+        if (p === PASS) document.getElementById('settings-modal').classList.add('open');
+    }
+
+    function closeSettings() {
+        document.getElementById('settings-modal').classList.remove('open');
+    }
+
+    function run() {
+        if (isDrawing) return;
+
+        const input = document.getElementById('list-input').value;
+        const lines = input.split('\n').filter(l => l.trim() !== "");
+        let pool = [];
+
+        lines.forEach(line => {
+            const [name, weight] = line.split(',');
+            const w = parseInt(weight) || 1;
+            for(let i=0; i<w; i++) pool.push(name.trim());
+        });
+
+        if (pool.length === 0) return alert("List is empty");
+
+        isDrawing = true;
+        const btn = document.getElementById('draw-btn');
+        const reel = document.getElementById('reel');
+        btn.disabled = true;
+
+        // 演出用配列
+        let displayList = [];
+        for(let i=0; i<40; i++) displayList.push(pool[Math.floor(Math.random() * pool.length)]);
+        const winner = pool[Math.floor(Math.random() * pool.length)];
+        displayList.push(winner);
+
+        reel.innerHTML = '';
+        displayList.forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'name-card';
+            div.innerText = name;
+            reel.appendChild(div);
+        });
+
+        const totalDist = (displayList.length - 1) * CARD_HEIGHT;
+        reel.style.transition = 'none';
+        reel.style.transform = `translateY(0)`;
+
+        setTimeout(() => {
+            reel.style.transition = 'transform 5s cubic-bezier(0.1, 0, 0, 1)';
+            reel.style.transform = `translateY(${-totalDist}px)`;
+        }, 50);
+
+        setTimeout(() => {
+            confetti({
+                particleCount: window.innerWidth < 600 ? 80 : 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#007AFF', '#ffffff']
+            });
+            document.getElementById('last-winner').innerText = "Winner: " + winner;
+            
+            if (document.getElementById('remove-check').checked) {
+                const newLines = lines.filter(l => !l.startsWith(winner + ","));
+                document.getElementById('list-input').value = newLines.join('\n');
+            }
+            
+            isDrawing = false;
+            btn.disabled = false;
+            btn.innerText = "RE-DRAW";
+        }, 5500);
+    }
+</script>
+</body>
+</html>
