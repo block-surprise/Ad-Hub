@@ -2,255 +2,135 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>ULTIMATE LOTTERY - VISUAL EDITION</title>
+    <title>LOTTERY ENGINE v1.0</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --gold: #ffd700;
-            --silver: #e0e0e0;
-            --bg-dark: #000000;
+            --accent: #ffffff; /* ここを好きな色に変えるだけでオリジナリティが出ます */
+            --bg: #050505;
         }
-        body {
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Inter', 'Yu Gothic', sans-serif;
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: white; font-family: "Inter", "Helvetica Neue", sans-serif; overflow: hidden; }
+        
+        /* メイン表示 */
+        #canvas-wrapper {
+            display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh;
         }
+        #name-display {
+            font-size: clamp(3rem, 15vw, 10rem); font-weight: 800; letter-spacing: -0.02em;
+            text-align: center; transition: 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+        .blur { filter: blur(12px); opacity: 0.3; transform: scale(0.9); }
 
-        /* 躍動感のある背景 */
-        .background-animation {
-            position: fixed;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
-            z-index: -1;
+        /* 操作系 */
+        .controls { position: fixed; bottom: 50px; width: 100%; text-align: center; }
+        #action-btn {
+            background: none; border: 1px solid rgba(255,255,255,0.3); color: white;
+            padding: 12px 40px; border-radius: 100px; font-size: 0.9rem; cursor: pointer;
+            backdrop-filter: blur(10px); transition: 0.3s;
         }
+        #action-btn:hover { background: white; color: black; }
 
-        .main-stage {
-            text-align: center;
-            z-index: 10;
+        /* 設定パネル（隠し要素） */
+        #settings-panel {
+            position: fixed; top: 0; right: -350px; width: 300px; height: 100%;
+            background: rgba(20,20,20,0.9); backdrop-filter: blur(20px);
+            padding: 30px; transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1); z-index: 100;
         }
-
-        /* 当選表示エリア */
-        #display-container {
-            height: 300px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            perspective: 1000px;
+        #settings-panel.open { right: 0; }
+        #config-trigger {
+            position: fixed; top: 20px; right: 20px; cursor: pointer; opacity: 0.2; font-size: 1.5rem;
         }
-
-        #label {
-            font-size: 1.5rem;
-            letter-spacing: 1rem;
-            color: var(--gold);
-            margin-bottom: 20px;
-            opacity: 0.5;
-            transition: all 0.8s ease;
-        }
-
-        #name-slot {
-            font-size: 7rem;
-            font-weight: 900;
-            margin: 0;
-            padding: 0 40px;
-            background: linear-gradient(to bottom, #fff 0%, #aaa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
-            transform-style: preserve-3d;
-        }
-
-        /* 抽選中のブラー効果 */
-        .shuffling {
-            filter: blur(4px) opacity(0.7);
-            transform: scale(0.95);
-        }
-
-        /* 決定した瞬間の演出 */
-        .winner-announced {
-            animation: winner-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            background: linear-gradient(to bottom, var(--gold) 0%, #ff8c00 100%) !important;
-            -webkit-background-clip: text !important;
-            filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.6)) !important;
-        }
-
-        @keyframes winner-pop {
-            0% { transform: scale(0.5) rotateX(90deg); opacity: 0; }
-            100% { transform: scale(1) rotateX(0deg); opacity: 1; }
-        }
-
-        /* 操作ボタン */
-        .controls {
-            margin-top: 50px;
-        }
-
-        #draw-btn {
-            background: none;
-            border: 2px solid var(--gold);
-            color: var(--gold);
-            padding: 15px 50px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            letter-spacing: 0.3rem;
-            border-radius: 0;
-            cursor: pointer;
-            transition: 0.4s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #draw-btn:hover {
-            background: var(--gold);
-            color: black;
-            box-shadow: 0 0 30px var(--gold);
-        }
-
-        #draw-btn:disabled {
-            border-color: #444;
-            color: #444;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        /* 入力エリア（隠し要素的デザイン） */
-        .settings {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            text-align: left;
-            opacity: 0.2;
-            transition: 0.5s;
-        }
-        .settings:hover { opacity: 1; }
         textarea {
-            background: transparent;
-            color: white;
-            border: 1px solid #333;
-            padding: 10px;
-            width: 200px;
-            height: 100px;
-            font-size: 12px;
+            width: 100%; height: 70%; background: rgba(255,255,255,0.05); border: 1px solid #333;
+            color: white; padding: 10px; border-radius: 8px; font-family: monospace;
         }
     </style>
 </head>
 <body>
 
-<div class="background-animation"></div>
+<div id="config-trigger" onclick="toggleSettings()">⚙</div>
 
-<div class="main-stage">
-    <div id="label">ENTRY LIST READY</div>
-    <div id="display-container">
-        <h1 id="name-slot">STANDBY</h1>
-    </div>
-    <div class="controls">
-        <button id="draw-btn" onclick="executeLottery()">START DRAW</button>
-    </div>
+<div id="settings-panel">
+    <h3>CANDIDATES</h3>
+    <textarea id="names-input">
+Member 01
+Member 02
+Member 03
+Member 04
+Member 05</textarea>
+    <p style="font-size: 12px; color: #666;">1行に1人入力してください</p>
+    <button onclick="toggleSettings()" style="width: 100%; padding: 10px;">CLOSE</button>
 </div>
 
-<div class="settings">
-    <div style="font-size: 10px; margin-bottom: 5px; color: #888;">CANDIDATES (ONE PER LINE)</div>
-    <textarea id="names">
-CEO Tanaka
-Director Sato
-Manager Suzuki
-Special Guest A
-Special Guest B
-Phoenix
-Dragon
-Tiger</textarea>
+<div id="canvas-wrapper">
+    <div id="name-display">READY</div>
+    <div class="controls">
+        <button id="action-btn" onclick="start()">RUN SYSTEM</button>
+    </div>
 </div>
 
 <script>
-    function executeLottery() {
-        const nameInput = document.getElementById('names').value;
-        const names = nameInput.split('\n').filter(n => n.trim() !== "");
+    let isRunning = false;
+
+    function toggleSettings() {
+        document.getElementById('settings-panel').classList.toggle('open');
+    }
+
+    function start() {
+        if (isRunning) return;
         
-        if (names.length < 1) return;
+        const input = document.getElementById('names-input').value;
+        const list = input.split('\n').filter(n => n.trim() !== "");
+        if (list.length === 0) return;
 
-        const btn = document.getElementById('draw-btn');
-        const slot = document.getElementById('name-slot');
-        const label = document.getElementById('label');
+        isRunning = true;
+        const btn = document.getElementById('action-btn');
+        const display = document.getElementById('name-display');
         
-        btn.disabled = true;
-        label.innerText = "DRAWING...";
-        label.style.letterSpacing = "0.5rem";
-        slot.classList.add('shuffling');
-        slot.classList.remove('winner-announced');
+        btn.style.display = 'none';
+        display.classList.add('blur');
 
-        let duration = 4000; // 4秒間の演出
-        let startTime = Date.now();
+        let count = 0;
+        let speed = 50;
+        const duration = 3500;
+        const startTime = Date.now();
 
-        const run = () => {
+        const loop = () => {
             const now = Date.now();
             const elapsed = now - startTime;
-            const progress = elapsed / duration;
-
-            // ランダムに名前を表示
-            slot.innerText = names[Math.floor(Math.random() * names.length)];
+            
+            display.innerText = list[Math.floor(Math.random() * list.length)];
 
             if (elapsed < duration) {
-                // 進捗に合わせて速度を落とす（イージング）
-                const delay = 40 + Math.pow(progress, 3) * 500;
-                setTimeout(run, delay);
+                // 指数関数的に速度を落とす
+                let progress = elapsed / duration;
+                setTimeout(loop, speed + Math.pow(progress, 4) * 600);
             } else {
-                // 最終決定
-                const winner = names[Math.floor(Math.random() * names.length)];
-                finalize(winner);
+                finish(list);
             }
         };
-
-        run();
+        loop();
     }
 
-    function finalize(winner) {
-        const slot = document.getElementById('name-slot');
-        const label = document.getElementById('label');
-        const btn = document.getElementById('draw-btn');
-
-        slot.innerText = winner;
-        slot.classList.remove('shuffling');
-        slot.classList.add('winner-announced');
+    function finish(list) {
+        const display = document.getElementById('name-display');
+        const btn = document.getElementById('action-btn');
         
-        label.innerText = "WINNER";
-        label.style.letterSpacing = "1.5rem";
-        label.style.opacity = "1";
+        display.innerText = list[Math.floor(Math.random() * list.length)];
+        display.classList.remove('blur');
+        
+        // 洗練された紙吹雪演出
+        confetti({
+            particleCount: 100, spread: 70, origin: { y: 0.6 },
+            colors: ['#ffffff', '#333333', '#666666']
+        });
 
-        // ゴージャスな紙吹雪
-        const end = Date.now() + (2 * 1000);
-        const colors = ['#ffd700', '#ffffff', '#ff8c00'];
-
-        (function frame() {
-            confetti({
-                particleCount: 3,
-                angle: 60,
-                spread: 55,
-                origin: { x: 0 },
-                colors: colors
-            });
-            confetti({
-                particleCount: 3,
-                angle: 120,
-                spread: 55,
-                origin: { x: 1 },
-                colors: colors
-            });
-
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        }());
-
-        btn.disabled = false;
-        btn.innerText = "AGAIN";
+        setTimeout(() => {
+            isRunning = false;
+            btn.style.display = 'inline-block';
+            btn.innerText = 'REBOOT';
+        }, 1000);
     }
 </script>
-
 </body>
 </html>
