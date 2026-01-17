@@ -2,156 +2,145 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>PREMIUM LOTTERY SHOW</title>
+    <title>ULTIMATE LOTTERY - SECURE & WEIGHTED</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        :root {
-            --gold: #d4af37;
-            --panel-bg: #1a1a1a;
-        }
-        body {
-            background-color: #000;
-            color: white;
-            font-family: 'Oswald', sans-serif; /* インパクトのあるフォント */
-            margin: 0; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
-        }
+        :root { --gold: #d4af37; --bg: #000; --admin: #111; }
+        body { background: var(--bg); color: white; margin: 0; font-family: sans-serif; display: flex; height: 100vh; overflow: hidden; }
 
-        /* 抽選リールの外枠 */
-        .slot-machine {
-            position: relative;
-            width: 80%;
-            height: 250px;
-            border-top: 4px solid var(--gold);
-            border-bottom: 4px solid var(--gold);
-            background: linear-gradient(180deg, #000 0%, #222 50%, #000 100%);
-            overflow: hidden;
-            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
+        /* 管理パネル（隠し） */
+        #admin-panel {
+            width: 0; background: var(--admin); border-right: 0px solid #333;
+            transition: 0.5s; overflow: hidden; display: flex; flex-direction: column; white-space: nowrap;
         }
+        #admin-panel.open { width: 350px; border-right: 1px solid #333; padding: 20px; }
+        
+        textarea { flex-grow: 1; background: #000; color: #0f0; border: 1px solid #333; padding: 10px; font-family: monospace; font-size: 14px; }
+        .help { font-size: 11px; color: #888; margin-top: 5px; white-space: normal; }
 
-        /* 名前が並ぶコンテナ */
-        #reel {
-            position: absolute;
-            width: 100%;
-            top: 0;
-            transition: transform 0s cubic-bezier(0.1, 0, 0, 1);
-            will-change: transform;
+        /* メイン画面 */
+        .stage { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .slot-container {
+            width: 80%; height: 200px; border: 2px solid var(--gold); border-radius: 10px;
+            overflow: hidden; position: relative; background: linear-gradient(180deg, #000 0%, #111 50%, #000 100%);
         }
+        #reel { position: absolute; width: 100%; top: 0; transition: transform 0s cubic-bezier(0.1, 0, 0.05, 1); }
+        .name-item { height: 200px; line-height: 200px; font-size: 6rem; font-weight: 900; text-align: center; }
 
-        .name-item {
-            height: 250px;
-            line-height: 250px;
-            font-size: 8rem;
-            font-weight: bold;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            white-space: nowrap;
-        }
-
-        /* 中央のガイド線 */
-        .pointer {
-            position: absolute;
-            top: 50%; width: 100%; height: 2px;
-            background: rgba(212, 175, 55, 0.5);
-            transform: translateY(-50%);
-            z-index: 5;
-        }
-
-        /* 操作パネル */
-        .ui { margin-top: 50px; z-index: 10; }
+        /* ボタンと鍵 */
         #draw-btn {
-            background: var(--gold); border: none; color: black;
-            padding: 20px 60px; font-size: 1.5rem; font-weight: bold;
-            cursor: pointer; border-radius: 5px; transition: 0.3s;
+            margin-top: 50px; background: var(--gold); border: none; padding: 20px 60px;
+            font-size: 1.5rem; font-weight: bold; border-radius: 50px; cursor: pointer;
         }
-        #draw-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--gold); }
-        #draw-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+        #lock-btn { position: fixed; bottom: 20px; left: 20px; background: none; border: none; color: #222; cursor: pointer; font-size: 20px; z-index: 100; }
+        #lock-btn:hover { color: #555; }
 
-        /* 設定エリア（左下に小さく） */
-        .config { position: fixed; bottom: 10px; left: 10px; opacity: 0.2; }
-        .config:hover { opacity: 1; }
-        textarea { width: 200px; height: 100px; background: #222; color: #fff; border: 1px solid #444; }
+        .history { height: 100px; overflow-y: auto; background: #000; border: 1px solid #222; margin-top: 10px; padding: 5px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="slot-machine">
-    <div class="pointer"></div>
-    <div id="reel">
-        <div class="name-item">LOTTERY</div>
+<button id="lock-btn" onclick="askPassword()">⚙️</button>
+
+<div id="admin-panel">
+    <h3>ADMIN SETTINGS</h3>
+    <label>抽選リスト（名前,比率）</label>
+    <textarea id="names-input">
+特等 豪華ハワイ旅行,1
+1等 高級肉セット,3
+2等 参加賞のティッシュ,20
+運試し田中さん,10</textarea>
+    <div class="help">※「名前,10」のように書くと当たりやすさが10倍になります。</div>
+
+    <div style="margin-top:15px">
+        <input type="checkbox" id="auto-remove">
+        <label for="auto-remove">当選者をリストから削除</label>
     </div>
+
+    <div class="history" id="history-log">履歴なし</div>
+    <button onclick="askPassword()" style="margin-top:10px">パネルを閉じる</button>
 </div>
 
-<div class="ui">
-    <button id="draw-btn" onclick="spin()">START SPIN</button>
-</div>
-
-<div class="config">
-    <textarea id="names-list">
-TAKAOKA
-SATO
-SUZUKI
-ICHIKAWA
-YAMAMOTO
-NAKAMURA
-KOBAYASHI
-TAKAHASHI</textarea>
+<div class="stage">
+    <div class="slot-container">
+        <div id="reel"><div class="name-item">READY</div></div>
+    </div>
+    <button id="draw-btn" onclick="spin()">START</button>
 </div>
 
 <script>
-    const ITEM_HEIGHT = 250;
+    const PASS = "1234"; // ★ここにパスコードを設定してください
+    let isAdminOpen = false;
+
+    function askPassword() {
+        if (!isAdminOpen) {
+            const res = prompt("パスコードを入力してください:");
+            if (res === PASS) {
+                document.getElementById('admin-panel').classList.add('open');
+                isAdminOpen = true;
+            } else {
+                alert("認証失敗");
+            }
+        } else {
+            document.getElementById('admin-panel').classList.remove('open');
+            isAdminOpen = false;
+        }
+    }
 
     function spin() {
         const btn = document.getElementById('draw-btn');
         const reel = document.getElementById('reel');
-        const listText = document.getElementById('names-list').value.trim();
-        let names = listText.split('\n').filter(n => n.trim() !== "");
+        const input = document.getElementById('names-input').value;
+        const autoRemove = document.getElementById('auto-remove').checked;
 
-        if (names.length < 1) return;
-        
+        // 確率計算用データのパース
+        let candidates = [];
+        input.split('\n').forEach(line => {
+            const [name, weight] = line.split(',');
+            if (name) {
+                const w = parseInt(weight) || 1;
+                for(let i=0; i<w; i++) candidates.push(name.trim());
+            }
+        });
+
+        if (candidates.length === 0) return alert("リストが空です");
+
         btn.disabled = true;
+        
+        // 演出用のリール作成（シャッフル）
+        let displayList = [];
+        for(let i=0; i<50; i++) displayList.push(candidates[Math.floor(Math.random() * candidates.length)]);
+        
+        const winner = candidates[Math.floor(Math.random() * candidates.length)];
+        displayList.push(winner); // 最後に当選者
 
-        // リール用の配列を作成（ループして見えるように多めに配置）
-        const displayNames = [...names];
-        while (displayNames.length < 50) {
-            displayNames.push(...names);
-        }
-        
-        // 当選者を決める
-        const winnerIndex = Math.floor(Math.random() * names.length);
-        // 最終的な停止位置（下の方にある当選者の位置）を計算
-        const stopIndex = displayNames.length - names.length + winnerIndex;
-        
-        // リールを初期化
         reel.innerHTML = '';
-        displayNames.forEach(name => {
+        displayList.forEach(name => {
             const div = document.createElement('div');
             div.className = 'name-item';
             div.innerText = name;
             reel.appendChild(div);
         });
 
-        // アニメーション設定
         reel.style.transition = 'none';
         reel.style.transform = 'translateY(0)';
 
-        // わずかな遅延のあと回転開始
         setTimeout(() => {
-            reel.style.transition = 'transform 6s cubic-bezier(0.15, 0, 0.05, 1)';
-            const y = -(stopIndex * ITEM_HEIGHT);
-            reel.style.transform = `translateY(${y}px)`;
+            reel.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0, 1)';
+            reel.style.transform = `translateY(${- (displayList.length - 1) * 200}px)`;
         }, 50);
 
-        // 終了時
         setTimeout(() => {
-            confetti({
-                particleCount: 250, spread: 100, origin: { y: 0.6 },
-                colors: ['#d4af37', '#ffffff', '#aa8e2d']
-            });
+            confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
+            document.getElementById('history-log').prepend(document.createElement('div').innerText = "当選: " + winner);
+            
+            if (autoRemove) {
+                const lines = document.getElementById('names-input').value.split('\n');
+                const newLines = lines.filter(line => !line.startsWith(winner + ","));
+                document.getElementById('names-input').value = newLines.join('\n');
+            }
             btn.disabled = false;
-            btn.innerText = "RE-SPIN";
-        }, 6100);
+        }, 6500);
     }
 </script>
 </body>
