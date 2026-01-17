@@ -3,148 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THE CHOSEN PRO</title>
+    <title>THE BOX - PREMIUM LOTTERY</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        :root {
-            --accent: #007AFF; /* Apple風ブルー */
-            --bg: #000000;
-            --glass: rgba(28, 28, 30, 0.8);
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            margin: 0; background: var(--bg); color: white;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow: hidden; height: 100vh; display: flex; flex-direction: column;
-        }
+        :root { --accent: #e74c3c; --gold: #f1c40f; --bg: #1a1a1a; }
+        body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; height: 100vh; overflow: hidden; }
 
         /* メインステージ */
-        .stage {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; position: relative;
+        .stage { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; position: relative; }
+
+        /* 抽選箱のデザイン */
+        .box-container { position: relative; width: 280px; height: 280px; perspective: 1000px; cursor: pointer; }
+        .box {
+            width: 100%; height: 100%; background: #c0392b; border: 8px solid #a93226;
+            border-radius: 10px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .box::after { /* 箱の穴 */
+            content: ""; position: absolute; top: 15px; width: 100px; height: 40px;
+            background: rgba(0,0,0,0.6); border-radius: 50%; border: 2px solid #922b21;
+        }
+        .box-label { font-size: 40px; font-weight: bold; color: var(--gold); opacity: 0.8; }
+
+        /* 飛び出す紙（くじ） */
+        .paper {
+            position: absolute; left: 50%; top: 30px; width: 200px; height: 100px;
+            background: white; color: black; border-radius: 4px; border: 1px solid #ddd;
+            transform: translateX(-50%) translateY(0) rotateX(90deg);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: bold; opacity: 0; z-index: 10;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .paper.active {
+            transform: translateX(-50%) translateY(-220px) rotateX(0deg); opacity: 1;
+            height: 120px; width: 240px; font-size: 28px;
         }
 
-        /* スマホ・PC両対応のスロット表示 */
-        .slot-window {
-            width: 100%; max-width: 600px; height: 160px;
-            border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-            background: linear-gradient(180deg, #000 0%, #111 50%, #000 100%);
-            position: relative; overflow: hidden;
-            box-shadow: 0 0 40px rgba(0,0,0,1), 0 0 20px rgba(0,122,255,0.2);
+        /* 設定パネル（右下に常駐） */
+        .config-toggle { position: fixed; bottom: 20px; right: 20px; background: rgba(255,255,255,0.1); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1001; }
+        #settings-panel {
+            position: fixed; bottom: 80px; right: 20px; width: 320px; background: #2c3e50;
+            border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none; z-index: 1000;
         }
-        .slot-window::after {
-            content: ""; position: absolute; top: 50%; left: 0; width: 100%; height: 2px;
-            background: var(--accent); transform: translateY(-50%); opacity: 0.5; pointer-events: none;
+        #settings-panel.open { display: block; }
+        textarea { width: 100%; height: 150px; background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px; margin-bottom: 10px; }
+        
+        button#draw-btn {
+            margin-top: 40px; background: var(--gold); border: none; padding: 15px 50px;
+            font-size: 20px; font-weight: bold; border-radius: 30px; cursor: pointer;
         }
-
-        #reel {
-            position: absolute; width: 100%; top: 0;
-            transition: transform 0s cubic-bezier(0.15, 0, 0, 1);
-        }
-        .name-card {
-            height: 160px; line-height: 160px; text-align: center;
-            font-size: clamp(1.8rem, 8vw, 4.5rem); font-weight: 800;
-            letter-spacing: -1px; white-space: nowrap; padding: 0 20px;
-        }
-
-        /* スタイリッシュな設定パネル (モーダル) */
-        #settings-modal {
-            position: fixed; inset: 0; background: var(--bg);
-            z-index: 1000; transform: translateY(100%); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 20px; overflow-y: auto;
-        }
-        #settings-modal.open { transform: translateY(0); }
-
-        .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .settings-header h2 { margin: 0; font-size: 1.5rem; }
-
-        .form-group { background: #1c1c1e; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-        label { display: block; color: #8e8e93; font-size: 0.8rem; margin-bottom: 8px; text-transform: uppercase; }
-        textarea {
-            width: 100%; height: 200px; background: transparent; border: none;
-            color: white; font-size: 1rem; outline: none; resize: none;
-        }
-
-        /* スタイリッシュボタン */
-        .btn-main {
-            background: var(--accent); color: white; border: none; border-radius: 100px;
-            padding: 18px 60px; font-size: 1.2rem; font-weight: 600; cursor: pointer;
-            transition: 0.3s; box-shadow: 0 10px 20px rgba(0,122,255,0.3);
-        }
-        .btn-main:active { transform: scale(0.95); opacity: 0.8; }
-        .btn-main:disabled { background: #3a3a3c; box-shadow: none; color: #8e8e93; }
-
-        .btn-close { background: #3a3a3c; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; }
-        .config-icon { position: fixed; top: 20px; right: 20px; font-size: 24px; opacity: 0.3; cursor: pointer; padding: 10px; }
-
-        /* 履歴・フッター */
-        .history-tag {
-            margin-top: 30px; font-size: 0.9rem; color: #8e8e93; text-align: center;
-        }
+        .winner-name { text-align: center; width: 100%; line-height: 1.2; word-break: break-all; }
     </style>
 </head>
 <body>
 
-<div class="config-icon" onclick="openSettings()">⚙️</div>
-
 <div class="stage">
-    <div class="slot-window">
-        <div id="reel">
-            <div class="name-card">TAP START</div>
+    <div class="box-container" onclick="draw()">
+        <div id="result-paper" class="paper">
+            <div id="winner-text" class="winner-name">???</div>
+        </div>
+        <div class="box">
+            <div class="box-label">抽選箱</div>
         </div>
     </div>
-    
-    <div style="margin-top: 60px;">
-        <button id="draw-btn" class="btn-main" onclick="run()">START</button>
-    </div>
-    
-    <div id="last-winner" class="history-tag">READY TO DRAW</div>
+    <button id="draw-btn" onclick="draw()">くじを引く！</button>
 </div>
 
-<div id="settings-modal">
-    <div class="settings-header">
-        <h2>SETTINGS</h2>
-        <button class="btn-close" onclick="closeSettings()">DONE</button>
-    </div>
+<div class="config-toggle" onclick="toggleSettings()">⚙️</div>
 
-    <div class="form-group">
-        <label>Lottery List (Name,Weight)</label>
-        <textarea id="list-input">
-iPhone 15 Pro,1
-AirPods Pro,3
-Gift Card ¥5000,5
-Special Thanks,15
-Try Again,10</textarea>
+<div id="settings-panel">
+    <h3 style="margin-top:0">抽選設定</h3>
+    <label style="font-size:12px; color:#bdc3c7;">名前,比率（改行区切り）</label>
+    <textarea id="names-input">
+特等: 豪華景品,1
+1等: A賞,5
+2等: B賞,10
+3等: C賞,20
+ハズレ,50</textarea>
+    
+    <div style="font-size:12px; margin-bottom:10px;">
+        <input type="checkbox" id="auto-remove"> 当選者を削除する
     </div>
-
-    <div class="form-group" style="display:flex; justify-content:space-between; align-items:center;">
-        <span>Remove Winner After Draw</span>
-        <input type="checkbox" id="remove-check" style="width:20px; height:20px;">
+    
+    <div style="font-size:11px; color:#95a5a6; margin-bottom:10px;">
+        パスコード: 1234 (⚙️をクリック)
     </div>
-
-    <div style="color: #444; font-size: 0.7rem; padding: 10px;">
-        Passcode is: 0000
-    </div>
+    <button onclick="toggleSettings()" style="width:100%; padding:8px;">閉じる</button>
 </div>
 
 <script>
-    const PASS = "0000";
-    const CARD_HEIGHT = 160;
     let isDrawing = false;
+    let isAdminOpen = false;
 
-    function openSettings() {
-        const p = prompt("Enter Access Code:");
-        if (p === PASS) document.getElementById('settings-modal').classList.add('open');
+    function toggleSettings() {
+        if (!isAdminOpen) {
+            const pass = prompt("パスコードを入力してください");
+            if (pass !== "1234") return alert("認証失敗");
+        }
+        document.getElementById('settings-panel').classList.toggle('open');
+        isAdminOpen = !isAdminOpen;
     }
 
-    function closeSettings() {
-        document.getElementById('settings-modal').classList.remove('open');
-    }
-
-    function run() {
+    function draw() {
         if (isDrawing) return;
 
-        const input = document.getElementById('list-input').value;
+        const input = document.getElementById('names-input').value;
         const lines = input.split('\n').filter(l => l.trim() !== "");
         let pool = [];
 
@@ -154,54 +119,37 @@ Try Again,10</textarea>
             for(let i=0; i<w; i++) pool.push(name.trim());
         });
 
-        if (pool.length === 0) return alert("List is empty");
+        if (pool.length === 0) return alert("リストを入力してください");
 
         isDrawing = true;
+        const paper = document.getElementById('result-paper');
+        const text = document.getElementById('winner-text');
         const btn = document.getElementById('draw-btn');
-        const reel = document.getElementById('reel');
+
+        // リセット
+        paper.classList.remove('active');
         btn.disabled = true;
 
-        // 演出用配列
-        let displayList = [];
-        for(let i=0; i<40; i++) displayList.push(pool[Math.floor(Math.random() * pool.length)]);
-        const winner = pool[Math.floor(Math.random() * pool.length)];
-        displayList.push(winner);
-
-        reel.innerHTML = '';
-        displayList.forEach(name => {
-            const div = document.createElement('div');
-            div.className = 'name-card';
-            div.innerText = name;
-            reel.appendChild(div);
-        });
-
-        const totalDist = (displayList.length - 1) * CARD_HEIGHT;
-        reel.style.transition = 'none';
-        reel.style.transform = `translateY(0)`;
-
+        // 1秒待ってから「飛び出す」演出
         setTimeout(() => {
-            reel.style.transition = 'transform 5s cubic-bezier(0.1, 0, 0, 1)';
-            reel.style.transform = `translateY(${-totalDist}px)`;
-        }, 50);
+            const winner = pool[Math.floor(Math.random() * pool.length)];
+            text.innerText = winner;
+            paper.classList.add('active');
 
-        setTimeout(() => {
             confetti({
-                particleCount: window.innerWidth < 600 ? 80 : 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#007AFF', '#ffffff']
+                particleCount: 150, spread: 70, origin: { y: 0.5 },
+                colors: ['#f1c40f', '#ffffff', '#e74c3c']
             });
-            document.getElementById('last-winner').innerText = "Winner: " + winner;
-            
-            if (document.getElementById('remove-check').checked) {
+
+            if (document.getElementById('auto-remove').checked) {
                 const newLines = lines.filter(l => !l.startsWith(winner + ","));
-                document.getElementById('list-input').value = newLines.join('\n');
+                document.getElementById('names-input').value = newLines.join('\n');
             }
-            
+
             isDrawing = false;
             btn.disabled = false;
-            btn.innerText = "RE-DRAW";
-        }, 5500);
+            btn.innerText = "もう一度引く";
+        }, 300);
     }
 </script>
 </body>
