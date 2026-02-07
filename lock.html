@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lock Screen Web</title>
+    <style>
+        /* 基本スタイル */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden; /* ロック中はスクロール禁止 */
+        }
+
+        /* --- ロック画面のスタイル --- */
+        #lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); /* 背景色（画像も可） */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 9999;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+        }
+
+        /* 時計のスタイル */
+        #clock {
+            font-size: 5rem;
+            font-weight: 200;
+            margin-bottom: 2rem;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            width: 200px;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background: #fff;
+            color: #1e3c72;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* --- 消える時のアニメーション --- */
+        .unlocked {
+            transform: translateY(-100%); /* 上にスライドして消える */
+            opacity: 0;
+        }
+
+        /* --- メインコンテンツ --- */
+        #main-content {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f2f5;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="lock-screen">
+        <div id="clock">00:00</div>
+        <div class="login-box">
+            <h3>Password: 1234</h3>
+            <input type="password" id="pass-input" placeholder="パスワードを入力">
+            <br>
+            <button onclick="tryUnlock()">Login</button>
+        </div>
+    </div>
+
+    <main id="main-content">
+        <div>
+            <h1>ようこそ！</h1>
+            <p>ロックが解除されました。このページがメインサイトです。</p>
+        </div>
+    </main>
+
+    <script>
+        // 時計の更新
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${h}:${m}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ロック解除処理
+        function tryUnlock() {
+            const input = document.getElementById('pass-input').value;
+            const lockScreen = document.getElementById('lock-screen');
+
+            if (input === "1234") {
+                // アニメーション開始
+                lockScreen.classList.add('unlocked');
+                
+                // スクロールを許可
+                document.body.style.overflow = 'auto';
+
+                // アニメーション完了後に要素を完全に消去
+                setTimeout(() => {
+                    lockScreen.remove();
+                    alert("ロック画面の要素を完全に削除しました。");
+                }, 800);
+            } else {
+                alert("パスワードが違います。");
+            }
+        }
+    </script>
+</body>
+</html>
