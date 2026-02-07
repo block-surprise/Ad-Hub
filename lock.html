@@ -2,136 +2,102 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lock Screen Web</title>
+    <title>Lock Screen System</title>
     <style>
-        /* 基本スタイル */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            overflow: hidden; /* ロック中はスクロール禁止 */
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        
+        /* 起動画面 */
+        #boot-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: white; display: flex; 
+            justify-content: center; align-items: center; z-index: 10000;
         }
 
-        /* --- ロック画面のスタイル --- */
+        /* ロック画面 */
         #lock-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); /* 背景色（画像も可） */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
             z-index: 9999;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+            transition: opacity 0.8s ease;
         }
 
-        /* 時計のスタイル */
-        #clock {
-            font-size: 5rem;
-            font-weight: 200;
-            margin-bottom: 2rem;
+        .login-box { text-align: center; background: rgba(0,0,0,0.4); padding: 40px; border-radius: 20px; backdrop-filter: blur(10px); }
+        input { 
+            padding: 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; 
+            margin-bottom: 15px; width: 220px; font-size: 1.1rem;
+            background: rgba(255,255,255,0.1); color: white; text-align: center;
         }
+        button { padding: 10px 25px; cursor: pointer; border-radius: 5px; border: none; background: #0078d4; color: white; font-weight: bold; }
+        button:hover { background: #005a9e; }
 
-        .login-box {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2rem;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-
-        input {
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            outline: none;
-            width: 200px;
-            font-size: 1rem;
-        }
-
-        button {
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            background: #fff;
-            color: #1e3c72;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        /* --- 消える時のアニメーション --- */
-        .unlocked {
-            transform: translateY(-100%); /* 上にスライドして消える */
-            opacity: 0;
-        }
-
-        /* --- メインコンテンツ --- */
-        #main-content {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f0f2f5;
+        /* メインサイト */
+        #main-site {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: #f3f3f3; color: #333;
         }
     </style>
 </head>
 <body>
 
+    <div id="boot-screen">
+        <button onclick="startLock()">システムを起動（全画面表示）</button>
+    </div>
+
     <div id="lock-screen">
-        <div id="clock">00:00</div>
         <div class="login-box">
-            <h3>Password: 1234</h3>
-            <input type="password" id="pass-input" placeholder="パスワードを入力">
+            <h2>LOCKED</h2>
+            <input type="password" id="pass" placeholder="Password" autofocus>
             <br>
-            <button onclick="tryUnlock()">Login</button>
+            <button onclick="unlock()">Unlock</button>
+            <p style="font-size: 0.8rem; margin-top: 15px; opacity: 0.7;">Hint: 1234 (Enter to unlock)</p>
         </div>
     </div>
 
-    <main id="main-content">
-        <div>
-            <h1>ようこそ！</h1>
-            <p>ロックが解除されました。このページがメインサイトです。</p>
-        </div>
+    <main id="main-site">
+        <h1>Welcome to the System</h1>
+        <p>全画面が解除され、セキュリティレイヤーが削除されました。</p>
     </main>
 
     <script>
-        // 時計の更新
-        function updateClock() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('clock').textContent = `${h}:${m}`;
+        const bootScreen = document.getElementById('boot-screen');
+        const lockScreen = document.getElementById('lock-screen');
+        const passInput = document.getElementById('pass');
+
+        function startLock() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            }
+            bootScreen.style.display = 'none';
+            lockScreen.style.display = 'flex';
+            // 自動で入力欄にフォーカスを当てる
+            setTimeout(() => passInput.focus(), 100);
         }
-        setInterval(updateClock, 1000);
-        updateClock();
 
-        // ロック解除処理
-        function tryUnlock() {
-            const input = document.getElementById('pass-input').value;
-            const lockScreen = document.getElementById('lock-screen');
+        // --- 追加機能：Enterキーの監視 ---
+        passInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                unlock();
+            }
+        });
 
-            if (input === "1234") {
-                // アニメーション開始
-                lockScreen.classList.add('unlocked');
-                
-                // スクロールを許可
-                document.body.style.overflow = 'auto';
+        function unlock() {
+            if (passInput.value === "1234") {
+                // 全画面解除
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
 
-                // アニメーション完了後に要素を完全に消去
+                // フェードアウトさせてから削除
+                lockScreen.style.opacity = '0';
                 setTimeout(() => {
                     lockScreen.remove();
-                    alert("ロック画面の要素を完全に削除しました。");
+                    document.body.style.overflow = 'auto';
                 }, 800);
             } else {
-                alert("パスワードが違います。");
+                alert("パスワードが違います");
+                passInput.value = ""; // 間違えたら入力をクリア
             }
         }
     </script>
