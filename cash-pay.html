@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>MyCompany Pay - Final Fixed</title>
+    <title>MyCompany Pay - Full Version</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -13,7 +13,9 @@
         .balance-amount { font-size: 3.5rem; font-weight: bold; color: var(--pay-color); margin: 0; }
         #qrcode { display: inline-block; margin: 15px 0; padding: 10px; background: white; border: 5px solid var(--pay-color); border-radius: 15px; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; }
-        .btn-charge { background: var(--pay-color); color: white; }
+        .btn-charge { background: var(--pay-color); color: white; margin-top: 10px; }
+        #video-container { width: 100%; height: 250px; background: #000; border-radius: 15px; overflow: hidden; display: none; margin-top: 15px; }
+        #preview { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -23,6 +25,10 @@
     <div id="qrcode"></div>
     <p style="font-weight:bold;">レジにかざしてお支払い</p>
     <button class="btn btn-charge" id="start-btn" onclick="openScanner()">⚡ チャージする</button>
+    <div id="video-container">
+        <video id="preview" playsinline></video>
+        <button class="btn" style="background:#666; color:white; margin-top:10px;" onclick="closeScanner()">キャンセル</button>
+    </div>
 </div>
 
 <script type="module">
@@ -50,42 +56,59 @@
         new QRCode(qrContainer, { text: "PAY_USER_" + balance, width: 200, height: 200 });
     }
 
-    // --- 【修正：最強の監視ロジック】 ---
-    let pendingAmount = 0; 
-    let alreadyPaid = false; // 二重引き落とし防止
-
+    // --- 決済監視（メッセージから金額を抜き取って確実に引く） ---
     onValue(posRef, (snapshot) => {
         const data = snapshot.val();
-        if (!data) return;
-
-        const posTotal = data.total;
-        const posMsg = data.lastItem || "";
-
-        // 1. レジに金額がある間は、「次に引くべき金額」を常にキープ
-        if (posTotal > 0) {
-            pendingAmount = posTotal;
-            alreadyPaid = false; // 金額が発生したので次の決済を待機
-            console.log("引き落とし待機金額:", pendingAmount);
-        }
-
-        // 2. 「自社Pay」という文字が含まれ、かつ合計が0になった瞬間を狙う
-        if (posTotal === 0 && (posMsg.includes("自社Pay") || posMsg.includes("決済完了"))) {
-            if (!alreadyPaid && pendingAmount > 0) {
-                console.log("引き落とし実行:", pendingAmount);
-                balance -= pendingAmount;
+        if (!data || !data.lastItem) return;
+        
+        // メッセージが「自社Pay決済完了_金額」の形式であることを確認
+        if (data.total === 0 && data.lastItem.includes("自社Pay決済完了_")) {
+            const amount = parseInt(data.lastItem.split("_")[1]);
+            if (amount > 0) {
+                balance -= amount;
                 if (balance < 0) balance = 0;
-                
-                alreadyPaid = true; // 1回の決済で1回しか引かないようにロック
-                pendingAmount = 0;  // 待機金額をリセット
-                
                 updateView();
-                alert(`決済完了！ ¥${balance.toLocaleString()} になりました。`);
+                alert(`決済完了！ ¥${amount.toLocaleString()} を引き落としました。`);
+                // レジ側のメッセージをクリアするために「処理済み」として扱う
+                // (リセットボタンなどで上書きされるのを待つ)
             }
         }
     });
 
+    const video = document.getElementById("preview");
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    let isScanning = false;
+
+    window.openScanner = () => {
+        document.getElementById('video-container').style.display = 'block';
+        document.getElementById('start-btn').style.display = 'none';
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then((stream) => {
+            video.srcObject = stream; video.play(); isScanning = true; requestAnimationFrame(tick);
+        });
+    };
+    window.closeScanner = () => {
+        isScanning = false; if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+        document.getElementById('video-container').style.display = 'none';
+        document.getElementById('start-btn').style.display = 'block';
+    };
+    function tick() {
+        if (!isScanning) return;
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.height = video.videoHeight; canvas.width = video.videoWidth;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const code = jsQR(context.getImageData(0,0,canvas.width,canvas.height).data, canvas.width, canvas.height);
+            if (code && code.data.startsWith("CHARGE_")) {
+                const amt = parseInt(code.data.split("_")[1]);
+                balance += amt;
+                alert(amt + "円チャージしました！");
+                closeScanner();
+                updateView();
+            }
+        }
+        requestAnimationFrame(tick);
+    }
     updateView();
-    // (スキャナー部分は省略していますが、上のロジックがメインです)
 </script>
 </body>
 </html>
