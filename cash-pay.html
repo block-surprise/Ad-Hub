@@ -2,29 +2,85 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>My Pay - スキャン支払</title>
+    <title>My Pay - 演出あり版</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #9b59b6; color: white; margin: 0; padding-top: 50px; }
-        .card { background: white; color: #333; width: 90%; margin: 0 auto; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); box-sizing: border-box; }
-        .balance { font-size: 4rem; font-weight: bold; color: #9b59b6; margin: 10px 0; }
-        .btn-scan { background: #9b59b6; color: white; width: 100%; padding: 20px; font-size: 1.3rem; font-weight: bold; border-radius: 15px; border: none; margin-top: 20px; cursor: pointer; }
+        :root { --pay-purple: #9b59b6; --success-green: #2ecc71; }
+        body { font-family: sans-serif; text-align: center; background: var(--pay-purple); color: white; margin: 0; overflow-x: hidden; }
+        
+        /* メインカード */
+        .card { background: white; color: #333; width: 90%; margin: 50px auto 20px; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .balance-label { color: #888; font-size: 0.9rem; font-weight: bold; }
+        .balance { font-size: 4rem; font-weight: bold; color: var(--pay-purple); margin: 10px 0; }
+        .btn-scan { background: var(--pay-purple); color: white; width: 100%; padding: 20px; font-size: 1.3rem; font-weight: bold; border-radius: 15px; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-scan:active { transform: scale(0.95); }
+
+        /* スキャナー */
         #video-container { display: none; margin-top: 20px; width: 100%; height: 350px; background: black; border-radius: 15px; overflow: hidden; position: relative; }
         #preview { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- 決済完了オーバーレイ --- */
+        #success-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 5000; flex-direction: column; justify-content: center; align-items: center;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .checkmark { width: 100px; height: 100px; border-radius: 50%; display: block; stroke-width: 2; stroke: var(--success-green); stroke-miterlimit: 10; box-shadow: inset 0px 0px 0px var(--success-green); animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
+        .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 2; stroke-miterlimit: 10; stroke: var(--success-green); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
+        
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 100px #fff; } }
+
+        .result-amount { font-size: 3.5rem; font-weight: bold; color: #333; margin: 20px 0; }
+        .result-msg { color: #888; font-weight: bold; margin-bottom: 40px; }
+        .btn-close { background: #eee; color: #333; border: none; padding: 15px 50px; border-radius: 30px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div style="color:#888;">マイ残高</div>
+    <div class="balance-label">マイ残高</div>
     <div class="balance">¥<span id="balance">0</span></div>
-    <button class="btn-scan" id="scan-btn" onclick="startScan()">📷 お店のQRを読み取る</button>
+    <button class="btn-scan" id="scan-btn" onclick="startScan()">📷 お支払いスキャン</button>
+    
     <div id="video-container">
         <video id="preview" playsinline></video>
         <button onclick="stopScan()" style="position:absolute; bottom:10px; left:10%; width:80%; padding:10px; background:rgba(0,0,0,0.5); color:white; border:none; border-radius:10px;">キャンセル</button>
     </div>
 </div>
+
+<div id="success-overlay">
+    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+        <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+        <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+    </svg>
+    <div style="color:var(--success-green); font-weight:bold; margin-top:10px; font-size:1.2rem;">お支払い完了</div>
+    <div class="result-amount">¥<span id="paid-amt">0</span></div>
+    <div class="result-msg">自社Payレジ</div>
+    <button class="btn-close" onclick="closeSuccess()">とじる</button>
+</div>
+
+<script>
+    function playPaySound() {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // ラ(A5)
+        oscillator.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.1); // ミ(E6)
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.5);
+    }
+</script>
 
 <script type="module">
     let myBalance = parseInt(localStorage.getItem('my_pay_balance')) || 0;
@@ -57,6 +113,16 @@
         document.getElementById('scan-btn').style.display = 'block';
     };
 
+    function showSuccess(amt) {
+        document.getElementById('paid-amt').innerText = amt.toLocaleString();
+        document.getElementById('success-overlay').style.display = 'flex';
+        playPaySound(); // 音を鳴らす
+    }
+
+    window.closeSuccess = () => {
+        document.getElementById('success-overlay').style.display = 'none';
+    };
+
     function tick() {
         if (!scanning) return;
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
@@ -65,14 +131,13 @@
             const code = jsQR(ctx.getImageData(0,0,canvas.width,canvas.height).data, canvas.width, canvas.height);
             
             if (code && code.data) {
-                // 1. チャージQRを読んだ場合
                 if (code.data.startsWith("CHARGE_")) {
                     const amt = parseInt(code.data.split("_")[1]);
                     myBalance += amt;
-                    alert("¥" + amt + " チャージしました！");
-                    stopScan(); updateView();
+                    updateView();
+                    alert("¥" + amt + " チャージ完了！");
+                    stopScan();
                 } 
-                // 2. 決済QRを読んだ場合
                 else if (code.data.startsWith("PAY_")) {
                     const parts = code.data.split("_");
                     const amt = parseInt(parts[1]);
@@ -82,10 +147,11 @@
                         lastPayId = payId;
                         if (myBalance >= amt) {
                             myBalance -= amt;
-                            alert("¥" + amt + " お支払い完了！");
-                            stopScan(); updateView();
+                            updateView();
+                            stopScan();
+                            showSuccess(amt); // 演出を表示！
                         } else {
-                            alert("残高が足りません！");
+                            alert("残高不足です！");
                             stopScan();
                         }
                     }
