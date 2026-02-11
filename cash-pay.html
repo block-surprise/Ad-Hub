@@ -2,83 +2,111 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>MyCompany Pay - User</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCompany Pay - User App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <style>
         :root { --pay-color: #9b59b6; --bg: #f3f4f6; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; }
-        .pay-card { width: 90%; max-width: 400px; background: white; margin-top: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 20px; text-align: center; }
-        .balance-label { color: #888; font-size: 0.9rem; }
-        .balance-amount { font-size: 3rem; font-weight: bold; color: var(--pay-color); margin: 10px 0; }
-        #qrcode { display: inline-block; margin: 20px 0; padding: 10px; background: white; border: 1px solid #eee; }
-        .btn-action { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; text-align: center; }
+        .pay-card { width: 90%; max-width: 400px; background: white; margin: 20px auto; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 20px; }
+        .balance-amount { font-size: 3rem; font-weight: bold; color: var(--pay-color); margin: 5px 0; }
+        
+        /* 支払い用QR表示エリア */
+        #qrcode { display: inline-block; margin: 15px 0; padding: 10px; background: white; border: 5px solid var(--pay-color); border-radius: 10px; }
+
+        /* スキャナー（チャージ用） */
+        #video-container { width: 100%; height: 200px; background: #000; border-radius: 12px; overflow: hidden; position: relative; display: none; margin-top: 15px; }
+        #preview { width: 100%; height: 100%; object-fit: cover; }
+        
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
         .btn-charge { background: var(--pay-color); color: white; }
-        #scanner-container { width: 100%; height: 200px; display: none; background: #000; border-radius: 12px; overflow: hidden; margin-top: 10px; }
+        .btn-close { background: #999; color: white; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="pay-card">
-    <div class="balance-label">現在の残高</div>
+    <div style="color: #888;">マイ残高</div>
     <div class="balance-amount">¥<span id="balance">0</span></div>
     
     <div id="qrcode"></div>
-    <p style="font-size: 0.8rem; color: #666;">このコードをレジに提示してください</p>
+    <p style="font-size: 0.8rem; color: #666; margin-bottom: 20px;">レジでこのQRを見せて支払う</p>
 
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-
-    <button class="btn-action btn-charge" onclick="openScanner()">チャージ（QR読み取り）</button>
-    <div id="scanner-container"></div>
+    <button class="btn btn-charge" id="start-btn" onclick="openScanner()">⚡ チャージする (カメラ起動)</button>
+    
+    <div id="video-container">
+        <video id="preview" playsinline></video>
+        <button class="btn btn-close" onclick="closeScanner()">カメラを閉じる</button>
+    </div>
 </div>
 
 <script>
-    // 1. ローカル残高の初期化
     let balance = parseInt(localStorage.getItem('user_balance')) || 0;
     const balanceEl = document.getElementById('balance');
     const qrContainer = document.getElementById('qrcode');
+    const video = document.getElementById("preview");
+    const container = document.getElementById('video-container');
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    let isScanning = false;
 
+    // --- 表示更新 ---
     function updateView() {
         balanceEl.innerText = balance.toLocaleString();
         localStorage.setItem('user_balance', balance);
-        
-        // 支払い用QRの更新（例: PAY_USER_12345 という形式）
         qrContainer.innerHTML = "";
+        // 支払い用QR: PAY_USER_残高 形式
         new QRCode(qrContainer, {
-            text: "PAY_USER_" + balance, // ここに残高情報などを込める
+            text: "PAY_USER_" + balance,
             width: 180,
             height: 180
         });
     }
 
-    // 2. スキャナー機能（チャージ用）
+    // --- チャージ用スキャナー (jsQR) ---
     function openScanner() {
-        const container = document.getElementById('scanner-container');
         container.style.display = 'block';
-        
-        Quagga.init({
-            inputStream: { name: "Live", type: "LiveStream", target: container, constraints: { facingMode: "environment" } },
-            decoder: { readers: ["code_128_reader", "ean_reader"] }
-        }, (err) => {
-            if (!err) Quagga.start();
+        document.getElementById('start-btn').style.display = 'none';
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then((stream) => {
+            video.srcObject = stream;
+            video.play();
+            isScanning = true;
+            requestAnimationFrame(tick);
         });
     }
 
-    Quagga.onDetected((result) => {
-        const code = result.codeResult.code;
-        // 例: CHARGE_1000 というコードを読んだらチャージ
-        if (code.startsWith("CHARGE_")) {
-            const amount = parseInt(code.split("_")[1]);
-            balance += amount;
-            alert(amount + "円チャージしました！");
-            Quagga.stop();
-            document.getElementById('scanner-container').style.display = 'none';
-            updateView();
+    function closeScanner() {
+        isScanning = false;
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
         }
-    });
+        container.style.display = 'none';
+        document.getElementById('start-btn').style.display = 'block';
+    }
 
-    // 初回表示
+    function tick() {
+        if (!isScanning) return;
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+            if (code) {
+                if (code.data.startsWith("CHARGE_")) {
+                    const amount = parseInt(code.data.split("_")[1]);
+                    balance += amount;
+                    alert(`⚡ ${amount}円チャージ完了！`);
+                    closeScanner();
+                    updateView();
+                }
+            }
+        }
+        requestAnimationFrame(tick);
+    }
+
     updateView();
 </script>
 </body>
