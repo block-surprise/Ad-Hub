@@ -15,15 +15,18 @@
         body.customer-mode .admin-only { display: none !important; }
         body.customer-mode #video-container { height: 0; }
 
-        #video-container { width: 100%; height: 200px; background: #000; position: relative; overflow: hidden; transition: 0.3s; }
+        #video-container { width: 100%; height: 250px; background: #000; position: relative; overflow: hidden; transition: 0.3s; }
         #preview { width: 100%; height: 100%; object-fit: cover; }
         
-        .display-section { padding: 30px 20px; text-align: center; background: white; border-bottom: 2px solid #eee; }
-        .total-amount { font-size: 4rem; font-weight: bold; margin: 0; color: var(--primary); }
-        .status-msg { height: 24px; color: var(--accent); font-weight: bold; margin-top: 10px; }
+        /* スキャン枠を表示 */
+        .scan-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 60%; border: 2px solid rgba(255,255,255,0.5); border-radius: 10px; box-shadow: 0 0 0 1000px rgba(0,0,0,0.3); pointer-events: none; }
 
-        .controls { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .tool-box { background: #f9f9f9; padding: 12px; border-radius: 10px; border: 1px solid #eee; }
+        .display-section { padding: 20px; text-align: center; background: white; border-bottom: 2px solid #eee; }
+        .total-amount { font-size: 3.5rem; font-weight: bold; margin: 0; color: var(--primary); }
+        .status-msg { height: 24px; color: var(--accent); font-weight: bold; margin-top: 5px; }
+
+        .controls { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .tool-box { background: #f9f9f9; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
         
         input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; box-sizing: border-box; margin-bottom: 8px; }
         button { border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; color: white; width: 100%; }
@@ -32,7 +35,6 @@
         .btn-manual { background: var(--accent); }
         .btn-switch { background: rgba(255,255,255,0.2); border: 1px solid white; font-size: 0.7rem; width: auto; padding: 5px 10px; }
 
-        /* モーダル表示を中央に固定 */
         #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; }
         #qr-canvas { background: white; padding: 20px; border-radius: 15px; }
     </style>
@@ -47,32 +49,28 @@
 
     <div id="video-container" class="admin-only">
         <video id="preview" playsinline></video>
+        <div class="scan-guide"></div>
     </div>
 
     <div class="display-section">
-        <div style="font-size:0.8rem; color:#999;">合計</div>
+        <div style="font-size:0.8rem; color:#999;">合計金額</div>
         <div class="total-amount">¥<span id="total-price">0</span></div>
         <div id="status-msg" class="status-msg">いらっしゃいませ</div>
     </div>
 
     <div class="controls admin-only">
-        <div class="tool-box">
-            <button class="btn-pay" onclick="generatePayQR()">📱 自社Pay決済用QRを表示</button>
-        </div>
+        <button class="btn-pay" onclick="generatePayQR()">📱 自社Pay決済QRを表示</button>
         <div class="tool-box">
             <button class="btn-cash" onclick="finishPayment('現金')">💵 現金会計を確定</button>
         </div>
-
         <div class="tool-box">
             <input type="number" id="manual-price" placeholder="金額を直接入力">
-            <button class="btn-manual" onclick="addManual()">➕ 金額を手入力で追加</button>
+            <button class="btn-manual" onclick="addManual()">➕ 手入力で追加</button>
         </div>
-
         <div class="tool-box">
             <input type="number" id="charge-input" placeholder="チャージ金額">
             <button class="btn-pay" style="background:#e67e22;" onclick="generateChargeQR()">⚡ チャージQR作成</button>
         </div>
-        
         <button onclick="clearCart()" style="background:#bbb; font-size:0.8rem;">リセット</button>
     </div>
 </div>
@@ -89,8 +87,6 @@
 
     const firebaseConfig = {
         apiKey: "AIzaSyBWmqdhnlEPxm3DgJDQk0qZ-EFrq8SBU_I",
-        authDomain: "kuraberukun-e638b.firebaseapp.com",
-        projectId: "kuraberukun-e638b",
         databaseURL: "https://kuraberukun-e638b-default-rtdb.firebaseio.com",
     };
 
@@ -103,6 +99,7 @@
     let itemMaster = {};
     let isProcessing = false;
 
+    // Firebase同期
     onValue(posRef, (snapshot) => {
         if (isProcessing) return; 
         const data = snapshot.val();
@@ -118,9 +115,8 @@
         document.getElementById('total-price').innerText = (newData.total || 0).toLocaleString();
         document.getElementById('status-msg').innerText = newData.lastItem;
         currentTotal = newData.total;
-
         await set(posRef, { ...newData, time: Date.now() });
-        setTimeout(() => { isProcessing = false; }, 1500);
+        setTimeout(() => { isProcessing = false; }, 1000);
     }
 
     window.toggleMode = () => {
@@ -130,33 +126,21 @@
 
     window.addManual = () => {
         const p = parseInt(document.getElementById('manual-price').value);
-        if (p) {
-            sendData({ total: currentTotal + p, lastItem: "手入力追加" });
-            document.getElementById('manual-price').value = "";
-        }
+        if (p) { sendData({ total: currentTotal + p, lastItem: "手入力追加" }); document.getElementById('manual-price').value = ""; }
     };
 
-    // 決済完了時の処理（現金用）
     window.finishPayment = (m) => {
-        if(currentTotal > 0) {
-            const final = currentTotal;
-            sendData({ total: 0, lastItem: `【${m}】会計完了` });
-        }
+        if(currentTotal > 0) sendData({ total: 0, lastItem: `【${m}】会計完了` });
     };
 
-    // --- 【追加】決済用QR生成 ---
     window.generatePayQR = () => {
         if (currentTotal <= 0) return;
         document.getElementById('qr-canvas').innerHTML = "";
-        // PAY_金額_時間の形式でQR作成
         new QRCode(document.getElementById('qr-canvas'), { text: `PAY_${currentTotal}_${Date.now()}`, width: 250, height: 250 });
         document.getElementById('qr-label').innerText = `お支払い: ¥${currentTotal}`;
         document.getElementById('qr-modal').style.display = 'flex';
-        // 画面上は会計完了にする
         sendData({ total: 0, lastItem: "自社Pay決済待ち" });
     };
-
-    window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
 
     window.generateChargeQR = () => {
         const amt = document.getElementById('charge-input').value;
@@ -167,12 +151,27 @@
         document.getElementById('qr-modal').style.display = 'flex';
     };
 
+    window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
+
+    // --- カメラ設定の強化 ---
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then((stream) => {
-        video.srcObject = stream; video.play(); requestAnimationFrame(tick);
+    // 解像度を明示的に指定してスキャン精度を上げる
+    navigator.mediaDevices.getUserMedia({ 
+        video: { 
+            facingMode: "environment",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        } 
+    }).then((stream) => {
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true); 
+        video.play();
+        requestAnimationFrame(tick);
+    }).catch(err => {
+        alert("カメラが起動できません: " + err);
     });
 
     function tick() {
@@ -180,20 +179,27 @@
             canvas.height = video.videoHeight;
             canvas.width = video.videoWidth;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const code = jsQR(context.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
-            if (code && code.data) handleScan(code.data);
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
+            });
+            if (code && code.data) {
+                handleScan(code.data);
+                // 連続スキャン防止のディレイ
+                isProcessing = true;
+                setTimeout(() => { isProcessing = false; }, 1500);
+            }
         }
         requestAnimationFrame(tick);
     }
 
     async function handleScan(data) {
-        if (isProcessing) return;
         if (itemMaster[data]) {
             await sendData({ total: currentTotal + itemMaster[data].price, lastItem: itemMaster[data].name });
         } else if (data.length > 5) {
             isProcessing = true;
-            const name = prompt("商品名を入力:");
-            const price = parseInt(prompt("価格を入力:"));
+            const name = prompt("新規商品名:");
+            const price = parseInt(prompt("価格:"));
             if(name && price) {
                 await update(ref(db, `item_master/${data}`), { name, price });
                 await sendData({ total: currentTotal + price, lastItem: name });
