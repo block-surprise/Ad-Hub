@@ -2,105 +2,167 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>My Pay - 演出あり版</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pay - Official</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        :root { --pay-purple: #9b59b6; --success-green: #2ecc71; }
-        body { font-family: sans-serif; text-align: center; background: var(--pay-purple); color: white; margin: 0; overflow-x: hidden; }
-        
-        /* メインカード */
-        .card { background: white; color: #333; width: 90%; margin: 50px auto 20px; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .balance-label { color: #888; font-size: 0.9rem; font-weight: bold; }
-        .balance { font-size: 4rem; font-weight: bold; color: var(--pay-purple); margin: 10px 0; }
-        .btn-scan { background: var(--pay-purple); color: white; width: 100%; padding: 20px; font-size: 1.3rem; font-weight: bold; border-radius: 15px; border: none; cursor: pointer; transition: 0.2s; }
-        .btn-scan:active { transform: scale(0.95); }
+        :root { --pay-red: #ff0033; --pay-blue: #00a5ff; --bg: #f8f9fb; }
+        body { font-family: 'Hiragino Sans', 'Meiryo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; overflow-x: hidden; }
 
-        /* スキャナー */
-        #video-container { display: none; margin-top: 20px; width: 100%; height: 350px; background: black; border-radius: 15px; overflow: hidden; position: relative; }
-        #preview { width: 100%; height: 100%; object-fit: cover; }
+        /* --- 起動スプラッシュ --- */
+        #splash { position: fixed; inset: 0; background: var(--pay-red); z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s; }
+        .logo-white { color: white; font-size: 3rem; font-weight: 900; font-style: italic; letter-spacing: -2px; }
 
-        /* --- 決済完了オーバーレイ --- */
-        #success-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; z-index: 5000; flex-direction: column; justify-content: center; align-items: center;
-            animation: fadeIn 0.3s ease-out forwards;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* --- ヘッダー --- */
+        header { background: var(--pay-red); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .user-id { font-size: 0.8rem; opacity: 0.9; }
 
-        .checkmark { width: 100px; height: 100px; border-radius: 50%; display: block; stroke-width: 2; stroke: var(--success-green); stroke-miterlimit: 10; box-shadow: inset 0px 0px 0px var(--success-green); animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
-        .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 2; stroke-miterlimit: 10; stroke: var(--success-green); fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
-        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
-        
-        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
-        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
-        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 100px #fff; } }
+        /* --- 残高エリア --- */
+        .balance-card { background: white; margin: 15px; padding: 25px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .bal-header { font-size: 0.75rem; color: #888; display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+        .bal-main { font-size: 2.8rem; font-weight: 800; color: #111; display: flex; align-items: baseline; }
+        .bal-main span { font-size: 1.2rem; margin-left: 4px; }
 
-        .result-amount { font-size: 3.5rem; font-weight: bold; color: #333; margin: 20px 0; }
-        .result-msg { color: #888; font-weight: bold; margin-bottom: 40px; }
-        .btn-close { background: #eee; color: #333; border: none; padding: 15px 50px; border-radius: 30px; font-weight: bold; cursor: pointer; }
+        /* --- クイックアクション --- */
+        .action-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 20px; }
+        .action-item { text-align: center; }
+        .action-icon { width: 50px; height: 50px; background: white; border-radius: 16px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .action-label { font-size: 0.65rem; color: #555; font-weight: bold; }
+
+        /* --- タイムライン（履歴） --- */
+        .section-title { margin: 25px 20px 10px; font-size: 0.9rem; font-weight: bold; color: #111; display: flex; justify-content: space-between; }
+        .history-list { background: white; margin: 0 15px; border-radius: 15px; overflow: hidden; }
+        .history-item { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; }
+        .history-info { display: flex; flex-direction: column; }
+        .history-name { font-size: 0.9rem; font-weight: bold; }
+        .history-date { font-size: 0.7rem; color: #999; }
+        .history-amt { font-weight: 800; font-size: 1rem; }
+        .amt-minus { color: #111; }
+        .amt-plus { color: var(--pay-blue); }
+
+        /* --- 下部スキャンボタン（本物風） --- */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 500; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.6rem; color: #999; }
+        .scan-button-large { position: absolute; top: -30px; width: 75px; height: 75px; background: white; border-radius: 50%; padding: 5px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); display: flex; justify-content: center; align-items: center; border: none; cursor: pointer; }
+        .scan-inner { width: 100%; height: 100%; background: var(--pay-red); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        .scan-inner span { font-size: 1.8rem; }
+        .scan-inner label { font-size: 0.6rem; font-weight: bold; margin-top: -2px; }
+
+        /* --- 決済成功オーバーレイ --- */
+        #success-overlay { display: none; position: fixed; inset: 0; background: white; z-index: 10000; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .success-circle { width: 100px; height: 100px; background: #2ecc71; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; margin-bottom: 20px; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <div class="balance-label">マイ残高</div>
-    <div class="balance">¥<span id="balance">0</span></div>
-    <button class="btn-scan" id="scan-btn" onclick="startScan()">📷 お支払いスキャン</button>
-    
-    <div id="video-container">
-        <video id="preview" playsinline></video>
-        <button onclick="stopScan()" style="position:absolute; bottom:10px; left:10%; width:80%; padding:10px; background:rgba(0,0,0,0.5); color:white; border:none; border-radius:10px;">キャンセル</button>
+<div id="splash"><div class="logo-white">My Pay</div></div>
+
+<header>
+    <span>My Pay</span>
+    <div class="user-id">ID: pos_user_8810</div>
+</header>
+
+<div class="balance-card">
+    <div class="bal-header">マネー残高 👁️</div>
+    <div class="bal-main">¥<span id="balance">0</span></div>
+    <div style="margin-top: 15px; display: flex; gap: 8px;">
+        <button style="flex:1; padding:10px; border-radius:10px; border:none; background:#f0f0f0; font-weight:bold; font-size:0.8rem;">チャージ</button>
+        <button style="flex:1; padding:10px; border-radius:10px; border:none; background:#f0f0f0; font-weight:bold; font-size:0.8rem;">残高を送る</button>
     </div>
 </div>
 
-<div id="success-overlay">
-    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-        <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-        <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-    </svg>
-    <div style="color:var(--success-green); font-weight:bold; margin-top:10px; font-size:1.2rem;">お支払い完了</div>
-    <div class="result-amount">¥<span id="paid-amt">0</span></div>
-    <div class="result-msg">自社Payレジ</div>
-    <button class="btn-close" onclick="closeSuccess()">とじる</button>
+<div class="action-row">
+    <div class="action-item"><div class="action-icon">🪙</div><div class="action-label">ポイント</div></div>
+    <div class="action-item"><div class="action-icon">📱</div><div class="action-label">クーポン</div></div>
+    <div class="action-item"><div class="action-icon">⛽</div><div class="action-label">ガソリン</div></div>
+    <div class="action-item"><div class="action-icon">🍔</div><div class="action-label">モバイル</div></div>
 </div>
 
-<script>
-    function playPaySound() {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // ラ(A5)
-        oscillator.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.1); // ミ(E6)
-        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.5);
-    }
-</script>
+<div class="section-title">
+    <span>最近の利用履歴</span>
+    <span style="color:var(--pay-blue); font-size:0.75rem;">すべて見る</span>
+</div>
+<div class="history-list" id="history-container">
+    <div style="padding: 20px; text-align: center; color: #ccc;">履歴はありません</div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item">🏠<br>ホーム</div>
+    <div class="nav-item">💰<br>ウォレット</div>
+    <button class="scan-button-large" onclick="startScan()">
+        <div class="scan-inner"><span>📷</span><label>支払う</label></div>
+    </button>
+    <div style="width: 50px;"></div>
+    <div class="nav-item">🎁<br>ポイント</div>
+    <div class="nav-item">⚙️<br>設定</div>
+</div>
+
+<div id="scanner-ui" style="display:none; position:fixed; inset:0; background:black; z-index:9000;">
+    <video id="preview" style="width:100%; height:100%; object-fit:cover;"></video>
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:250px; height:250px; border:2px solid white; border-radius:20px; box-shadow:0 0 0 1000px rgba(0,0,0,0.6);"></div>
+    <button onclick="stopScan()" style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); padding:15px 50px; border-radius:30px; border:none; background:white; font-weight:bold;">× 閉じる</button>
+</div>
+
+<div id="success-overlay" onclick="this.style.display='none'">
+    <div class="success-circle">✓</div>
+    <div style="color:#2ecc71; font-weight:bold; font-size:1.2rem;">お支払い完了</div>
+    <div style="font-size: 3.5rem; font-weight: 800; color: #111; margin: 15px 0;">¥<span id="res-amt">0</span></div>
+    <div style="font-size: 0.9rem; color: #888; margin-bottom: 40px;">自社Pay加盟店</div>
+    <button style="padding:15px 60px; border-radius:30px; border:none; background:#f0f0f0; font-weight:bold; color:#555;">閉じる</button>
+</div>
 
 <script type="module">
+    // --- データ処理 ---
     let myBalance = parseInt(localStorage.getItem('my_pay_balance')) || 0;
-    const balanceEl = document.getElementById('balance');
+    let history = JSON.parse(localStorage.getItem('my_pay_history')) || [];
+    
+    const balDisplay = document.getElementById('balance');
+    const historyContainer = document.getElementById('history-container');
 
-    function updateView() {
-        balanceEl.innerText = myBalance.toLocaleString();
+    function updateUI() {
+        balDisplay.innerText = myBalance.toLocaleString();
         localStorage.setItem('my_pay_balance', myBalance);
+        localStorage.setItem('my_pay_history', JSON.stringify(history));
+        
+        // 履歴表示の更新
+        if (history.length > 0) {
+            historyContainer.innerHTML = history.slice().reverse().map(h => `
+                <div class="history-item">
+                    <div class="history-info">
+                        <span class="history-name">${h.name}</span>
+                        <span class="history-date">${h.date}</span>
+                    </div>
+                    <span class="history-amt ${h.amt > 0 ? 'amt-plus' : 'amt-minus'}">
+                        ${h.amt > 0 ? '+' : ''}${h.amt.toLocaleString()}
+                    </span>
+                </div>
+            `).join('');
+        }
     }
 
+    // 音声
+    function playPaySound() {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+        osc.start(); osc.stop(ctx.currentTime + 0.4);
+    }
+
+    // --- スキャナー ---
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     let scanning = false;
-    let lastPayId = "";
 
     window.startScan = () => {
         scanning = true;
-        document.getElementById('video-container').style.display = 'block';
-        document.getElementById('scan-btn').style.display = 'none';
+        document.getElementById('scanner-ui').style.display = 'block';
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
             video.srcObject = s; video.play(); requestAnimationFrame(tick);
         });
@@ -109,19 +171,16 @@
     window.stopScan = () => {
         scanning = false;
         if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
-        document.getElementById('video-container').style.display = 'none';
-        document.getElementById('scan-btn').style.display = 'block';
+        document.getElementById('scanner-ui').style.display = 'none';
     };
 
-    function showSuccess(amt) {
-        document.getElementById('paid-amt').innerText = amt.toLocaleString();
-        document.getElementById('success-overlay').style.display = 'flex';
-        playPaySound(); // 音を鳴らす
+    function addHistory(name, amt) {
+        const now = new Date();
+        const dateStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+        history.push({ name, amt, date: dateStr });
+        if (history.length > 5) history.shift();
+        updateUI();
     }
-
-    window.closeSuccess = () => {
-        document.getElementById('success-overlay').style.display = 'none';
-    };
 
     function tick() {
         if (!scanning) return;
@@ -129,38 +188,37 @@
             canvas.height = video.videoHeight; canvas.width = video.videoWidth;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const code = jsQR(ctx.getImageData(0,0,canvas.width,canvas.height).data, canvas.width, canvas.height);
-            
             if (code && code.data) {
                 if (code.data.startsWith("CHARGE_")) {
                     const amt = parseInt(code.data.split("_")[1]);
                     myBalance += amt;
-                    updateView();
-                    alert("¥" + amt + " チャージ完了！");
+                    addHistory("残高チャージ", amt);
                     stopScan();
-                } 
-                else if (code.data.startsWith("PAY_")) {
-                    const parts = code.data.split("_");
-                    const amt = parseInt(parts[1]);
-                    const payId = parts[2];
-
-                    if (payId !== lastPayId) {
-                        lastPayId = payId;
-                        if (myBalance >= amt) {
-                            myBalance -= amt;
-                            updateView();
-                            stopScan();
-                            showSuccess(amt); // 演出を表示！
-                        } else {
-                            alert("残高不足です！");
-                            stopScan();
-                        }
-                    }
+                } else if (code.data.startsWith("PAY_")) {
+                    const amt = parseInt(code.data.split("_")[1]);
+                    if (myBalance >= amt) {
+                        myBalance -= amt;
+                        addHistory("お支払い（加盟店）", -amt);
+                        stopScan();
+                        document.getElementById('res-amt').innerText = amt.toLocaleString();
+                        document.getElementById('success-overlay').style.display = 'flex';
+                        playPaySound();
+                    } else { alert("残高不足です"); stopScan(); }
                 }
             }
         }
         requestAnimationFrame(tick);
     }
-    updateView();
+
+    // 起動スプラッシュの演出
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.getElementById('splash').style.opacity = '0';
+            setTimeout(() => document.getElementById('splash').style.display = 'none', 500);
+        }, 1500);
+    });
+
+    updateUI();
 </script>
 </body>
 </html>
