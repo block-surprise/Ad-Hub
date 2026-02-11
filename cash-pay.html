@@ -2,108 +2,94 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>MyCompany Pay - Full Version</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Pay - スキャン支払</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --pay-color: #9b59b6; --bg: #f3f4f6; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; text-align: center; }
-        .pay-card { width: 90%; max-width: 400px; background: white; margin: 20px auto; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 25px; box-sizing: border-box; }
-        .balance-amount { font-size: 3.5rem; font-weight: bold; color: var(--pay-color); margin: 0; }
-        #qrcode { display: inline-block; margin: 15px 0; padding: 10px; background: white; border: 5px solid var(--pay-color); border-radius: 15px; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; }
-        .btn-charge { background: var(--pay-color); color: white; margin-top: 10px; }
-        #video-container { width: 100%; height: 250px; background: #000; border-radius: 15px; overflow: hidden; display: none; margin-top: 15px; }
+        body { font-family: sans-serif; text-align: center; background: #9b59b6; color: white; margin: 0; padding-top: 50px; }
+        .card { background: white; color: #333; width: 90%; margin: 0 auto; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); box-sizing: border-box; }
+        .balance { font-size: 4rem; font-weight: bold; color: #9b59b6; margin: 10px 0; }
+        .btn-scan { background: #9b59b6; color: white; width: 100%; padding: 20px; font-size: 1.3rem; font-weight: bold; border-radius: 15px; border: none; margin-top: 20px; cursor: pointer; }
+        #video-container { display: none; margin-top: 20px; width: 100%; height: 350px; background: black; border-radius: 15px; overflow: hidden; position: relative; }
         #preview { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
-<div class="pay-card">
+
+<div class="card">
     <div style="color:#888;">マイ残高</div>
-    <div class="balance-amount">¥<span id="balance">0</span></div>
-    <div id="qrcode"></div>
-    <p style="font-weight:bold;">レジにかざしてお支払い</p>
-    <button class="btn btn-charge" id="start-btn" onclick="openScanner()">⚡ チャージする</button>
+    <div class="balance">¥<span id="balance">0</span></div>
+    <button class="btn-scan" id="scan-btn" onclick="startScan()">📷 お店のQRを読み取る</button>
     <div id="video-container">
         <video id="preview" playsinline></video>
-        <button class="btn" style="background:#666; color:white; margin-top:10px;" onclick="closeScanner()">キャンセル</button>
+        <button onclick="stopScan()" style="position:absolute; bottom:10px; left:10%; width:80%; padding:10px; background:rgba(0,0,0,0.5); color:white; border:none; border-radius:10px;">キャンセル</button>
     </div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyBWmqdhnlEPxm3DgJDQk0qZ-EFrq8SBU_I",
-        authDomain: "kuraberukun-e638b.firebaseapp.com",
-        projectId: "kuraberukun-e638b",
-        databaseURL: "https://kuraberukun-e638b-default-rtdb.firebaseio.com",
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const posRef = ref(db, 'pos_data');
-
-    let balance = parseInt(localStorage.getItem('user_balance')) || 0;
+    let myBalance = parseInt(localStorage.getItem('my_pay_balance')) || 0;
     const balanceEl = document.getElementById('balance');
-    const qrContainer = document.getElementById('qrcode');
 
     function updateView() {
-        balanceEl.innerText = balance.toLocaleString();
-        localStorage.setItem('user_balance', balance);
-        qrContainer.innerHTML = "";
-        new QRCode(qrContainer, { text: "PAY_USER_" + balance, width: 200, height: 200 });
+        balanceEl.innerText = myBalance.toLocaleString();
+        localStorage.setItem('my_pay_balance', myBalance);
     }
-
-    // --- 決済監視（メッセージから金額を抜き取って確実に引く） ---
-    onValue(posRef, (snapshot) => {
-        const data = snapshot.val();
-        if (!data || !data.lastItem) return;
-        
-        // メッセージが「自社Pay決済完了_金額」の形式であることを確認
-        if (data.total === 0 && data.lastItem.includes("自社Pay決済完了_")) {
-            const amount = parseInt(data.lastItem.split("_")[1]);
-            if (amount > 0) {
-                balance -= amount;
-                if (balance < 0) balance = 0;
-                updateView();
-                alert(`決済完了！ ¥${amount.toLocaleString()} を引き落としました。`);
-                // レジ側のメッセージをクリアするために「処理済み」として扱う
-                // (リセットボタンなどで上書きされるのを待つ)
-            }
-        }
-    });
 
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    let isScanning = false;
+    const ctx = canvas.getContext("2d");
+    let scanning = false;
+    let lastPayId = "";
 
-    window.openScanner = () => {
+    window.startScan = () => {
+        scanning = true;
         document.getElementById('video-container').style.display = 'block';
-        document.getElementById('start-btn').style.display = 'none';
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then((stream) => {
-            video.srcObject = stream; video.play(); isScanning = true; requestAnimationFrame(tick);
+        document.getElementById('scan-btn').style.display = 'none';
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
+            video.srcObject = s; video.play(); requestAnimationFrame(tick);
         });
     };
-    window.closeScanner = () => {
-        isScanning = false; if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+
+    window.stopScan = () => {
+        scanning = false;
+        if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
         document.getElementById('video-container').style.display = 'none';
-        document.getElementById('start-btn').style.display = 'block';
+        document.getElementById('scan-btn').style.display = 'block';
     };
+
     function tick() {
-        if (!isScanning) return;
+        if (!scanning) return;
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
             canvas.height = video.videoHeight; canvas.width = video.videoWidth;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const code = jsQR(context.getImageData(0,0,canvas.width,canvas.height).data, canvas.width, canvas.height);
-            if (code && code.data.startsWith("CHARGE_")) {
-                const amt = parseInt(code.data.split("_")[1]);
-                balance += amt;
-                alert(amt + "円チャージしました！");
-                closeScanner();
-                updateView();
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const code = jsQR(ctx.getImageData(0,0,canvas.width,canvas.height).data, canvas.width, canvas.height);
+            
+            if (code && code.data) {
+                // 1. チャージQRを読んだ場合
+                if (code.data.startsWith("CHARGE_")) {
+                    const amt = parseInt(code.data.split("_")[1]);
+                    myBalance += amt;
+                    alert("¥" + amt + " チャージしました！");
+                    stopScan(); updateView();
+                } 
+                // 2. 決済QRを読んだ場合
+                else if (code.data.startsWith("PAY_")) {
+                    const parts = code.data.split("_");
+                    const amt = parseInt(parts[1]);
+                    const payId = parts[2];
+
+                    if (payId !== lastPayId) {
+                        lastPayId = payId;
+                        if (myBalance >= amt) {
+                            myBalance -= amt;
+                            alert("¥" + amt + " お支払い完了！");
+                            stopScan(); updateView();
+                        } else {
+                            alert("残高が足りません！");
+                            stopScan();
+                        }
+                    }
+                }
             }
         }
         requestAnimationFrame(tick);
