@@ -2,49 +2,50 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Master POS System - Fix</title>
+    <title>Fixed POS System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --pay: #9b59b6; --bg: #f8f9fa; }
         body { font-family: sans-serif; margin: 0; background: var(--bg); }
-        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; }
-        header { background: var(--primary); color: white; padding: 12px; text-align: center; }
-        #video-container { width: 100%; height: 250px; background: #000; position: relative; }
+        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: var(--primary); color: white; padding: 12px; text-align: center; font-weight: bold; }
+        #video-container { width: 100%; height: 200px; background: #000; position: relative; }
         #preview { width: 100%; height: 100%; object-fit: cover; }
-        .total-display { padding: 20px; text-align: center; border-bottom: 2px solid #eee; }
-        .total-amount { font-size: 4rem; font-weight: bold; margin: 0; }
+        .display-section { padding: 30px 20px; text-align: center; border-bottom: 2px solid #eee; }
+        .total-amount { font-size: 4rem; font-weight: bold; margin: 0; color: var(--primary); }
+        .status-msg { height: 24px; color: var(--accent); font-weight: bold; margin-top: 10px; }
         .controls { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        button { border: none; border-radius: 8px; padding: 15px; font-weight: bold; cursor: pointer; color: white; font-size: 1rem; }
-        .btn-pay { background: var(--pay); }
+        .tool-box { background: #f9f9f9; padding: 12px; border-radius: 10px; border: 1px solid #eee; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; box-sizing: border-box; margin-bottom: 8px; }
+        button { border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; color: white; width: 100%; }
         .btn-cash { background: var(--success); }
-        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        /* スキャン成功時に一瞬光らせる演出 */
-        .flash { animation: flash-animation 0.2s; }
-        @keyframes flash-animation { from { background: #fff; } to { background: #27ae60; } }
+        .btn-pay { background: var(--pay); }
+        .btn-manual { background: var(--accent); }
     </style>
 </head>
 <body>
 
-<div class="app-container" id="main-app">
-    <header>店員レジモード</header>
+<div class="app-container">
+    <header>🍎 自社Payレジシステム</header>
     <div id="video-container"><video id="preview" playsinline></video></div>
-    
-    <div class="total-display">
-        <div style="color:#999;">合計金額</div>
+
+    <div class="display-section">
         <div class="total-amount">¥<span id="total-price">0</span></div>
-        <div id="status-msg" style="color:var(--accent); font-weight:bold;">スキャン待機中</div>
+        <div id="status-msg" class="status-msg">READY</div>
     </div>
 
     <div class="controls">
-        <button class="btn-pay" onclick="finishPayment('自社Pay')">📱 自社Pay決済を確定</button>
-        <button class="btn-cash" onclick="finishPayment('現金')">💵 現金会計</button>
-        <div style="display:flex; gap:5px;">
-            <input type="number" id="manual-price" placeholder="手入力金額">
-            <button style="background:var(--accent); width:120px;" onclick="addManual()">追加</button>
+        <div class="tool-box"><button class="btn-pay" onclick="finishPayment('自社Pay')">📱 自社Pay決済を確定</button></div>
+        <div class="tool-box"><button class="btn-cash" onclick="finishPayment('現金')">💵 現金会計を確定</button></div>
+        
+        <div class="tool-box">
+            <input type="number" id="manual-price" placeholder="追加する金額">
+            <button class="btn-manual" onclick="addManual()">➕ 金額を手入力で追加</button>
         </div>
-        <button style="background:#bbb;" onclick="clearCart()">リセット</button>
+
+        <button onclick="clearCart()" style="background:#bbb;">カートを空にする</button>
     </div>
 </div>
 
@@ -58,6 +59,7 @@
         projectId: "kuraberukun-e638b",
         databaseURL: "https://kuraberukun-e638b-default-rtdb.firebaseio.com",
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const posRef = ref(db, 'pos_data');
@@ -65,80 +67,84 @@
 
     let currentTotal = 0;
     let itemMaster = {};
-    let isScanningLocked = false; // スキャン連打防止フラグ
+    let ignoreUpdates = false; // 書き込み後の跳ね返り防止フラグ
 
-    // データ受信
+    // --- データ受信 ---
     onValue(posRef, (snapshot) => {
+        // 自分が書き込んだ直後2秒間は、Firebaseからの読み込みを無視する
+        if (ignoreUpdates) return; 
+
         const data = snapshot.val();
         currentTotal = data ? data.total : 0;
         document.getElementById('total-price').innerText = currentTotal.toLocaleString();
-        if(data?.lastItem) document.getElementById('status-msg').innerText = data.lastItem;
+        document.getElementById('status-msg').innerText = data?.lastItem || "READY";
     });
+
     onValue(masterRef, (snapshot) => { itemMaster = snapshot.val() || {}; });
 
-    // スキャン処理
-    async function processScan(data) {
-        if (isScanningLocked) return;
-        isScanningLocked = true; // ロック
-
-        if (itemMaster[data]) {
-            const item = itemMaster[data];
-            await set(posRef, { total: currentTotal + item.price, lastItem: item.name });
-            flashScreen();
-        } else {
-            // 未登録商品はその場で登録
-            const name = prompt("新商品名:");
-            const price = parseInt(prompt("価格:"));
-            if (name && price) {
-                await update(ref(db, `item_master/${data}`), { name, price });
-                await set(posRef, { total: currentTotal + price, lastItem: name });
-            }
-        }
+    // --- データ送信（ここが修正のキモ） ---
+    async function sendData(newData) {
+        ignoreUpdates = true; // 読み込みを一時停止
         
-        // 1.5秒後にスキャン再開可能にする
-        setTimeout(() => { isScanningLocked = false; }, 1500);
-    }
+        // 1. まず画面を即座に更新（ユーザーを待たせない）
+        document.getElementById('total-price').innerText = (newData.total || 0).toLocaleString();
+        document.getElementById('status-msg').innerText = newData.lastItem;
+        currentTotal = newData.total; 
 
-    // 会計確定
-    window.finishPayment = async (method) => {
-        if (currentTotal <= 0) return;
-        const finalAmount = currentTotal;
-        await set(posRef, { total: 0, lastItem: `${method}決済完了_${finalAmount}` });
-        alert(method + "決済完了: ¥" + finalAmount);
-    };
+        // 2. Firebaseに保存
+        await set(posRef, newData);
+        
+        // 3. 2秒後に読み込み再開（Firebaseのデータが落ち着くのを待つ）
+        setTimeout(() => { ignoreUpdates = false; }, 2000);
+    }
 
     window.addManual = () => {
-        const p = parseInt(document.getElementById('manual-price').value);
-        if (p) { set(posRef, { total: currentTotal + p, lastItem: "手入力追加" }); }
+        const input = document.getElementById('manual-price');
+        const p = parseInt(input.value);
+        if (p) {
+            sendData({ total: currentTotal + p, lastItem: "手入力追加" });
+            input.value = "";
+        }
     };
 
-    window.clearCart = () => set(posRef, { total: 0, lastItem: "リセット" });
+    window.finishPayment = async (method) => {
+        if (currentTotal <= 0) return;
+        const amount = currentTotal;
+        // Pay側が検知できるように、あえて total: 0 ではなく 
+        // 読み込みロック中に決済完了メッセージを送る
+        await sendData({ total: 0, lastItem: `${method}決済完了_${amount}_${Date.now()}` });
+        alert(`${method}での会計完了: ¥${amount}`);
+    };
 
-    function flashScreen() {
-        const el = document.getElementById('main-app');
-        el.classList.add('flash');
-        setTimeout(() => el.classList.remove('flash'), 200);
-    }
+    window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
 
-    // カメラループ
+    // --- スキャナー処理 ---
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
-        video.srcObject = s; video.play();
-        requestAnimationFrame(tick);
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then((s) => {
+        video.srcObject = s; video.play(); requestAnimationFrame(tick);
     });
 
     function tick() {
-        if (video.readyState === video.HAVE_ENOUGH_DATA && !isScanningLocked) {
-            canvas.height = video.videoHeight;
-            canvas.width = video.videoWidth;
+        if (video.readyState === video.HAVE_ENOUGH_DATA && !ignoreUpdates) {
+            canvas.height = video.videoHeight; canvas.width = video.videoWidth;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            const code = jsQR(ctx.getImageData(0,0,canvas.width,canvas.height).data, canvas.width, canvas.height);
+
             if (code && code.data) {
-                processScan(code.data);
+                if (itemMaster[code.data]) {
+                    const item = itemMaster[code.data];
+                    sendData({ total: currentTotal + item.price, lastItem: item.name });
+                } else {
+                    const name = prompt("新商品名:");
+                    const price = parseInt(prompt("価格:"));
+                    if(name && price) {
+                        update(ref(db, `item_master/${code.data}`), { name, price });
+                        sendData({ total: currentTotal + price, lastItem: name });
+                    }
+                }
             }
         }
         requestAnimationFrame(tick);
