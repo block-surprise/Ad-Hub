@@ -2,51 +2,53 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Fixed POS System</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>レジ - ストアスキャン版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --pay: #9b59b6; --bg: #f8f9fa; }
-        body { font-family: sans-serif; margin: 0; background: var(--bg); }
-        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; }
-        header { background: var(--primary); color: white; padding: 12px; text-align: center; font-weight: bold; }
-        #video-container { width: 100%; height: 200px; background: #000; position: relative; }
+        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --bg: #f8f9fa; }
+        body { font-family: sans-serif; margin: 0; background: var(--bg); text-align: center; }
+        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; }
+        header { background: var(--primary); color: white; padding: 15px; font-weight: bold; }
+        .total-section { padding: 30px; border-bottom: 2px solid #eee; }
+        .total-amount { font-size: 4.5rem; font-weight: bold; color: var(--primary); margin: 0; }
+        #video-container { width: 100%; height: 180px; background: #000; position: relative; }
         #preview { width: 100%; height: 100%; object-fit: cover; }
-        .display-section { padding: 30px 20px; text-align: center; border-bottom: 2px solid #eee; }
-        .total-amount { font-size: 4rem; font-weight: bold; margin: 0; color: var(--primary); }
-        .status-msg { height: 24px; color: var(--accent); font-weight: bold; margin-top: 10px; }
-        .controls { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .tool-box { background: #f9f9f9; padding: 12px; border-radius: 10px; border: 1px solid #eee; }
-        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; box-sizing: border-box; margin-bottom: 8px; }
-        button { border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; color: white; width: 100%; }
-        .btn-cash { background: var(--success); }
-        .btn-pay { background: var(--pay); }
-        .btn-manual { background: var(--accent); }
+        .controls { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        input { padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.2rem; text-align: center; }
+        button { padding: 15px; border-radius: 10px; border: none; font-weight: bold; color: white; cursor: pointer; font-size: 1.1rem; }
+        
+        /* 決済用QRモーダル */
+        #pay-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; justify-content: center; align-items: center; flex-direction: column; }
+        #pay-qr { margin: 20px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <header>🍎 自社Payレジシステム</header>
+    <header>店舗レジ (Store Scan Mode)</header>
     <div id="video-container"><video id="preview" playsinline></video></div>
-
-    <div class="display-section">
+    
+    <div class="total-section">
+        <div style="color:#999;">合計金額</div>
         <div class="total-amount">¥<span id="total-price">0</span></div>
-        <div id="status-msg" class="status-msg">READY</div>
+        <div id="status-msg" style="color:var(--accent); font-weight:bold; margin-top:10px;">READY</div>
     </div>
 
     <div class="controls">
-        <div class="tool-box"><button class="btn-pay" onclick="finishPayment('自社Pay')">📱 自社Pay決済を確定</button></div>
-        <div class="tool-box"><button class="btn-cash" onclick="finishPayment('現金')">💵 現金会計を確定</button></div>
-        
-        <div class="tool-box">
-            <input type="number" id="manual-price" placeholder="追加する金額">
-            <button class="btn-manual" onclick="addManual()">➕ 金額を手入力で追加</button>
-        </div>
-
-        <button onclick="clearCart()" style="background:#bbb;">カートを空にする</button>
+        <input type="number" id="manual-price" placeholder="金額を入力">
+        <button style="background:var(--accent);" onclick="addManual()">➕ 金額を追加</button>
+        <button style="background:var(--success);" onclick="showPayQR()">✨ 決済用QRを表示</button>
+        <button style="background:#bbb;" onclick="resetAll()">リセット</button>
     </div>
+</div>
+
+<div id="pay-modal">
+    <h2 style="color:#333;">お客様にスキャンしてもらってください</h2>
+    <div id="pay-qr"></div>
+    <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">請求額: ¥<span id="modal-amt">0</span></div>
+    <button onclick="closeModal()" style="background:#666; width: 200px; margin-top: 30px;">閉じる</button>
 </div>
 
 <script type="module">
@@ -55,11 +57,8 @@
 
     const firebaseConfig = {
         apiKey: "AIzaSyBWmqdhnlEPxm3DgJDQk0qZ-EFrq8SBU_I",
-        authDomain: "kuraberukun-e638b.firebaseapp.com",
-        projectId: "kuraberukun-e638b",
         databaseURL: "https://kuraberukun-e638b-default-rtdb.firebaseio.com",
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const posRef = ref(db, 'pos_data');
@@ -67,84 +66,61 @@
 
     let currentTotal = 0;
     let itemMaster = {};
-    let ignoreUpdates = false; // 書き込み後の跳ね返り防止フラグ
-
-    // --- データ受信 ---
-    onValue(posRef, (snapshot) => {
-        // 自分が書き込んだ直後2秒間は、Firebaseからの読み込みを無視する
-        if (ignoreUpdates) return; 
-
-        const data = snapshot.val();
-        currentTotal = data ? data.total : 0;
-        document.getElementById('total-price').innerText = currentTotal.toLocaleString();
-        document.getElementById('status-msg').innerText = data?.lastItem || "READY";
-    });
 
     onValue(masterRef, (snapshot) => { itemMaster = snapshot.val() || {}; });
 
-    // --- データ送信（ここが修正のキモ） ---
-    async function sendData(newData) {
-        ignoreUpdates = true; // 読み込みを一時停止
-        
-        // 1. まず画面を即座に更新（ユーザーを待たせない）
-        document.getElementById('total-price').innerText = (newData.total || 0).toLocaleString();
-        document.getElementById('status-msg').innerText = newData.lastItem;
-        currentTotal = newData.total; 
-
-        // 2. Firebaseに保存
-        await set(posRef, newData);
-        
-        // 3. 2秒後に読み込み再開（Firebaseのデータが落ち着くのを待つ）
-        setTimeout(() => { ignoreUpdates = false; }, 2000);
+    // 合計金額を更新
+    function updateVal(amt, name) {
+        currentTotal = amt;
+        document.getElementById('total-price').innerText = currentTotal.toLocaleString();
+        document.getElementById('status-msg').innerText = name;
     }
 
     window.addManual = () => {
-        const input = document.getElementById('manual-price');
-        const p = parseInt(input.value);
-        if (p) {
-            sendData({ total: currentTotal + p, lastItem: "手入力追加" });
-            input.value = "";
-        }
+        const p = parseInt(document.getElementById('manual-price').value);
+        if (p) { updateVal(currentTotal + p, "手入力追加"); document.getElementById('manual-price').value = ""; }
     };
 
-    window.finishPayment = async (method) => {
+    window.showPayQR = () => {
         if (currentTotal <= 0) return;
-        const amount = currentTotal;
-        // Pay側が検知できるように、あえて total: 0 ではなく 
-        // 読み込みロック中に決済完了メッセージを送る
-        await sendData({ total: 0, lastItem: `${method}決済完了_${amount}_${Date.now()}` });
-        alert(`${method}での会計完了: ¥${amount}`);
+        document.getElementById('pay-qr').innerHTML = "";
+        // QRの中身に「PAY_金額_時間」を込める
+        const payCode = `PAY_${currentTotal}_${Date.now()}`;
+        new QRCode(document.getElementById('pay-qr'), { text: payCode, width: 280, height: 280 });
+        document.getElementById('modal-amt').innerText = currentTotal.toLocaleString();
+        document.getElementById('pay-modal').style.display = 'flex';
     };
 
-    window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
+    window.closeModal = () => document.getElementById('pay-modal').style.display = 'none';
+    window.resetAll = () => updateVal(0, "READY");
 
-    // --- スキャナー処理 ---
+    // 商品スキャン用
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then((s) => {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
         video.srcObject = s; video.play(); requestAnimationFrame(tick);
     });
 
     function tick() {
-        if (video.readyState === video.HAVE_ENOUGH_DATA && !ignoreUpdates) {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
             canvas.height = video.videoHeight; canvas.width = video.videoWidth;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const code = jsQR(ctx.getImageData(0,0,canvas.width,canvas.height).data, canvas.width, canvas.height);
-
             if (code && code.data) {
                 if (itemMaster[code.data]) {
-                    const item = itemMaster[code.data];
-                    sendData({ total: currentTotal + item.price, lastItem: item.name });
+                    updateVal(currentTotal + itemMaster[code.data].price, itemMaster[code.data].name);
                 } else {
                     const name = prompt("新商品名:");
                     const price = parseInt(prompt("価格:"));
                     if(name && price) {
                         update(ref(db, `item_master/${code.data}`), { name, price });
-                        sendData({ total: currentTotal + price, lastItem: name });
+                        updateVal(currentTotal + price, name);
                     }
                 }
+                // 連続スキャン防止
+                video.pause(); setTimeout(() => video.play(), 1500);
             }
         }
         requestAnimationFrame(tick);
