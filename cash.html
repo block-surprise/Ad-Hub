@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>バーコード連携レジ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 0; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 500px; background: white; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        #interactive.viewport { width: 100%; height: 250px; border: 2px solid #007bff; border-radius: 8px; overflow: hidden; position: relative; }
+        #interactive.viewport video { width: 100%; height: 100%; object-fit: cover; }
+        .price-display { font-size: 3rem; font-weight: bold; color: #d9534f; text-align: center; margin: 20px 0; }
+        .log { font-size: 0.9rem; color: #666; height: 100px; overflow-y: auto; border: 1px solid #ddd; padding: 5px; }
+        button { width: 100%; padding: 15px; margin: 5px 0; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+        .btn-scan { background: #007bff; color: white; }
+        .btn-clear { background: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Web POS Terminal</h2>
+    
+    <div id="interactive" class="viewport"></div>
+    
+    <div class="price-display">¥<span id="total-price">0</span></div>
+    
+    <button class="btn-scan" onclick="startScanner()">スキャナー起動</button>
+    <button class="btn-clear" onclick="clearCart()">金額リセット</button>
+
+    <h4>スキャン履歴</h4>
+    <div id="log" class="log"></div>
+</div>
+
+<script type="module">
+    // Firebase SDKのインポート
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // ユーザー設定のFirebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyBWmqdhnlEPxm3DgJDQk0qZ-EFrq8SBU_I",
+        authDomain: "kuraberukun-e638b.firebaseapp.com",
+        projectId: "kuraberukun-e638b",
+        storageBucket: "kuraberukun-e638b.firebasestorage.app",
+        databaseURL: "https://kuraberukun-e638b-default-rtdb.firebaseio.com", // Realtime DBのURLを確認してください
+        messagingSenderId: "796604463328",
+        appId: "1:796604463328:web:93987f5299edc5a3cb3885"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const posRef = ref(db, 'pos_data');
+
+    // 簡易商品マスター
+    const itemMaster = {
+        "4901777018686": { name: "伊右衛門", price: 150 },
+        "4902102072618": { name: "コカ・コーラ", price: 160 },
+        "4901085000000": { name: "おーいお茶", price: 140 } // サンプル
+    };
+
+    let currentTotal = 0;
+
+    // --- 1. Firebaseとの同期（客用表示との連動） ---
+    onValue(posRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            document.getElementById('total-price').innerText = data.total.toLocaleString();
+            if(data.total === 0) document.getElementById('log').innerHTML = "";
+        }
+    });
+
+    function updateFirebase(amount, itemName) {
+        currentTotal += amount;
+        set(posRef, { total: currentTotal });
+        const logDiv = document.getElementById('log');
+        logDiv.innerHTML = `<div>${itemName}: ¥${amount}</div>` + logDiv.innerHTML;
+    }
+
+    window.clearCart = () => {
+        currentTotal = 0;
+        set(posRef, { total: 0 });
+    };
+
+    // --- 2. バーコードスキャンの設定 ---
+    window.startScanner = () => {
+        Quagga.init({
+            inputStream: { name: "Live", type: "LiveStream", target: document.querySelector('#interactive') },
+            decoder: { readers: ["ean_reader"] } // 一般的なJANコード用
+        }, (err) => {
+            if (err) return console.error(err);
+            Quagga.start();
+        });
+    };
+
+    Quagga.onDetected((result) => {
+        const code = result.codeResult.code;
+        if (itemMaster[code]) {
+            const item = itemMaster[code];
+            // 連続読み取り防止のため一時停止
+            Quagga.stop();
+            updateFirebase(item.price, item.name);
+            alert(`${item.name} を追加しました`);
+            setTimeout(() => Quagga.start(), 2000); 
+        } else {
+            console.log("未登録のバーコード:", code);
+        }
+    });
+</script>
+</body>
+</html>
