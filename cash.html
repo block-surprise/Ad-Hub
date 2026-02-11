@@ -2,51 +2,77 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>多機能Webレジ</title>
+    <title>Modern POS System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <style>
-        body { font-family: sans-serif; margin: 0; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 500px; background: white; min-height: 100vh; padding: 20px; box-sizing: border-box; border-left: 1px solid #ddd; border-right: 1px solid #ddd; }
-        #interactive.viewport { width: 100%; height: 200px; border: 2px solid #007bff; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
-        #interactive.viewport video { width: 100%; height: 100%; object-fit: cover; }
-        .price-display { font-size: 3.5rem; font-weight: bold; color: #d9534f; text-align: center; margin: 10px 0; background: #fffbe6; border-radius: 10px; padding: 10px; }
-        .input-group { display: flex; gap: 5px; margin-bottom: 20px; }
-        input { padding: 12px; font-size: 1rem; border: 1px solid #ccc; border-radius: 5px; flex: 1; }
-        button { padding: 12px; font-size: 1rem; cursor: pointer; border: none; border-radius: 5px; transition: 0.2s; }
-        .btn-main { background: #007bff; color: white; width: 100%; margin-bottom: 5px; }
-        .btn-sub { background: #28a745; color: white; }
-        .btn-clear { background: #6c757d; color: white; width: 100%; }
-        .log { font-size: 0.9rem; border: 1px solid #eee; padding: 10px; height: 150px; overflow-y: auto; background: #fafafa; }
+        :root {
+            --primary: #2c3e50; --accent: #3498db; --success: #27ae60;
+            --danger: #e74c3c; --bg: #f8f9fa; --text: #2c3e50;
+        }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+        .app-container { max-width: 600px; margin: 0 auto; min-height: 100vh; background: white; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        
+        /* ヘッダー */
+        header { background: var(--primary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .mode-badge { font-size: 0.8rem; padding: 4px 10px; border-radius: 20px; background: rgba(255,255,255,0.2); }
+        
+        /* メイン表示（客側からも見える部分） */
+        .display-section { padding: 40px 20px; text-align: center; background: white; border-bottom: 2px solid #eee; }
+        .total-label { font-size: 1rem; color: #7f8c8d; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        .total-amount { font-size: 4.5rem; font-weight: bold; margin: 0; color: var(--primary); }
+        .last-item { height: 24px; color: var(--accent); font-weight: 500; margin-top: 10px; }
+
+        /* 店員用操作エリア */
+        .controls { padding: 20px; flex-grow: 1; }
+        #interactive.viewport { width: 100%; height: 180px; border-radius: 12px; overflow: hidden; margin-bottom: 20px; background: #000; position: relative; }
+        
+        .input-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="number"] { flex: 1; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1.2rem; outline: none; }
+        
+        button { border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-add { background: var(--accent); color: white; padding: 0 25px; }
+        .btn-scan { background: var(--primary); color: white; width: 100%; padding: 15px; margin-bottom: 10px; }
+        .btn-clear { background: var(--danger); color: white; width: 100%; padding: 15px; margin-top: auto; }
+        .btn-switch { background: none; border: 1px solid white; color: white; font-size: 0.7rem; padding: 5px 10px; }
+
+        /* 客用モード時の隠し設定 */
+        body.customer-mode .controls { display: none; }
+        body.customer-mode header { background: var(--accent); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2 id="view-title">店員用ターミナル</h2>
-    
-    <div class="price-display">¥<span id="total-price">0</span></div>
+<div class="app-container">
+    <header>
+        <div>
+            <span class="mode-badge" id="modeStatus">店員モード</span>
+        </div>
+        <button class="btn-switch" onclick="toggleMode()">画面切替</button>
+    </header>
 
-    <div id="controls">
+    <div class="display-section">
+        <div class="total-label">Total Amount</div>
+        <div class="total-amount">¥<span id="total-price">0</span></div>
+        <div id="last-item-name" class="last-item">いらっしゃいませ</div>
+    </div>
+
+    <div class="controls" id="adminPanel">
         <div id="interactive" class="viewport"></div>
-        <button class="btn-main" onclick="startScanner()">スキャナー起動</button>
-        
-        <p style="margin: 10px 0 5px;">▼金額を直接打つ</p>
-        <div class="input-group">
-            <input type="number" id="manualAmount" placeholder="金額を入力">
-            <button class="btn-sub" onclick="addManual()">追加</button>
+        <button class="btn-scan" onclick="startScanner()">カメラを起動する</button>
+
+        <div class="input-row">
+            <input type="number" id="manualAmount" placeholder="金額を直接入力">
+            <button class="btn-add" onclick="addManual()">入力</button>
         </div>
 
-        <button class="btn-clear" onclick="clearCart()">全部消去（お会計完了）</button>
-
-        <h4>販売履歴</h4>
-        <div id="log" class="log"></div>
+        <button class="btn-clear" onclick="clearCart()">お会計完了 / リセット</button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBWmqdhnlEPxm3DgJDQk0qZ-EFrq8SBU_I",
@@ -66,47 +92,39 @@
     let currentTotal = 0;
     let itemMaster = {};
 
-    // 1. マスターデータの読み込み
-    onValue(masterRef, (snapshot) => {
-        itemMaster = snapshot.val() || {};
-    });
+    // 1. モード切り替え機能
+    window.toggleMode = () => {
+        document.body.classList.toggle('customer-mode');
+        const isCustomer = document.body.classList.contains('customer-mode');
+        document.getElementById('modeStatus').innerText = isCustomer ? '客用モード' : '店員モード';
+    };
 
-    // 2. リアルタイム同期（客用・店員用共通）
+    // 2. リアルタイム同期
     onValue(posRef, (snapshot) => {
         const data = snapshot.val();
         currentTotal = data ? data.total : 0;
         document.getElementById('total-price').innerText = currentTotal.toLocaleString();
-        if(data && data.lastItem) {
-            const logDiv = document.getElementById('log');
-            logDiv.innerHTML = `<div>${data.lastItem}: ¥${data.lastPrice}</div>` + logDiv.innerHTML;
-        }
-        if(currentTotal === 0) document.getElementById('log').innerHTML = "";
+        document.getElementById('last-item-name').innerText = data?.lastItem || "いらっしゃいませ";
     });
 
-    // 金額をFirebaseへ送る
+    onValue(masterRef, (snapshot) => { itemMaster = snapshot.val() || {}; });
+
+    // 3. 入力処理
     function updateFirebase(amount, name) {
-        set(posRef, {
-            total: currentTotal + amount,
-            lastItem: name,
-            lastPrice: amount
-        });
+        set(posRef, { total: currentTotal + amount, lastItem: name });
     }
 
-    // 直接入力
     window.addManual = () => {
         const input = document.getElementById('manualAmount');
         const val = parseInt(input.value);
-        if (val) {
-            updateFirebase(val, "直接入力");
-            input.value = "";
-        }
+        if (val) { updateFirebase(val, "手入力"); input.value = ""; }
     };
 
     window.clearCart = () => {
-        set(posRef, { total: 0, lastItem: "", lastPrice: 0 });
+        set(posRef, { total: 0, lastItem: "ありがとうございました！" });
     };
 
-    // 3. スキャナー機能
+    // 4. バーコードスキャン
     window.startScanner = () => {
         Quagga.init({
             inputStream: { name: "Live", type: "LiveStream", target: document.querySelector('#interactive'), constraints: { facingMode: "environment" } },
@@ -117,29 +135,20 @@
     Quagga.onDetected((result) => {
         const code = result.codeResult.code;
         if (itemMaster[code]) {
-            const item = itemMaster[code];
+            updateFirebase(itemMaster[code].price, itemMaster[code].name);
             Quagga.stop();
-            updateFirebase(item.price, item.name);
             setTimeout(() => Quagga.start(), 2000);
         } else {
-            // 未登録ならその場で登録
             Quagga.stop();
-            const name = prompt("新商品です。名前を入力してください:");
-            const price = parseInt(prompt("価格を入力してください:"));
+            const name = prompt("商品名:");
+            const price = parseInt(prompt("価格:"));
             if (name && price) {
-                set(ref(db, 'item_master/' + code), { name: name, price: price });
+                set(ref(db, 'item_master/' + code), { name, price });
                 updateFirebase(price, name);
             }
             Quagga.start();
         }
     });
-
-    // 客用画面モードの切り替え（URLに ?view=customer をつけると操作パネルが消える）
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('view') === 'customer') {
-        document.getElementById('controls').style.display = 'none';
-        document.getElementById('view-title').innerText = 'ご案内';
-    }
 </script>
 </body>
 </html>
