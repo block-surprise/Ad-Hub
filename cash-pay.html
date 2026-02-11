@@ -2,65 +2,49 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>MyCompany Pay - User Wallet</title>
+    <title>MyCompany Pay - Final</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --pay-color: #9b59b6; --bg: #f3f4f6; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; text-align: center; color: #333; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; text-align: center; }
         .pay-card { width: 90%; max-width: 400px; background: white; margin: 20px auto; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 25px; box-sizing: border-box; }
-        .balance-label { color: #888; font-size: 0.9rem; margin-bottom: 5px; }
         .balance-amount { font-size: 3.5rem; font-weight: bold; color: var(--pay-color); margin: 0; }
-        
-        #qrcode { display: inline-block; margin: 20px 0; padding: 12px; background: white; border: 6px solid var(--pay-color); border-radius: 15px; }
-        
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: 0.2s; }
-        .btn-charge { background: var(--pay-color); color: white; margin-top: 10px; }
-        .btn-close { background: #666; color: white; margin-top: 10px; }
-
-        #video-container { width: 100%; height: 250px; background: #000; border-radius: 15px; overflow: hidden; position: relative; display: none; margin-top: 15px; }
+        #qrcode { display: inline-block; margin: 15px 0; padding: 10px; background: white; border: 5px solid var(--pay-color); border-radius: 15px; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; }
+        .btn-charge { background: var(--pay-color); color: white; }
+        #video-container { width: 100%; height: 250px; background: #000; border-radius: 15px; overflow: hidden; display: none; margin-top: 15px; }
         #preview { width: 100%; height: 100%; object-fit: cover; }
-        
-        .info-msg { font-size: 0.8rem; color: #999; margin-top: 15px; }
     </style>
 </head>
 <body>
-
 <div class="pay-card">
-    <div class="balance-label">マイ残高</div>
+    <div style="color:#888;">マイ残高</div>
     <div class="balance-amount">¥<span id="balance">0</span></div>
-    
     <div id="qrcode"></div>
-    <p style="font-weight: bold; color: #555;">レジにかざしてお支払い</p>
-
+    <p style="font-weight:bold;">レジにかざしてお支払い</p>
     <button class="btn btn-charge" id="start-btn" onclick="openScanner()">⚡ チャージする</button>
-    
     <div id="video-container">
         <video id="preview" playsinline></video>
-        <button class="btn btn-close" onclick="closeScanner()">キャンセル</button>
+        <button class="btn" style="background:#666; color:white; margin-top:10px;" onclick="closeScanner()">キャンセル</button>
     </div>
-
-    <div class="info-msg">決済が完了すると自動で残高が引かれます</div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // --- Firebase設定（レジ側と全く同じものにする） ---
     const firebaseConfig = {
         apiKey: "AIzaSyBWmqdhnlEPxm3DgJDQk0qZ-EFrq8SBU_I",
         authDomain: "kuraberukun-e638b.firebaseapp.com",
         projectId: "kuraberukun-e638b",
         databaseURL: "https://kuraberukun-e638b-default-rtdb.firebaseio.com",
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const posRef = ref(db, 'pos_data');
 
-    // --- ローカル残高の初期化 ---
     let balance = parseInt(localStorage.getItem('user_balance')) || 0;
     const balanceEl = document.getElementById('balance');
     const qrContainer = document.getElementById('qrcode');
@@ -69,79 +53,58 @@
         balanceEl.innerText = balance.toLocaleString();
         localStorage.setItem('user_balance', balance);
         qrContainer.innerHTML = "";
-        // レジが読み取る形式: PAY_USER_残高
-        new QRCode(qrContainer, {
-            text: "PAY_USER_" + balance,
-            width: 200,
-            height: 200
-        });
+        new QRCode(qrContainer, { text: "PAY_USER_" + balance, width: 200, height: 200 });
     }
 
-    // --- 【重要】決済の自動検知機能 ---
-    let lastTotal = 0;
+    // --- 決済監視ロジック ---
+    let lastKnownTotal = 0;
     onValue(posRef, (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
-
-        // 条件：レジが0円になり(data.total===0)、直前まで金額があった(lastTotal>0)
-        // かつ、メッセージに「決済完了」が含まれている場合
-        if (data.total === 0 && lastTotal > 0 && data.lastItem.includes("決済完了")) {
-            balance -= lastTotal;
-            if (balance < 0) balance = 0; // マイナス防止
-            alert(`決済を確認しました！\n¥${lastTotal.toLocaleString()} をお支払いしました。`);
-            updateView();
-        }
         
-        // 常に最新の合計金額をメモしておく
-        lastTotal = data.total;
+        // 合計が0になった時、直前の金額分を引く
+        if (data.total === 0 && lastKnownTotal > 0 && data.lastItem.includes("決済完了")) {
+            balance -= lastKnownTotal;
+            if (balance < 0) balance = 0;
+            updateView();
+            alert(`¥${lastKnownTotal.toLocaleString()} をお支払いしました！`);
+            lastKnownTotal = 0; 
+        } else if (data.total > 0) {
+            lastKnownTotal = data.total;
+        }
     });
 
-    // --- スキャナー制御（チャージ用） ---
+    // スキャナー(チャージ用)
     const video = document.getElementById("preview");
-    const container = document.getElementById('video-container');
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
     let isScanning = false;
 
     window.openScanner = () => {
-        container.style.display = 'block';
+        document.getElementById('video-container').style.display = 'block';
         document.getElementById('start-btn').style.display = 'none';
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then((stream) => {
-            video.srcObject = stream;
-            video.play();
-            isScanning = true;
-            requestAnimationFrame(tick);
+            video.srcObject = stream; video.play(); isScanning = true; requestAnimationFrame(tick);
         });
     };
-
     window.closeScanner = () => {
-        isScanning = false;
-        if (video.srcObject) video.srcObject.getTracks().forEach(track => track.stop());
-        container.style.display = 'none';
+        isScanning = false; if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+        document.getElementById('video-container').style.display = 'none';
         document.getElementById('start-btn').style.display = 'block';
     };
-
     function tick() {
         if (!isScanning) return;
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            canvas.height = video.videoHeight;
-            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight; canvas.width = video.videoWidth;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
-
+            const code = jsQR(context.getImageData(0,0,canvas.width,canvas.height).data, canvas.width, canvas.height);
             if (code && code.data.startsWith("CHARGE_")) {
-                const amount = parseInt(code.data.split("_")[1]);
-                balance += amount;
-                alert(`⚡ ${amount}円チャージしました！`);
-                closeScanner();
-                updateView();
+                balance += parseInt(code.data.split("_")[1]);
+                alert("チャージ完了！"); closeScanner(); updateView();
             }
         }
         requestAnimationFrame(tick);
     }
-
-    // 初期表示
     updateView();
 </script>
 </body>
