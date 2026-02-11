@@ -2,83 +2,88 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Ultimate POS System - Complete</title>
+    <title>Full POS System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --pay: #9b59b6; --danger: #e74c3c; --bg: #f8f9fa; }
+        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --pay: #9b59b6; --bg: #f8f9fa; }
         body { font-family: sans-serif; margin: 0; background: var(--bg); color: #333; }
-        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        header { background: var(--primary); color: white; padding: 15px; font-weight: bold; font-size: 1.1rem; text-align: center; }
+        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: var(--primary); color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* カメラ・スキャンエリア */
-        #video-container { width: 100%; height: 240px; background: #000; position: relative; overflow: hidden; }
-        #preview { width: 100%; height: 100%; object-fit: cover; }
-        .scan-line { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: rgba(255,0,0,0.5); box-shadow: 0 0 8px red; pointer-events: none; }
-        
-        .display-section { padding: 20px; text-align: center; border-bottom: 4px solid var(--bg); }
-        .total-amount { font-size: 3.5rem; font-weight: bold; margin: 5px 0; color: var(--primary); }
-        .status-msg { height: 24px; color: var(--accent); font-weight: bold; }
+        /* 客用モード時の非表示設定 */
+        body.customer-mode .admin-only { display: none !important; }
+        body.customer-mode #video-container { height: 0; }
 
-        .controls { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .tool-box { background: #fdfdfd; padding: 15px; border-radius: 12px; border: 1px solid #eee; }
-        .box-title { font-size: 0.8rem; font-weight: bold; color: #888; margin-bottom: 8px; text-align: left; }
+        #video-container { width: 100%; height: 200px; background: #000; position: relative; overflow: hidden; transition: 0.3s; }
+        #preview { width: 100%; height: 100%; object-fit: cover; }
         
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; margin-bottom: 8px; }
-        button { border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; color: white; width: 100%; font-size: 1rem; }
+        .display-section { padding: 30px 20px; text-align: center; background: white; border-bottom: 2px solid #eee; }
+        .total-amount { font-size: 4rem; font-weight: bold; margin: 0; color: var(--primary); }
+        .status-msg { height: 24px; color: var(--accent); font-weight: bold; margin-top: 10px; }
+
+        .controls { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .tool-box { background: #f9f9f9; padding: 12px; border-radius: 10px; border: 1px solid #eee; }
+        
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; box-sizing: border-box; margin-bottom: 8px; }
+        button { border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; color: white; width: 100%; }
         .btn-cash { background: var(--success); }
         .btn-charge { background: var(--pay); }
-        .btn-reset { background: #bbb; margin-top: 10px; padding: 8px; font-size: 0.8rem; }
+        .btn-manual { background: var(--accent); }
+        .btn-switch { background: rgba(255,255,255,0.2); border: 1px solid white; font-size: 0.7rem; width: auto; padding: 5px 10px; }
 
-        /* モーダル */
-        #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; }
+        #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; }
         #qr-canvas { background: white; padding: 20px; border-radius: 15px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <header>自社Pay連携・プロ仕様レジ</header>
+    <header>
+        <span id="mode-label">店員モード</span>
+        <button class="btn-switch" onclick="toggleMode()">画面切替</button>
+    </header>
 
-    <div id="video-container">
+    <div id="video-container" class="admin-only">
         <video id="preview" playsinline></video>
-        <div class="scan-line"></div>
     </div>
 
     <div class="display-section">
+        <div style="font-size:0.8rem; color:#999;">合計</div>
         <div class="total-amount">¥<span id="total-price">0</span></div>
-        <div id="status-msg" class="status-msg">スキャン待機中...</div>
+        <div id="status-msg" class="status-msg">いらっしゃいませ</div>
     </div>
 
-    <div class="controls">
+    <div class="controls admin-only">
         <div class="tool-box">
-            <div class="box-title">会計処理</div>
-            <button class="btn-cash" onclick="finishPayment('現金')">💵 現金で会計を確定</button>
-            <p style="font-size: 0.7rem; color: #999; margin-top: 8px; text-align: center;">自社PayはQRをかざすだけで決済されます</p>
+            <button class="btn-cash" onclick="finishPayment('現金')">💵 現金会計を確定</button>
         </div>
 
         <div class="tool-box">
-            <div class="box-title">自社Payチャージ発行</div>
-            <input type="number" id="charge-input" placeholder="チャージ金額を入力">
-            <button class="btn-charge" onclick="generateChargeQR()">⚡ チャージ用QR作成</button>
+            <input type="number" id="manual-price" placeholder="金額を直接入力">
+            <button class="btn-manual" onclick="addManual()">➕ 金額を手入力で追加</button>
         </div>
 
-        <button class="btn-reset" onclick="clearCart()">カート内容を強制リセット</button>
+        <div class="tool-box">
+            <input type="number" id="charge-input" placeholder="チャージ金額">
+            <button class="btn-charge" onclick="generateChargeQR()">⚡ チャージQR作成</button>
+        </div>
+        
+        <button onclick="clearCart()" style="background:#bbb; font-size:0.8rem;">リセット</button>
     </div>
 </div>
 
 <div id="qr-modal" onclick="this.style.display='none'">
     <div id="qr-canvas"></div>
     <p id="qr-label" style="font-size:1.5rem; margin-top:20px; font-weight:bold;"></p>
-    <p style="color: #ccc;">タップして閉じる</p>
+    <p>タップで閉じる</p>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // --- Firebase設定（自分のものに書き換え！） ---
     const firebaseConfig = {
         apiKey: "AIzaSyBWmqdhnlEPxm3DgJDQk0qZ-EFrq8SBU_I",
         authDomain: "kuraberukun-e638b.firebaseapp.com",
@@ -93,31 +98,77 @@
 
     let currentTotal = 0;
     let itemMaster = {};
-    let isProcessing = false; // 連打防止フラグ
+    let isProcessing = false;
 
-    // 同期
+    // --- データ受信 ---
     onValue(posRef, (snapshot) => {
+        // 自分が書き込み処理中の時は、受信データを無視して画面が跳ね返るのを防ぐ
+        if (isProcessing) return; 
+
         const data = snapshot.val();
         currentTotal = data ? data.total : 0;
         document.getElementById('total-price').innerText = currentTotal.toLocaleString();
-        if(data?.lastItem) document.getElementById('status-msg').innerText = data.lastItem;
+        document.getElementById('status-msg').innerText = data?.lastItem || "Ready";
     });
+
     onValue(masterRef, (snapshot) => { itemMaster = snapshot.val() || {}; });
 
-    // --- カメラ・jsQR制御 ---
+    // --- データ送信（一貫性を持たせる） ---
+    async function sendData(newData) {
+        isProcessing = true; // 受信をブロック
+        // 先に自分の画面表示を更新（サクサク感を出す）
+        document.getElementById('total-price').innerText = (newData.total || 0).toLocaleString();
+        document.getElementById('status-msg').innerText = newData.lastItem;
+        
+        await set(posRef, newData);
+        
+        // 送信完了から少し遅らせてブロック解除（データの往復時間を稼ぐ）
+        setTimeout(() => { isProcessing = false; }, 1000);
+    }
+
+    // --- 各種アクション ---
+    window.toggleMode = () => {
+        document.body.classList.toggle('customer-mode');
+        document.getElementById('mode-label').innerText = document.body.classList.contains('customer-mode') ? "客用モード" : "店員モード";
+    };
+
+    window.addManual = () => {
+        const p = parseInt(document.getElementById('manual-price').value);
+        if (p) {
+            sendData({ total: currentTotal + p, lastItem: "手入力追加" });
+            document.getElementById('manual-price').value = "";
+        }
+    };
+
+    window.finishPayment = (m) => {
+        if(currentTotal > 0) sendData({ total: 0, lastItem: `【${m}】会計完了` });
+    };
+
+    window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
+
+    // --- QRコード生成 ---
+    window.generateChargeQR = () => {
+        const amt = document.getElementById('charge-input').value;
+        if(!amt) return;
+        document.getElementById('qr-canvas').innerHTML = "";
+        new QRCode(document.getElementById('qr-canvas'), { text: "CHARGE_" + amt, width: 250, height: 250 });
+        document.getElementById('qr-label').innerText = `チャージ: ¥${amt}`;
+        document.getElementById('qr-modal').style.display = 'flex';
+    };
+
+    // --- スキャナー制御 ---
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
 
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then((stream) => {
         video.srcObject = stream;
-        video.setAttribute("playsinline", true);
         video.play();
         requestAnimationFrame(tick);
     });
 
     function tick() {
-        if (video.readyState === video.HAVE_ENOUGH_DATA && !isProcessing) {
+        if (video.readyState === video.HAVE_ENOUGH_DATA && !isProcessing && !document.body.classList.contains('customer-mode')) {
             canvas.height = video.videoHeight;
             canvas.width = video.videoWidth;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -131,71 +182,26 @@
         requestAnimationFrame(tick);
     }
 
-    // --- スキャン処理（サウンド＆連打防止付き） ---
     function handleScan(data) {
-        isProcessing = true; // ロック開始
-
-        // 1. 自社Pay支払いQR
         if (data.startsWith("PAY_USER_")) {
             const balance = parseInt(data.split("_")[2]);
             if (balance >= currentTotal && currentTotal > 0) {
-                playBeep(880, 0.4); // 成功音
-                set(posRef, { total: 0, lastItem: "【自社Pay】決済完了" });
-                alert("決済成功！ありがとうございました。");
-            } else {
-                playBeep(200, 0.5); // 失敗音
-                alert("残高不足です");
+                sendData({ total: 0, lastItem: "【自社Pay】決済成功" });
+                alert("決済完了！");
             }
-        } 
-        // 2. 商品バーコード
-        else if (itemMaster[data]) {
-            const item = itemMaster[data];
-            playBeep(440, 0.1); // 通常音
-            update(posRef, { total: currentTotal + item.price, lastItem: item.name });
-        } 
-        // 3. 未登録
-        else if (data.length > 5) {
-            playBeep(660, 0.2);
-            const name = prompt(`新商品(コード:${data})\n商品名を入力:`);
-            const price = parseInt(prompt("価格を入力:"));
-            if(name && price) update(ref(db, `item_master/${data}`), { name, price });
+        } else if (itemMaster[data]) {
+            sendData({ total: currentTotal + itemMaster[data].price, lastItem: itemMaster[data].name });
+        } else if (data.length > 5) {
+            isProcessing = true;
+            const name = prompt("新商品名:");
+            const price = parseInt(prompt("価格:"));
+            if(name && price) {
+                set(ref(db, `item_master/${data}`), { name, price });
+                sendData({ total: currentTotal + price, lastItem: name });
+            }
+            isProcessing = false;
         }
-
-        // 3秒間ロックして連打を防ぐ
-        setTimeout(() => { isProcessing = false; }, 3000);
     }
-
-    // サウンド再生
-    function playBeep(freq, duration) {
-        try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.frequency.value = freq; osc.type = "sine";
-            osc.start(); setTimeout(() => osc.stop(), duration * 1000);
-        } catch(e) { console.log("Audio Error"); }
-    }
-
-    // ツール
-    window.generateChargeQR = () => {
-        const amt = document.getElementById('charge-input').value;
-        if(!amt || amt <= 0) return;
-        document.getElementById('qr-canvas').innerHTML = "";
-        new QRCode(document.getElementById('qr-canvas'), { text: "CHARGE_" + amt, width: 250, height: 250 });
-        document.getElementById('qr-label').innerText = `チャージ用: ¥${parseInt(amt).toLocaleString()}`;
-        document.getElementById('qr-modal').style.display = 'flex';
-        document.getElementById('charge-input').value = "";
-    };
-
-    window.finishPayment = (m) => {
-        if(currentTotal > 0) {
-            playBeep(880, 0.1);
-            set(posRef, { total: 0, lastItem: `【${m}】会計完了` });
-        }
-    };
-
-    window.clearCart = () => { if(confirm("リセットしますか？")) set(posRef, { total: 0, lastItem: "リセット完了" }); };
 </script>
 </body>
 </html>
