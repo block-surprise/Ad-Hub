@@ -40,6 +40,10 @@
 </head>
 <body>
 
+<audio id="beep-sound" preload="auto">
+    <source src="https://assets.mixkit.co/active_storage/sfx/2632/2632-preview.mp3" type="audio/mp3">
+</audio>
+
 <div class="app-container">
     <header>
         <span id="mode-label">店員モード</span>
@@ -98,7 +102,6 @@
     let itemMaster = {};
     let isProcessing = false;
 
-    // Firebase同期
     onValue(posRef, (snapshot) => {
         if (isProcessing) return; 
         const data = snapshot.val();
@@ -115,13 +118,21 @@
         document.getElementById('status-msg').innerText = newData.lastItem;
         currentTotal = newData.total;
         await set(posRef, { ...newData, time: Date.now() });
-        // 送信後に少し待ってからスキャンを再開
         setTimeout(() => { isProcessing = false; }, 1500);
+    }
+
+    function playBeep() {
+        const beep = document.getElementById("beep-sound");
+        if (beep) {
+            beep.currentTime = 0;
+            beep.play().catch(e => console.log("Audio play blocked: touch screen first."));
+        }
     }
 
     window.toggleMode = () => {
         document.body.classList.toggle('customer-mode');
         document.getElementById('mode-label').innerText = document.body.classList.contains('customer-mode') ? "客用モード" : "店員モード";
+        playBeep(); // モード切替時に音を鳴らすことで、ブラウザの音再生制限を解除させる
     };
 
     window.addManual = () => {
@@ -153,7 +164,6 @@
 
     window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
 
-    // --- カメラ・スキャン処理の改善 ---
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d", { willReadFrequently: true });
@@ -166,12 +176,11 @@
         video.play();
         requestAnimationFrame(tick);
     }).catch(err => {
-        alert("カメラ起動エラー: " + err);
+        alert("カメラエラー: " + err);
     });
 
     function tick() {
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            // 客用モードではない、かつ処理中ではない時のみスキャン実行
             if (!isProcessing && !document.body.classList.contains('customer-mode')) {
                 canvas.height = video.videoHeight;
                 canvas.width = video.videoWidth;
@@ -183,8 +192,8 @@
                 });
 
                 if (code && code.data) {
-                    // QRを見つけたら即座にフラグを立てて多重反応を防止
                     isProcessing = true;
+                    playBeep(); // スキャン成功時にピッ！
                     handleScan(code.data);
                 }
             }
@@ -193,26 +202,20 @@
     }
 
     async function handleScan(data) {
-        console.log("スキャン成功:", data); // デバッグ用
-
         if (itemMaster[data]) {
-            // 登録済みの商品
             await sendData({ total: currentTotal + itemMaster[data].price, lastItem: itemMaster[data].name });
         } else if (data.length > 3) {
-            // 未登録の商品（登録画面へ）
-            const name = prompt("【新規登録】商品名を入力してください:");
-            const priceStr = prompt("【新規登録】価格を入力してください:");
+            const name = prompt("【新規登録】商品名:");
+            const priceStr = prompt("【新規登録】価格:");
             const price = parseInt(priceStr);
             
             if (name && !isNaN(price)) {
                 await update(ref(db, `item_master/${data}`), { name, price });
                 await sendData({ total: currentTotal + price, lastItem: name });
             } else {
-                // キャンセルされたらスキャンを再開できるようにする
-                isProcessing = false;
+                isProcessing = false; // キャンセル時は即座にスキャン復帰
             }
         } else {
-            // データが短すぎるなどの場合は再開
             isProcessing = false;
         }
     }
