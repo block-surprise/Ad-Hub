@@ -9,7 +9,7 @@
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --pay: #9b59b6; --bg: #f8f9fa; }
         body { font-family: sans-serif; margin: 0; background: var(--bg); color: #333; overflow-x: hidden; }
-        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; }
+        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
         header { background: var(--primary); color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
         body.customer-mode .admin-only { display: none !important; }
         #video-container { width: 100%; height: 250px; background: #000; position: relative; overflow: hidden; }
@@ -28,6 +28,7 @@
         .btn-switch { background: rgba(255,255,255,0.2); border: 1px solid white; font-size: 0.7rem; width: auto; padding: 5px 10px; }
         #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; }
         #qr-canvas { background: white; padding: 20px; border-radius: 15px; }
+        #conn-status { position: absolute; top: 0; left: 0; font-size: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 2px 5px; z-index: 10; }
     </style>
 </head>
 <body>
@@ -37,6 +38,7 @@
 </audio>
 
 <div class="app-container">
+    <div id="conn-status">DB: 接続待機中...</div>
     <header>
         <span id="mode-label">店員モード</span>
         <button class="btn-switch" onclick="toggleMode()">画面切替</button>
@@ -54,7 +56,7 @@
     </div>
 
     <div class="controls admin-only">
-        <button class="btn-pay" onclick="generatePayQR()">📱 自社Pay決済QRを表示</button>
+        <button class="btn-pay" onclick="generatePayQR()">📱 決済QRを表示</button>
         <div class="tool-box">
             <button class="btn-cash" onclick="finishPayment('現金')">💵 現金会計を確定</button>
         </div>
@@ -80,7 +82,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // ★重要: databaseURLを必ず入力してください（Firebaseコンソールからコピー）
     const firebaseConfig = {
         apiKey: "AIzaSyBWmqdhnlEPxm3DgJDQk0qZ-EFrq8SBU_I",
         databaseURL: "https://kuraberukun-e638b-default-rtdb.firebaseio.com", 
@@ -95,17 +96,15 @@
     let itemMaster = {};
     let isProcessing = false;
 
-    // Firebaseデータのリアルタイム同期
+    // Firebase同期
     onValue(posRef, (snapshot) => {
+        document.getElementById('conn-status').innerText = "DB: 同期中";
         const data = snapshot.val();
         if (data) {
             currentTotal = data.total || 0;
             document.getElementById('total-price').innerText = currentTotal.toLocaleString();
             document.getElementById('status-msg').innerText = data.lastItem || "Ready";
         }
-    }, (error) => {
-        console.error("Firebase Read Error:", error);
-        alert("データベース接続エラー。ルールを確認してください。");
     });
 
     onValue(masterRef, (snapshot) => { itemMaster = snapshot.val() || {}; });
@@ -114,20 +113,16 @@
         isProcessing = true;
         try {
             await set(posRef, { ...newData, time: Date.now() });
-        } catch (e) {
-            alert("送信失敗: " + e.message);
         } finally {
             setTimeout(() => { isProcessing = false; }, 1000);
         }
     }
 
-    // 音声再生
     function playBeep() {
         const beep = document.getElementById("beep-sound");
         if (beep) { beep.currentTime = 0; beep.play().catch(() => {}); }
     }
 
-    // 各種操作
     window.toggleMode = () => {
         document.body.classList.toggle('customer-mode');
         document.getElementById('mode-label').innerText = document.body.classList.contains('customer-mode') ? "客用モード" : "店員モード";
@@ -149,12 +144,22 @@
         new QRCode(document.getElementById('qr-canvas'), { text: `PAY_${currentTotal}_${Date.now()}`, width: 250, height: 250 });
         document.getElementById('qr-label').innerText = `お支払い: ¥${currentTotal}`;
         document.getElementById('qr-modal').style.display = 'flex';
-        sendData({ total: 0, lastItem: "決済待ち" });
+    };
+
+    // ★チャージQR作成機能
+    window.generateChargeQR = () => {
+        const amt = document.getElementById('charge-input').value;
+        if(!amt) return;
+        document.getElementById('qr-canvas').innerHTML = "";
+        // 形式を "CHARGE_1000" のようにする
+        new QRCode(document.getElementById('qr-canvas'), { text: "CHARGE_" + amt, width: 250, height: 250 });
+        document.getElementById('qr-label').innerText = `チャージ用: ¥${amt}`;
+        document.getElementById('qr-modal').style.display = 'flex';
     };
 
     window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
 
-    // --- スキャン処理のコア ---
+    // --- スキャン処理 ---
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d", { willReadFrequently: true });
@@ -163,11 +168,9 @@
         video: { facingMode: "environment", width: { ideal: 1280 } } 
     }).then((stream) => {
         video.srcObject = stream;
-        video.onloadedmetadata = () => {
-            video.play();
-            requestAnimationFrame(tick);
-        };
-    }).catch(err => alert("カメラエラー: " + err));
+        video.play();
+        requestAnimationFrame(tick);
+    });
 
     function tick() {
         if (video.readyState === video.HAVE_ENOUGH_DATA && !isProcessing && !document.body.classList.contains('customer-mode')) {
@@ -187,10 +190,19 @@
     }
 
     async function handleScan(data) {
+        // ★チャージQRを読み取った場合の処理
+        if (data.startsWith("CHARGE_")) {
+            const amount = parseInt(data.replace("CHARGE_", ""));
+            if (!isNaN(amount)) {
+                await sendData({ total: currentTotal + amount, lastItem: `⚡ ¥${amount} チャージ完了` });
+                return;
+            }
+        }
+
+        // 通常の商品スキャン
         if (itemMaster[data]) {
             await sendData({ total: currentTotal + itemMaster[data].price, lastItem: itemMaster[data].name });
         } else {
-            // 新規登録フロー
             const name = prompt("新規商品名:");
             const price = parseInt(prompt("価格:"));
             if (name && !isNaN(price)) {
