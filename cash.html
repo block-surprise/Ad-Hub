@@ -15,14 +15,14 @@
         body.customer-mode .admin-only { display: none !important; }
         body.customer-mode #video-container { height: 0; }
 
-        #video-container { width: 100%; height: 250px; background: #000; position: relative; overflow: hidden; transition: 0.3s; }
+        #video-container { width: 100%; height: 250px; background: #000; position: relative; overflow: hidden; }
         #preview { width: 100%; height: 100%; object-fit: cover; }
         
         .scan-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 60%; border: 2px solid rgba(255,255,255,0.5); border-radius: 10px; box-shadow: 0 0 0 1000px rgba(0,0,0,0.3); pointer-events: none; }
 
         .display-section { padding: 20px; text-align: center; background: white; border-bottom: 2px solid #eee; }
         .total-amount { font-size: 3.5rem; font-weight: bold; margin: 0; color: var(--primary); }
-        .status-msg { height: 24px; color: var(--accent); font-weight: bold; margin-top: 5px; }
+        .status-msg { height: 24px; color: var(--accent); font-weight: bold; margin-top: 5px; font-size: 0.9rem; }
 
         .controls { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
         .tool-box { background: #f9f9f9; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
@@ -36,6 +36,9 @@
 
         #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; }
         #qr-canvas { background: white; padding: 20px; border-radius: 15px; }
+        
+        /* デバッグ用表示 */
+        #debug-info { font-size: 10px; color: #ccc; padding: 5px; position: absolute; bottom: 0; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -51,14 +54,15 @@
     </header>
 
     <div id="video-container" class="admin-only">
-        <video id="preview" playsinline></video>
+        <video id="preview" playsinline muted autoplay></video>
         <div class="scan-guide"></div>
+        <div id="debug-info">System: Initializing...</div>
     </div>
 
     <div class="display-section">
         <div style="font-size:0.8rem; color:#999;">合計金額</div>
         <div class="total-amount">¥<span id="total-price">0</span></div>
-        <div id="status-msg" class="status-msg">いらっしゃいませ</div>
+        <div id="status-msg" class="status-msg">スキャン準備中...</div>
     </div>
 
     <div class="controls admin-only">
@@ -102,21 +106,25 @@
     let itemMaster = {};
     let isProcessing = false;
 
+    // UI更新用のヘルパー
+    const updateStatus = (text) => document.getElementById('status-msg').innerText = text;
+    const updateDebug = (text) => document.getElementById('debug-info').innerText = "System: " + text;
+
     onValue(posRef, (snapshot) => {
         if (isProcessing) return; 
         const data = snapshot.val();
         currentTotal = data ? data.total : 0;
         document.getElementById('total-price').innerText = currentTotal.toLocaleString();
-        document.getElementById('status-msg').innerText = data?.lastItem || "Ready";
+        updateStatus(data?.lastItem || "Ready");
     });
 
     onValue(masterRef, (snapshot) => { itemMaster = snapshot.val() || {}; });
 
     async function sendData(newData) {
         isProcessing = true;
-        document.getElementById('total-price').innerText = (newData.total || 0).toLocaleString();
-        document.getElementById('status-msg').innerText = newData.lastItem;
         currentTotal = newData.total;
+        document.getElementById('total-price').innerText = (newData.total || 0).toLocaleString();
+        updateStatus(newData.lastItem);
         await set(posRef, { ...newData, time: Date.now() });
         setTimeout(() => { isProcessing = false; }, 1500);
     }
@@ -125,14 +133,14 @@
         const beep = document.getElementById("beep-sound");
         if (beep) {
             beep.currentTime = 0;
-            beep.play().catch(e => console.log("Audio play blocked: touch screen first."));
+            beep.play().catch(() => {});
         }
     }
 
     window.toggleMode = () => {
         document.body.classList.toggle('customer-mode');
         document.getElementById('mode-label').innerText = document.body.classList.contains('customer-mode') ? "客用モード" : "店員モード";
-        playBeep(); // モード切替時に音を鳴らすことで、ブラウザの音再生制限を解除させる
+        playBeep();
     };
 
     window.addManual = () => {
@@ -150,7 +158,7 @@
         new QRCode(document.getElementById('qr-canvas'), { text: `PAY_${currentTotal}_${Date.now()}`, width: 250, height: 250 });
         document.getElementById('qr-label').innerText = `お支払い: ¥${currentTotal}`;
         document.getElementById('qr-modal').style.display = 'flex';
-        sendData({ total: 0, lastItem: "自社Pay決済待ち" });
+        sendData({ total: 0, lastItem: "決済待ち" });
     };
 
     window.generateChargeQR = () => {
@@ -164,20 +172,26 @@
 
     window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
 
+    // --- カメラ・スキャン処理 ---
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d", { willReadFrequently: true });
 
-    navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
-    }).then((stream) => {
-        video.srcObject = stream;
-        video.setAttribute("playsinline", true); 
-        video.play();
-        requestAnimationFrame(tick);
-    }).catch(err => {
-        alert("カメラエラー: " + err);
-    });
+    async function initCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
+            });
+            video.srcObject = stream;
+            // 確実に再生を開始させる
+            await video.play();
+            updateDebug("Camera Active");
+            requestAnimationFrame(tick);
+        } catch (err) {
+            updateDebug("Camera Error: " + err.message);
+            alert("カメラを起動できませんでした。ブラウザの権限設定を確認してください。");
+        }
+    }
 
     function tick() {
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
@@ -187,14 +201,20 @@
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
                 const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert",
-                });
+                
+                // jsQRが読み込まれているかチェック
+                if (typeof jsQR !== "undefined") {
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "dontInvert",
+                    });
 
-                if (code && code.data) {
-                    isProcessing = true;
-                    playBeep(); // スキャン成功時にピッ！
-                    handleScan(code.data);
+                    if (code && code.data) {
+                        isProcessing = true;
+                        playBeep();
+                        handleScan(code.data);
+                    }
+                } else {
+                    updateDebug("Library jsQR not found!");
                 }
             }
         }
@@ -202,23 +222,31 @@
     }
 
     async function handleScan(data) {
+        updateDebug("Scanned: " + data);
+        
         if (itemMaster[data]) {
             await sendData({ total: currentTotal + itemMaster[data].price, lastItem: itemMaster[data].name });
-        } else if (data.length > 3) {
-            const name = prompt("【新規登録】商品名:");
-            const priceStr = prompt("【新規登録】価格:");
+        } else {
+            // 新規登録
+            updateStatus("新規商品を発見");
+            const name = prompt("新規商品名を入力してください:", "新商品");
+            if (!name) { isProcessing = false; return; }
+            
+            const priceStr = prompt(`${name} の価格は？`, "100");
             const price = parseInt(priceStr);
             
-            if (name && !isNaN(price)) {
+            if (!isNaN(price)) {
+                updateDebug("Registering...");
                 await update(ref(db, `item_master/${data}`), { name, price });
                 await sendData({ total: currentTotal + price, lastItem: name });
             } else {
-                isProcessing = false; // キャンセル時は即座にスキャン復帰
+                isProcessing = false;
             }
-        } else {
-            isProcessing = false;
         }
     }
+
+    // 起動
+    initCamera();
 </script>
 </body>
 </html>
