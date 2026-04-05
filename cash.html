@@ -2,43 +2,32 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>SURGE PRO - POS System</title>
+    <title>SURGE PRO</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --pay: #9b59b6; --bg: #f8f9fa; }
-        body { font-family: sans-serif; margin: 0; background: var(--bg); color: #333; }
+        body { font-family: sans-serif; margin: 0; background: var(--bg); color: #333; overflow-x: hidden; }
         .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; }
         header { background: var(--primary); color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-        
         body.customer-mode .admin-only { display: none !important; }
-        body.customer-mode #video-container { height: 0; }
-
         #video-container { width: 100%; height: 250px; background: #000; position: relative; overflow: hidden; }
         #preview { width: 100%; height: 100%; object-fit: cover; }
-        
         .scan-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 60%; border: 2px solid rgba(255,255,255,0.5); border-radius: 10px; box-shadow: 0 0 0 1000px rgba(0,0,0,0.3); pointer-events: none; }
-
         .display-section { padding: 20px; text-align: center; background: white; border-bottom: 2px solid #eee; }
         .total-amount { font-size: 3.5rem; font-weight: bold; margin: 0; color: var(--primary); }
         .status-msg { height: 24px; color: var(--accent); font-weight: bold; margin-top: 5px; font-size: 0.9rem; }
-
         .controls { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
         .tool-box { background: #f9f9f9; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
-        
         input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; box-sizing: border-box; margin-bottom: 8px; }
         button { border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; color: white; width: 100%; }
         .btn-cash { background: var(--success); }
         .btn-pay { background: var(--pay); }
         .btn-manual { background: var(--accent); }
         .btn-switch { background: rgba(255,255,255,0.2); border: 1px solid white; font-size: 0.7rem; width: auto; padding: 5px 10px; }
-
         #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; }
         #qr-canvas { background: white; padding: 20px; border-radius: 15px; }
-        
-        /* デバッグ用表示 */
-        #debug-info { font-size: 10px; color: #ccc; padding: 5px; position: absolute; bottom: 0; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -56,13 +45,12 @@
     <div id="video-container" class="admin-only">
         <video id="preview" playsinline muted autoplay></video>
         <div class="scan-guide"></div>
-        <div id="debug-info">System: Initializing...</div>
     </div>
 
     <div class="display-section">
         <div style="font-size:0.8rem; color:#999;">合計金額</div>
         <div class="total-amount">¥<span id="total-price">0</span></div>
-        <div id="status-msg" class="status-msg">スキャン準備中...</div>
+        <div id="status-msg" class="status-msg">いらっしゃいませ</div>
     </div>
 
     <div class="controls admin-only">
@@ -92,9 +80,10 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+    // ★重要: databaseURLを必ず入力してください（Firebaseコンソールからコピー）
     const firebaseConfig = {
         apiKey: "AIzaSyBWmqdhnlEPxm3DgJDQk0qZ-EFrq8SBU_I",
-        databaseURL: "https://kuraberukun-e638b-default-rtdb.firebaseio.com",
+        databaseURL: "https://kuraberukun-e638b-default-rtdb.firebaseio.com", 
     };
 
     const app = initializeApp(firebaseConfig);
@@ -106,37 +95,39 @@
     let itemMaster = {};
     let isProcessing = false;
 
-    // UI更新用のヘルパー
-    const updateStatus = (text) => document.getElementById('status-msg').innerText = text;
-    const updateDebug = (text) => document.getElementById('debug-info').innerText = "System: " + text;
-
+    // Firebaseデータのリアルタイム同期
     onValue(posRef, (snapshot) => {
-        if (isProcessing) return; 
         const data = snapshot.val();
-        currentTotal = data ? data.total : 0;
-        document.getElementById('total-price').innerText = currentTotal.toLocaleString();
-        updateStatus(data?.lastItem || "Ready");
+        if (data) {
+            currentTotal = data.total || 0;
+            document.getElementById('total-price').innerText = currentTotal.toLocaleString();
+            document.getElementById('status-msg').innerText = data.lastItem || "Ready";
+        }
+    }, (error) => {
+        console.error("Firebase Read Error:", error);
+        alert("データベース接続エラー。ルールを確認してください。");
     });
 
     onValue(masterRef, (snapshot) => { itemMaster = snapshot.val() || {}; });
 
     async function sendData(newData) {
         isProcessing = true;
-        currentTotal = newData.total;
-        document.getElementById('total-price').innerText = (newData.total || 0).toLocaleString();
-        updateStatus(newData.lastItem);
-        await set(posRef, { ...newData, time: Date.now() });
-        setTimeout(() => { isProcessing = false; }, 1500);
-    }
-
-    function playBeep() {
-        const beep = document.getElementById("beep-sound");
-        if (beep) {
-            beep.currentTime = 0;
-            beep.play().catch(() => {});
+        try {
+            await set(posRef, { ...newData, time: Date.now() });
+        } catch (e) {
+            alert("送信失敗: " + e.message);
+        } finally {
+            setTimeout(() => { isProcessing = false; }, 1000);
         }
     }
 
+    // 音声再生
+    function playBeep() {
+        const beep = document.getElementById("beep-sound");
+        if (beep) { beep.currentTime = 0; beep.play().catch(() => {}); }
+    }
+
+    // 各種操作
     window.toggleMode = () => {
         document.body.classList.toggle('customer-mode');
         document.getElementById('mode-label').innerText = document.body.classList.contains('customer-mode') ? "客用モード" : "店員モード";
@@ -161,82 +152,48 @@
         sendData({ total: 0, lastItem: "決済待ち" });
     };
 
-    window.generateChargeQR = () => {
-        const amt = document.getElementById('charge-input').value;
-        if(!amt) return;
-        document.getElementById('qr-canvas').innerHTML = "";
-        new QRCode(document.getElementById('qr-canvas'), { text: "CHARGE_" + amt, width: 250, height: 250 });
-        document.getElementById('qr-label').innerText = `チャージ: ¥${amt}`;
-        document.getElementById('qr-modal').style.display = 'flex';
-    };
-
     window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
 
-    // --- カメラ・スキャン処理 ---
+    // --- スキャン処理のコア ---
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d", { willReadFrequently: true });
 
-    async function initCamera() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
-            });
-            video.srcObject = stream;
-            // 確実に再生を開始させる
-            await video.play();
-            updateDebug("Camera Active");
+    navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "environment", width: { ideal: 1280 } } 
+    }).then((stream) => {
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+            video.play();
             requestAnimationFrame(tick);
-        } catch (err) {
-            updateDebug("Camera Error: " + err.message);
-            alert("カメラを起動できませんでした。ブラウザの権限設定を確認してください。");
-        }
-    }
+        };
+    }).catch(err => alert("カメラエラー: " + err));
 
     function tick() {
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            if (!isProcessing && !document.body.classList.contains('customer-mode')) {
-                canvas.height = video.videoHeight;
-                canvas.width = video.videoWidth;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                
-                // jsQRが読み込まれているかチェック
-                if (typeof jsQR !== "undefined") {
-                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                        inversionAttempts: "dontInvert",
-                    });
+        if (video.readyState === video.HAVE_ENOUGH_DATA && !isProcessing && !document.body.classList.contains('customer-mode')) {
+            canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-                    if (code && code.data) {
-                        isProcessing = true;
-                        playBeep();
-                        handleScan(code.data);
-                    }
-                } else {
-                    updateDebug("Library jsQR not found!");
-                }
+            if (code && code.data) {
+                isProcessing = true;
+                playBeep();
+                handleScan(code.data);
             }
         }
         requestAnimationFrame(tick);
     }
 
     async function handleScan(data) {
-        updateDebug("Scanned: " + data);
-        
         if (itemMaster[data]) {
             await sendData({ total: currentTotal + itemMaster[data].price, lastItem: itemMaster[data].name });
         } else {
-            // 新規登録
-            updateStatus("新規商品を発見");
-            const name = prompt("新規商品名を入力してください:", "新商品");
-            if (!name) { isProcessing = false; return; }
-            
-            const priceStr = prompt(`${name} の価格は？`, "100");
-            const price = parseInt(priceStr);
-            
-            if (!isNaN(price)) {
-                updateDebug("Registering...");
+            // 新規登録フロー
+            const name = prompt("新規商品名:");
+            const price = parseInt(prompt("価格:"));
+            if (name && !isNaN(price)) {
                 await update(ref(db, `item_master/${data}`), { name, price });
                 await sendData({ total: currentTotal + price, lastItem: name });
             } else {
@@ -244,9 +201,6 @@
             }
         }
     }
-
-    // 起動
-    initCamera();
 </script>
 </body>
 </html>
