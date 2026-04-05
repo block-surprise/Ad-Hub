@@ -14,7 +14,7 @@
         body.customer-mode .admin-only { display: none !important; }
         #video-container { width: 100%; height: 250px; background: #000; position: relative; overflow: hidden; }
         #preview { width: 100%; height: 100%; object-fit: cover; }
-        .scan-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 60%; border: 2px solid rgba(255,255,255,0.5); border-radius: 10px; box-shadow: 0 0 0 1000px rgba(0,0,0,0.3); pointer-events: none; }
+        .scan-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 60%; border: 2px solid rgba(255,255,255,0.8); border-radius: 10px; box-shadow: 0 0 0 1000px rgba(0,0,0,0.5); pointer-events: none; z-index: 5; }
         .display-section { padding: 20px; text-align: center; background: white; border-bottom: 2px solid #eee; }
         .total-amount { font-size: 3.5rem; font-weight: bold; margin: 0; color: var(--primary); }
         .status-msg { height: 24px; color: var(--accent); font-weight: bold; margin-top: 5px; font-size: 0.9rem; }
@@ -38,7 +38,7 @@
 </audio>
 
 <div class="app-container">
-    <div id="conn-status">DB: 接続待機中...</div>
+    <div id="conn-status">DB: 接続中...</div>
     <header>
         <span id="mode-label">店員モード</span>
         <button class="btn-switch" onclick="toggleMode()">画面切替</button>
@@ -52,7 +52,7 @@
     <div class="display-section">
         <div style="font-size:0.8rem; color:#999;">合計金額</div>
         <div class="total-amount">¥<span id="total-price">0</span></div>
-        <div id="status-msg" class="status-msg">いらっしゃいませ</div>
+        <div id="status-msg" class="status-msg">スキャン待機中...</div>
     </div>
 
     <div class="controls admin-only">
@@ -98,7 +98,7 @@
 
     // Firebase同期
     onValue(posRef, (snapshot) => {
-        document.getElementById('conn-status').innerText = "DB: 同期中";
+        document.getElementById('conn-status').innerText = "DB: 同期完了";
         const data = snapshot.val();
         if (data) {
             currentTotal = data.total || 0;
@@ -113,8 +113,11 @@
         isProcessing = true;
         try {
             await set(posRef, { ...newData, time: Date.now() });
+        } catch (e) {
+            console.error(e);
         } finally {
-            setTimeout(() => { isProcessing = false; }, 1000);
+            // スキャン再開までの待ち時間
+            setTimeout(() => { isProcessing = false; }, 1200);
         }
     }
 
@@ -146,12 +149,10 @@
         document.getElementById('qr-modal').style.display = 'flex';
     };
 
-    // ★チャージQR作成機能
     window.generateChargeQR = () => {
         const amt = document.getElementById('charge-input').value;
         if(!amt) return;
         document.getElementById('qr-canvas').innerHTML = "";
-        // 形式を "CHARGE_1000" のようにする
         new QRCode(document.getElementById('qr-canvas'), { text: "CHARGE_" + amt, width: 250, height: 250 });
         document.getElementById('qr-label').innerText = `チャージ用: ¥${amt}`;
         document.getElementById('qr-modal').style.display = 'flex';
@@ -159,38 +160,54 @@
 
     window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
 
-    // --- スキャン処理 ---
+    // --- スキャン処理（ここが重要） ---
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
+    // willReadFrequently を true にしてスキャンを高速化
     const context = canvas.getContext("2d", { willReadFrequently: true });
 
-    navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment", width: { ideal: 1280 } } 
-    }).then((stream) => {
-        video.srcObject = stream;
-        video.play();
-        requestAnimationFrame(tick);
-    });
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
+            });
+            video.srcObject = stream;
+            // 映像が読み込まれるのを待ってからループ開始
+            video.onloadeddata = () => {
+                video.play();
+                requestAnimationFrame(tick);
+            };
+        } catch (err) {
+            document.getElementById('status-msg').innerText = "カメラ起動エラー";
+            console.error(err);
+        }
+    }
 
     function tick() {
-        if (video.readyState === video.HAVE_ENOUGH_DATA && !isProcessing && !document.body.classList.contains('customer-mode')) {
-            canvas.height = video.videoHeight;
-            canvas.width = video.videoWidth;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            // スキャン中かつ店員モードの時だけ解析
+            if (!isProcessing && !document.body.classList.contains('customer-mode')) {
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
 
-            if (code && code.data) {
-                isProcessing = true;
-                playBeep();
-                handleScan(code.data);
+                if (code && code.data) {
+                    isProcessing = true; // 二重読み取り防止
+                    playBeep();
+                    handleScan(code.data);
+                }
             }
         }
         requestAnimationFrame(tick);
     }
 
     async function handleScan(data) {
-        // ★チャージQRを読み取った場合の処理
+        // チャージ
         if (data.startsWith("CHARGE_")) {
             const amount = parseInt(data.replace("CHARGE_", ""));
             if (!isNaN(amount)) {
@@ -199,20 +216,24 @@
             }
         }
 
-        // 通常の商品スキャン
+        // 商品マスター照合
         if (itemMaster[data]) {
             await sendData({ total: currentTotal + itemMaster[data].price, lastItem: itemMaster[data].name });
         } else {
-            const name = prompt("新規商品名:");
-            const price = parseInt(prompt("価格:"));
+            // 未登録なら登録画面へ
+            const name = prompt("【新規商品】名前を入力:", "新商品");
+            const price = parseInt(prompt("【新規商品】価格を入力:"));
             if (name && !isNaN(price)) {
                 await update(ref(db, `item_master/${data}`), { name, price });
                 await sendData({ total: currentTotal + price, lastItem: name });
             } else {
-                isProcessing = false;
+                isProcessing = false; // キャンセルされたら即スキャン復帰
             }
         }
     }
+
+    // 起動
+    startCamera();
 </script>
 </body>
 </html>
