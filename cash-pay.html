@@ -2,17 +2,13 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>My Pay - Official Full App</title>
+    <title>My Pay - Ultimate App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
         :root { --pay-red: #ff0033; --pay-blue: #00a5ff; --bg: #f8f9fb; --text: #333; }
-        body { font-family: 'Hiragino Sans', 'Meiryo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; color: var(--text); overflow-x: hidden; }
-
-        /* スプラッシュ画面 */
-        #splash { position: fixed; inset: 0; background: var(--pay-red); z-index: 10000; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s; }
-        .logo-white { color: white; font-size: 3rem; font-weight: 900; font-style: italic; letter-spacing: -2px; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; color: var(--text); overflow-x: hidden; }
 
         /* ページ制御 */
         .page { display: none; min-height: 100vh; animation: fadeIn 0.3s ease; }
@@ -22,135 +18,98 @@
         /* ヘッダー */
         header { background: var(--pay-red); color: white; padding: 15px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
 
-        /* カードデザイン */
+        /* カード */
         .card { background: white; margin: 15px; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .bal-label { font-size: 0.75rem; color: #888; display: flex; align-items: center; gap: 5px; }
         .bal-amt { font-size: 2.5rem; font-weight: 800; margin: 5px 0; color: #111; }
-        .bal-amt span { font-size: 1.2rem; margin-left: 5px; }
+        .point-display { font-size: 0.9rem; color: var(--pay-red); font-weight: bold; border-top: 1px solid #f0f0f0; pt: 10px; margin-top: 10px; display: flex; align-items: center; gap: 5px; }
 
-        /* アクションボタン */
+        /* ボタン */
         .btn-row { display: flex; gap: 10px; margin-top: 15px; }
         .btn-sub { flex: 1; padding: 12px; border-radius: 12px; border: none; background: #f0f0f0; font-weight: bold; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
 
-        /* 機能アイコングリッド */
-        .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 10px 20px; }
-        .icon-item { text-align: center; }
-        .icon-box { width: 52px; height: 52px; background: white; border-radius: 18px; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .icon-label { font-size: 0.65rem; font-weight: bold; color: #666; }
-
         /* 履歴リスト */
         .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f0f0f0; background: white; margin: 0 15px; }
-        .history-item:first-child { border-radius: 15px 15px 0 0; }
-        .history-item:last-child { border-radius: 0 0 15px 15px; border: none; }
+        .history-item:last-child { border: none; }
 
-        /* 下部ナビゲーション */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 85px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 500; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.6rem; color: #999; cursor: pointer; transition: 0.2s; }
+        /* 下部ナビ */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 80px; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 500; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.6rem; color: #999; cursor: pointer; }
         .nav-item.active { color: var(--pay-red); }
         .nav-item i { font-size: 1.3rem; margin-bottom: 4px; }
         
-        .scan-fab { position: absolute; top: -30px; width: 75px; height: 75px; background: white; border-radius: 50%; padding: 5px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); border: none; cursor: pointer; }
-        .scan-fab-inner { width: 100%; height: 100%; background: var(--pay-red); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        .scan-fab { position: absolute; top: -25px; width: 70px; height: 70px; background: var(--pay-red); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; }
 
-        /* スキャナーUI */
+        /* スキャナー */
         #scanner-ui { display:none; position:fixed; inset:0; background:black; z-index:9000; }
         #preview { width:100%; height:100%; object-fit:cover; }
-        .scan-frame { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:250px; height:250px; border:2px solid white; border-radius:20px; box-shadow:0 0 0 1000px rgba(0,0,0,0.6); }
+        .scan-frame { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:240px; height:240px; border:2px solid white; border-radius:20px; box-shadow:0 0 0 1000px rgba(0,0,0,0.6); }
 
-        /* 決済成功画面 */
+        /* 成功画面 */
         #success-overlay { display: none; position: fixed; inset: 0; background: white; z-index: 10000; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .success-circle { width: 100px; height: 100px; background: #2ecc71; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; margin-bottom: 20px; }
+        .success-circle { width: 80px; height: 80px; background: #2ecc71; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2.5rem; margin-bottom: 15px; }
 
-        /* 設定画面アイテム */
+        /* 設定 */
         .settings-row { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; }
-        .settings-row input[type="text"] { border: none; text-align: right; font-size: 1rem; color: #666; }
+        input[type="text"] { border: none; text-align: right; font-size: 1rem; color: #666; width: 50%; }
     </style>
 </head>
 <body>
-
-<div id="splash"><div class="logo-white">My Pay</div></div>
 
 <div id="page-home" class="page active">
     <header><span id="header-user">My Pay</span><i class="fa-regular fa-bell"></i></header>
     <div class="card">
         <div class="bal-label"><i class="fa-solid fa-wallet"></i> マネー残高</div>
         <div class="bal-amt">¥<span id="bal-val">0</span></div>
-        <div style="font-size: 0.8rem; color: var(--pay-red); font-weight: bold;">
-            <i class="fa-solid fa-star"></i> ポイント: <span id="point-val">0</span> pt
-        </div>
+        <div class="point-display"><i class="fa-solid fa-star"></i> ポイント: <span id="point-val">0</span> pt</div>
         <div class="btn-row">
-            <button class="btn-sub" onclick="startScan('CHARGE')"><i class="fa-solid fa-circle-plus"></i> チャージ</button>
-            <button class="btn-sub"><i class="fa-solid fa-paper-plane"></i> 送る</button>
+            <button class="btn-sub" onclick="startScan()"><i class="fa-solid fa-circle-plus"></i> チャージ</button>
+            <button class="btn-sub" onclick="alert('送金機能は準備中です')"><i class="fa-solid fa-paper-plane"></i> 送る</button>
         </div>
     </div>
-    <div class="icon-grid">
-        <div class="icon-item"><div class="icon-box" style="color:#f39c12;"><i class="fa-solid fa-coins"></i></div><div class="icon-label">ポイント</div></div>
-        <div class="icon-item"><div class="icon-box" style="color:#e74c3c;"><i class="fa-solid fa-ticket"></i></div><div class="icon-label">クーポン</div></div>
-        <div class="icon-item"><div class="icon-box" style="color:#3498db;"><i class="fa-solid fa-gas-pump"></i></div><div class="icon-label">ガソリン</div></div>
-        <div class="icon-item"><div class="icon-box" style="color:#9b59b6;"><i class="fa-solid fa-mobile-screen-button"></i></div><div class="icon-label">モバイル</div></div>
-    </div>
-</div>
-
-<div id="page-wallet" class="page">
-    <header><span>利用履歴</span></header>
-    <div id="history-container" style="margin-top: 15px;"></div>
+    <div style="padding: 0 20px; font-weight: bold; font-size: 0.9rem; margin-bottom: 10px;">最近の履歴</div>
+    <div id="history-container"></div>
 </div>
 
 <div id="page-settings" class="page">
-    <header><span>アカウント設定</span></header>
+    <header><span>設定</span></header>
     <div style="margin-top: 15px;">
-        <div class="settings-row">
-            <span>表示名</span>
-            <input type="text" id="set-name" onchange="saveSettings()" placeholder="名前を入力">
-        </div>
-        <div class="settings-row">
-            <span>ポイントを優先的に使う</span>
-            <input type="checkbox" id="set-point-usage" onchange="saveSettings()">
-        </div>
-        <div class="settings-row" onclick="resetData()" style="color:red; justify-content:center; font-weight:bold; margin-top:30px;">
-            データをすべて初期化する
-        </div>
+        <div class="settings-row"><span>名前</span><input type="text" id="set-name" onchange="saveSettings()"></div>
+        <div class="settings-row"><span>ポイントを優先利用</span><input type="checkbox" id="set-point-usage" onchange="saveSettings()"></div>
+        <div class="settings-row" onclick="resetData()" style="color:red; justify-content:center; font-weight:bold; mt:30px;">データを初期化</div>
     </div>
 </div>
 
-<div class="bottom-nav">
+<nav class="bottom-nav">
     <div class="nav-item active" onclick="showPage('home', this)"><i class="fa-solid fa-house"></i>ホーム</div>
-    <div class="nav-item" onclick="showPage('wallet', this)"><i class="fa-solid fa-list-ul"></i>履歴</div>
-    <button class="scan-fab" onclick="startScan('ANY')">
-        <div class="scan-fab-inner"><i class="fa-solid fa-qrcode"></i><label>支払う</label></div>
+    <button class="scan-fab" onclick="startScan()">
+        <i class="fa-solid fa-qrcode"></i><span style="font-size:0.6rem; font-weight:bold;">支払う</span>
     </button>
-    <div style="width: 50px;"></div>
-    <div class="nav-item"><i class="fa-solid fa-gift"></i>ポイント</div>
+    <div style="width: 70px;"></div>
     <div class="nav-item" onclick="showPage('settings', this)"><i class="fa-solid fa-user-gear"></i>設定</div>
-</div>
+</nav>
 
 <div id="scanner-ui">
     <video id="preview" playsinline></video>
-    <div id="scan-guide" style="position:absolute; top:20%; width:100%; text-align:center; color:white; font-weight:bold; text-shadow:0 2px 4px #000;">QRをスキャンしてください</div>
     <div class="scan-frame"></div>
-    <button onclick="stopScan()" style="position:absolute; bottom:60px; left:50%; transform:translateX(-50%); padding:15px 50px; border-radius:30px; border:none; background:white; font-weight:bold; box-shadow:0 4px 10px rgba(0,0,0,0.3);">× 閉じる</button>
+    <button onclick="stopScan()" style="position:absolute; bottom:50px; left:50%; transform:translateX(-50%); padding:12px 40px; border-radius:25px; border:none; background:white; font-weight:bold;">キャンセル</button>
 </div>
 
 <div id="success-overlay" onclick="this.style.display='none'">
     <div class="success-circle"><i class="fa-solid fa-check"></i></div>
-    <div style="color:#2ecc71; font-weight:bold; font-size:1.2rem;">お支払い完了</div>
-    <div style="font-size: 3.5rem; font-weight: 800; color: #111; margin: 10px 0;">¥<span id="res-amt">0</span></div>
+    <h2 id="res-title" style="margin:0; color:#2ecc71;">完了</h2>
+    <div style="font-size: 3rem; font-weight: 800; color: #111; margin: 10px 0;">¥<span id="res-amt">0</span></div>
     <div id="res-detail" style="color:#888; font-size:0.8rem;"></div>
-    <button style="margin-top:40px; padding:15px 60px; border-radius:30px; border:none; background:#f0f0f0; font-weight:bold;">閉じる</button>
+    <button style="margin-top:30px; padding:12px 50px; border-radius:25px; border:none; background:#f0f0f0; font-weight:bold;">ホームへ戻る</button>
 </div>
 
 <script type="module">
-    // --- 1. 初期データ設定 ---
-    let appData = JSON.parse(localStorage.getItem('mypay_official_data')) || {
-        balance: 5000,
-        points: 150,
-        username: "ゲストユーザー",
-        usePointFirst: false,
-        history: []
+    let appData = JSON.parse(localStorage.getItem('mypay_data_final')) || {
+        balance: 5000, points: 0, username: "ゲストユーザー", usePointFirst: false, history: []
     };
 
     function save() {
-        localStorage.setItem('mypay_official_data', JSON.stringify(appData));
+        localStorage.setItem('mypay_data_final', JSON.stringify(appData));
         render();
     }
 
@@ -161,156 +120,106 @@
         document.getElementById('set-name').value = appData.username;
         document.getElementById('set-point-usage').checked = appData.usePointFirst;
 
-        const histContainer = document.getElementById('history-container');
-        if (appData.history.length === 0) {
-            histContainer.innerHTML = '<div style="text-align:center; color:#ccc; padding:40px;">履歴はありません</div>';
-        } else {
-            histContainer.innerHTML = appData.history.slice().reverse().map(h => `
-                <div class="history-item">
-                    <div>
-                        <div style="font-weight:bold; font-size:0.9rem;">${h.title}</div>
-                        <div style="font-size:0.7rem; color:#999;">${h.date}</div>
-                    </div>
-                    <div style="font-weight:800; color:${h.amt > 0 ? '#00a5ff' : '#111'}">
-                        ${h.amt > 0 ? '+' : ''}${h.amt.toLocaleString()}
-                    </div>
-                </div>
-            `).join('');
-        }
+        const hist = document.getElementById('history-container');
+        hist.innerHTML = appData.history.length ? appData.history.slice().reverse().map(h => `
+            <div class="history-item">
+                <div><div style="font-weight:bold; font-size:0.85rem;">${h.title}</div><div style="font-size:0.7rem; color:#999;">${h.date}</div></div>
+                <div style="font-weight:bold; color:${h.amt > 0 ? '#00a5ff' : '#111'}">${h.amt > 0 ? '+' : ''}${h.amt.toLocaleString()}</div>
+            </div>
+        `).join('') : '<div style="text-align:center; color:#ccc; padding:20px;">履歴なし</div>';
     }
 
-    // --- 2. ページ切り替え ---
-    window.showPage = (pageId, el) => {
+    window.showPage = (id, el) => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('page-' + pageId).classList.add('active');
-        if (el) el.classList.add('active');
+        document.getElementById('page-' + id).classList.add('active');
+        if(el) el.classList.add('active');
     };
 
-    // --- 3. 設定変更 ---
     window.saveSettings = () => {
         appData.username = document.getElementById('set-name').value;
         appData.usePointFirst = document.getElementById('set-point-usage').checked;
         save();
     };
 
-    window.resetData = () => {
-        if(confirm("すべてのデータを消去しますか？")) {
-            localStorage.clear();
-            location.reload();
-        }
-    };
+    window.resetData = () => { if(confirm("消去しますか？")){ localStorage.clear(); location.reload(); } };
 
-    // --- 4. スキャン機能 ---
+    // スキャン
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     let isScanning = false;
-    let currentMode = "ANY";
 
-    window.startScan = (mode) => {
-        currentMode = mode;
+    window.startScan = () => {
         isScanning = true;
-        document.getElementById('scan-guide').innerText = mode === 'CHARGE' ? "チャージQRを読み取ってください" : "支払いQRを読み取ってください";
         document.getElementById('scanner-ui').style.display = 'block';
-        
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
-            video.srcObject = stream;
-            video.play();
-            requestAnimationFrame(scanLoop);
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
+            video.srcObject = s; video.play(); requestAnimationFrame(scanLoop);
         });
     };
 
     window.stopScan = () => {
         isScanning = false;
-        if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+        if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
         document.getElementById('scanner-ui').style.display = 'none';
     };
 
     function scanLoop() {
-        if (!isScanning) return;
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            canvas.height = video.videoHeight;
-            canvas.width = video.videoWidth;
+        if(!isScanning) return;
+        if(video.readyState === video.HAVE_ENOUGH_DATA){
+            canvas.height = video.videoHeight; canvas.width = video.videoWidth;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
-            
-            if (code && code.data) {
-                handleResult(code.data);
-                return; // スキャン成功したらループ終了
-            }
+            if(code){ handleResult(code.data); return; }
         }
         requestAnimationFrame(scanLoop);
     }
 
-    // --- 5. 決済・チャージ処理 ---
-    function handleResult(qrData) {
-        // チャージ
-        if (qrData.startsWith("CHARGE_")) {
-            const amt = parseInt(qrData.split("_")[1]);
-            appData.balance += amt;
-            appData.history.push({ title: "残高チャージ", amt: amt, date: getNow() });
-            alert("¥" + amt + " チャージ完了！");
-            stopScan();
-            save();
+    function handleResult(data) {
+        stopScan();
+        const now = () => { const d = new Date(); return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}`; };
+
+        // 1. ポイント付与
+        if (data.startsWith("POINT_")) {
+            const pt = parseInt(data.split("_")[1]);
+            appData.points += pt;
+            appData.history.push({ title: "ポイント獲得", amt: pt, date: now() });
+            showOverlay("ポイント獲得", pt, "獲得しました！");
         } 
-        // 支払い
-        else if (qrData.startsWith("PAY_")) {
-            const billAmt = parseInt(qrData.split("_")[1]);
-            let toPay = billAmt;
+        // 2. チャージ
+        else if (data.startsWith("CHARGE_")) {
+            const amt = parseInt(data.split("_")[1]);
+            appData.balance += amt;
+            appData.history.push({ title: "残高チャージ", amt: amt, date: now() });
+            showOverlay("チャージ完了", amt, "マネーが増えました");
+        }
+        // 3. 支払い
+        else if (data.startsWith("PAY_")) {
+            let toPay = parseInt(data.split("_")[1]);
             let usedP = 0;
-
-            if (appData.usePointFirst && appData.points > 0) {
+            if (appData.usePointFirst) {
                 usedP = Math.min(toPay, appData.points);
-                appData.points -= usedP;
-                toPay -= usedP;
+                appData.points -= usedP; toPay -= usedP;
             }
-
             if (appData.balance >= toPay) {
                 appData.balance -= toPay;
-                const earned = Math.floor(toPay * 0.01);
-                appData.points += earned;
-                appData.history.push({ title: "自社Pay加盟店で支払い", amt: -(toPay + usedP), date: getNow() });
-                
-                // 成功画面表示
-                document.getElementById('res-amt').innerText = (toPay + usedP).toLocaleString();
-                document.getElementById('res-detail').innerText = `獲得: +${earned}pt / 利用: ${usedP}pt`;
-                document.getElementById('success-overlay').style.display = 'flex';
-                playPaySound();
-                stopScan();
-                save();
-            } else {
-                alert("残高が足りません！");
-                stopScan();
-            }
+                appData.history.push({ title: "支払い", amt: -(toPay + usedP), date: now() });
+                showOverlay("支払い完了", toPay + usedP, `(内ポイント利用: ${usedP})`);
+            } else { alert("残高不足です"); }
         }
+        save();
     }
 
-    function getNow() {
-        const d = new Date();
-        return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}`;
+    function showOverlay(t, a, m) {
+        document.getElementById('res-title').innerText = t;
+        document.getElementById('res-amt').innerText = a.toLocaleString();
+        document.getElementById('res-detail').innerText = m;
+        document.getElementById('success-overlay').style.display = 'flex';
+        const ctxA = new AudioContext(); const o = ctxA.createOscillator(); const g = ctxA.createGain();
+        o.connect(g); g.connect(ctxA.destination); o.frequency.setValueAtTime(880, 0); o.start(); o.stop(0.2);
     }
 
-    function playPaySound() {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.connect(g); g.connect(audioCtx.destination);
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.1);
-        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-    }
-
-    // 起動スプラッシュ
-    window.onload = () => {
-        setTimeout(() => {
-            document.getElementById('splash').style.opacity = '0';
-            setTimeout(() => document.getElementById('splash').style.display = 'none', 500);
-        }, 1200);
-        render();
-    };
+    render();
 </script>
 </body>
 </html>
