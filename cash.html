@@ -2,73 +2,94 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>SURGE PRO</title>
+    <title>SURGE PRO - Ultimate Terminal</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --pay: #9b59b6; --bg: #f8f9fa; }
-        body { font-family: sans-serif; margin: 0; background: var(--bg); color: #333; overflow-x: hidden; }
-        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
-        header { background: var(--primary); color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-        body.customer-mode .admin-only { display: none !important; }
-        #video-container { width: 100%; height: 250px; background: #000; position: relative; overflow: hidden; }
+        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --pay: #9b59b6; --point: #f39c12; --bg: #f8f9fa; }
+        body { font-family: sans-serif; margin: 0; background: var(--bg); color: #333; }
+        .app-container { max-width: 500px; margin: 0 auto; background: white; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: var(--primary); color: white; padding: 12px; font-weight: bold; text-align: center; font-size: 1.2rem; }
+        
+        /* スキャナーエリア */
+        #video-container { width: 100%; height: 220px; background: #000; position: relative; overflow: hidden; }
         #preview { width: 100%; height: 100%; object-fit: cover; }
-        .scan-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; height: 60%; border: 2px solid rgba(255,255,255,0.8); border-radius: 10px; box-shadow: 0 0 0 1000px rgba(0,0,0,0.5); pointer-events: none; z-index: 5; }
-        .display-section { padding: 20px; text-align: center; background: white; border-bottom: 2px solid #eee; }
+        .scan-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60%; height: 50%; border: 2px solid rgba(255,255,255,0.8); border-radius: 10px; box-shadow: 0 0 0 1000px rgba(0,0,0,0.5); pointer-events: none; }
+
+        /* 表示エリア */
+        .display-section { padding: 15px; text-align: center; border-bottom: 2px solid #eee; background: #fff; }
         .total-amount { font-size: 3.5rem; font-weight: bold; margin: 0; color: var(--primary); }
-        .status-msg { height: 24px; color: var(--accent); font-weight: bold; margin-top: 5px; font-size: 0.9rem; }
-        .controls { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .tool-box { background: #f9f9f9; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
-        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; box-sizing: border-box; margin-bottom: 8px; }
-        button { border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; color: white; width: 100%; }
+        #status-msg { color: var(--accent); font-weight: bold; min-height: 1.2rem; font-size: 0.9rem; }
+
+        /* 操作エリア */
+        .controls { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .tool-box { background: #f9f9f9; padding: 12px; border-radius: 12px; border: 1px solid #eee; display: flex; flex-direction: column; gap: 8px; }
+        .row { display: flex; gap: 8px; }
+        
+        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        button { border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; color: white; transition: 0.2s; }
+        button:active { transform: scale(0.98); opacity: 0.8; }
+
+        /* ボタン色分け */
+        .btn-main { background: var(--pay); width: 100%; font-size: 1.1rem; }
+        .btn-add { background: var(--accent); }
+        .btn-charge { background: #e67e22; }
+        .btn-point { background: var(--point); }
         .btn-cash { background: var(--success); }
-        .btn-pay { background: var(--pay); }
-        .btn-manual { background: var(--accent); }
-        .btn-switch { background: rgba(255,255,255,0.2); border: 1px solid white; font-size: 0.7rem; width: auto; padding: 5px 10px; }
-        #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; }
+        .btn-clear { background: #bbb; font-size: 0.8rem; padding: 8px; }
+
+        /* モーダル */
+        #qr-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; color: white; }
         #qr-canvas { background: white; padding: 20px; border-radius: 15px; }
-        #conn-status { position: absolute; top: 0; left: 0; font-size: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 2px 5px; z-index: 10; }
+        #conn-status { position: fixed; top: 0; left: 0; font-size: 10px; color: #fff; background: rgba(0,0,0,0.5); padding: 2px 5px; z-index: 100; }
     </style>
 </head>
 <body>
 
-<audio id="beep-sound" preload="auto">
-    <source src="https://assets.mixkit.co/active_storage/sfx/2632/2632-preview.mp3" type="audio/mp3">
-</audio>
+<audio id="beep-sound" preload="auto"><source src="https://assets.mixkit.co/active_storage/sfx/2632/2632-preview.mp3" type="audio/mp3"></audio>
 
 <div class="app-container">
-    <div id="conn-status">DB: 接続中...</div>
-    <header>
-        <span id="mode-label">店員モード</span>
-        <button class="btn-switch" onclick="toggleMode()">画面切替</button>
-    </header>
+    <div id="conn-status">Firebase: 待機中...</div>
+    <header>SURGE PRO TERMINAL</header>
 
-    <div id="video-container" class="admin-only">
+    <div id="video-container">
         <video id="preview" playsinline muted autoplay></video>
         <div class="scan-guide"></div>
     </div>
 
     <div class="display-section">
-        <div style="font-size:0.8rem; color:#999;">合計金額</div>
+        <div style="font-size:0.8rem; color:#999;">合計請求額</div>
         <div class="total-amount">¥<span id="total-price">0</span></div>
-        <div id="status-msg" class="status-msg">スキャン待機中...</div>
+        <div id="status-msg">スキャン待機中...</div>
     </div>
 
-    <div class="controls admin-only">
-        <button class="btn-pay" onclick="generatePayQR()">📱 決済QRを表示</button>
+    <div class="controls">
+        <button class="btn-main" onclick="genQR('PAY')">📱 決済用QRコードを表示</button>
+
         <div class="tool-box">
-            <button class="btn-cash" onclick="finishPayment('現金')">💵 現金会計を確定</button>
+            <div class="row">
+                <input type="number" id="manual-price" placeholder="金額を入力">
+                <button class="btn-add" onclick="addManual()">➕ 追加</button>
+            </div>
         </div>
+
         <div class="tool-box">
-            <input type="number" id="manual-price" placeholder="金額を直接入力">
-            <button class="btn-manual" onclick="addManual()">➕ 手入力で追加</button>
+            <div class="row">
+                <input type="number" id="charge-input" placeholder="チャージ額">
+                <button class="btn-charge" onclick="genQR('CHARGE')">⚡ チャージQR</button>
+            </div>
         </div>
+
         <div class="tool-box">
-            <input type="number" id="charge-input" placeholder="チャージ金額">
-            <button class="btn-pay" style="background:#e67e22;" onclick="generateChargeQR()">⚡ チャージQR作成</button>
+            <div class="row">
+                <input type="number" id="point-input" placeholder="付与ポイント">
+                <button class="btn-point" onclick="genQR('POINT')">🎁 ポイントQR</button>
+            </div>
         </div>
-        <button onclick="clearCart()" style="background:#bbb; font-size:0.8rem;">リセット</button>
+
+        <button class="btn-cash" onclick="finishPayment()">💵 現金会計で確定(リセット)</button>
+        <button class="btn-clear" onclick="clearCart()">カートを強制リセット</button>
     </div>
 </div>
 
@@ -96,144 +117,105 @@
     let itemMaster = {};
     let isProcessing = false;
 
-    // Firebase同期
-    onValue(posRef, (snapshot) => {
-        document.getElementById('conn-status').innerText = "DB: 同期完了";
-        const data = snapshot.val();
-        if (data) {
-            currentTotal = data.total || 0;
+    // リアルタイム同期
+    onValue(posRef, (s) => {
+        document.getElementById('conn-status').innerText = "Firebase: 同期済み";
+        const d = s.val();
+        if (d) {
+            currentTotal = d.total || 0;
             document.getElementById('total-price').innerText = currentTotal.toLocaleString();
-            document.getElementById('status-msg').innerText = data.lastItem || "Ready";
+            document.getElementById('status-msg').innerText = d.lastItem || "Ready";
         }
     });
 
-    onValue(masterRef, (snapshot) => { itemMaster = snapshot.val() || {}; });
+    onValue(masterRef, (s) => { itemMaster = s.val() || {}; });
 
     async function sendData(newData) {
         isProcessing = true;
         try {
             await set(posRef, { ...newData, time: Date.now() });
-        } catch (e) {
-            console.error(e);
         } finally {
-            // スキャン再開までの待ち時間
             setTimeout(() => { isProcessing = false; }, 1200);
         }
     }
 
-    function playBeep() {
-        const beep = document.getElementById("beep-sound");
-        if (beep) { beep.currentTime = 0; beep.play().catch(() => {}); }
-    }
+    // 各種QR生成
+    window.genQR = (type) => {
+        const canvas = document.getElementById('qr-canvas');
+        canvas.innerHTML = "";
+        let text = "", label = "";
 
-    window.toggleMode = () => {
-        document.body.classList.toggle('customer-mode');
-        document.getElementById('mode-label').innerText = document.body.classList.contains('customer-mode') ? "客用モード" : "店員モード";
-        playBeep();
+        if (type === 'PAY') {
+            if (currentTotal <= 0) return;
+            text = `PAY_${currentTotal}_${Date.now()}`;
+            label = `お支払い: ¥${currentTotal}`;
+        } else if (type === 'CHARGE') {
+            const amt = document.getElementById('charge-input').value;
+            if (!amt) return;
+            text = `CHARGE_${amt}`;
+            label = `残高チャージ: ¥${amt}`;
+        } else if (type === 'POINT') {
+            const pt = document.getElementById('point-input').value;
+            if (!pt) return;
+            text = `POINT_${pt}`;
+            label = `ギフトポイント: ${pt}pt`;
+        }
+
+        new QRCode(canvas, { text: text, width: 250, height: 250 });
+        document.getElementById('qr-label').innerText = label;
+        document.getElementById('qr-modal').style.display = 'flex';
     };
 
+    // 手入力
     window.addManual = () => {
-        const p = parseInt(document.getElementById('manual-price').value);
-        if (p) { sendData({ total: currentTotal + p, lastItem: "手入力追加" }); document.getElementById('manual-price').value = ""; }
+        const val = parseInt(document.getElementById('manual-price').value);
+        if (val) {
+            sendData({ total: currentTotal + val, lastItem: "手入力合計に追加" });
+            document.getElementById('manual-price').value = "";
+        }
     };
 
-    window.finishPayment = (m) => {
-        if(currentTotal > 0) sendData({ total: 0, lastItem: `【${m}】会計完了` });
-    };
+    window.finishPayment = () => sendData({ total: 0, lastItem: "【現金】会計完了" });
+    window.clearCart = () => { if(confirm("リセットしますか？")) sendData({ total: 0, lastItem: "リセットされました" }); };
 
-    window.generatePayQR = () => {
-        if (currentTotal <= 0) return;
-        document.getElementById('qr-canvas').innerHTML = "";
-        new QRCode(document.getElementById('qr-canvas'), { text: `PAY_${currentTotal}_${Date.now()}`, width: 250, height: 250 });
-        document.getElementById('qr-label').innerText = `お支払い: ¥${currentTotal}`;
-        document.getElementById('qr-modal').style.display = 'flex';
-    };
-
-    window.generateChargeQR = () => {
-        const amt = document.getElementById('charge-input').value;
-        if(!amt) return;
-        document.getElementById('qr-canvas').innerHTML = "";
-        new QRCode(document.getElementById('qr-canvas'), { text: "CHARGE_" + amt, width: 250, height: 250 });
-        document.getElementById('qr-label').innerText = `チャージ用: ¥${amt}`;
-        document.getElementById('qr-modal').style.display = 'flex';
-    };
-
-    window.clearCart = () => sendData({ total: 0, lastItem: "リセット" });
-
-    // --- スキャン処理（ここが重要） ---
+    // スキャン処理
     const video = document.getElementById("preview");
     const canvas = document.createElement("canvas");
-    // willReadFrequently を true にしてスキャンを高速化
-    const context = canvas.getContext("2d", { willReadFrequently: true });
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
-    async function startCamera() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
-            });
-            video.srcObject = stream;
-            // 映像が読み込まれるのを待ってからループ開始
-            video.onloadeddata = () => {
-                video.play();
-                requestAnimationFrame(tick);
-            };
-        } catch (err) {
-            document.getElementById('status-msg').innerText = "カメラ起動エラー";
-            console.error(err);
-        }
-    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
+        video.srcObject = stream;
+        video.play();
+        requestAnimationFrame(tick);
+    });
 
     function tick() {
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-            // スキャン中かつ店員モードの時だけ解析
-            if (!isProcessing && !document.body.classList.contains('customer-mode')) {
-                canvas.height = video.videoHeight;
-                canvas.width = video.videoWidth;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert",
-                });
-
-                if (code && code.data) {
-                    isProcessing = true; // 二重読み取り防止
-                    playBeep();
-                    handleScan(code.data);
-                }
+        if (video.readyState === video.HAVE_ENOUGH_DATA && !isProcessing) {
+            canvas.height = video.videoHeight; canvas.width = video.videoWidth;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
+            if (code) {
+                isProcessing = true;
+                const beep = document.getElementById("beep-sound");
+                beep.currentTime = 0; beep.play().catch(()=>{});
+                handleScan(code.data);
             }
         }
         requestAnimationFrame(tick);
     }
 
     async function handleScan(data) {
-        // チャージ
-        if (data.startsWith("CHARGE_")) {
-            const amount = parseInt(data.replace("CHARGE_", ""));
-            if (!isNaN(amount)) {
-                await sendData({ total: currentTotal + amount, lastItem: `⚡ ¥${amount} チャージ完了` });
-                return;
-            }
-        }
-
-        // 商品マスター照合
         if (itemMaster[data]) {
             await sendData({ total: currentTotal + itemMaster[data].price, lastItem: itemMaster[data].name });
         } else {
-            // 未登録なら登録画面へ
-            const name = prompt("【新規商品】名前を入力:", "新商品");
-            const price = parseInt(prompt("【新規商品】価格を入力:"));
+            const name = prompt("新規商品名:");
+            const price = parseInt(prompt("価格:"));
             if (name && !isNaN(price)) {
                 await update(ref(db, `item_master/${data}`), { name, price });
                 await sendData({ total: currentTotal + price, lastItem: name });
-            } else {
-                isProcessing = false; // キャンセルされたら即スキャン復帰
-            }
+            } else { isProcessing = false; }
         }
     }
-
-    // 起動
-    startCamera();
 </script>
 </body>
 </html>
