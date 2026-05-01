@@ -31,29 +31,34 @@
             font-weight: 800;
             letter-spacing: 0.1em;
             color: var(--primary);
-            /* 初期の状態：ぼやけて透明 */
-            filter: blur(20px);
+            
+            /* 【修正点】最初は完全に透明、かつボケを強く設定 */
             opacity: 0;
+            filter: blur(30px);
             transform: scale(0.9);
-            /* アニメーション設定 */
-            animation: reveal 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+            
+            /* アニメーション：0.3秒ほど「無」の状態を作ってから現れるように調整 */
+            animation: reveal 1.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
         }
 
-        /* ぼやけながら浮かび上がるアニメーション */
         @keyframes reveal {
             0% {
-                filter: blur(20px);
                 opacity: 0;
+                filter: blur(30px);
                 transform: scale(0.9);
             }
+            /* 20%の地点まで透明を維持することで、パッと出を防ぐ */
+            20% {
+                opacity: 0;
+                filter: blur(30px);
+            }
             100% {
-                filter: blur(0px);
                 opacity: 1;
+                filter: blur(0px);
                 transform: scale(1);
             }
         }
 
-        /* 画面全体が最後にフェードアウトする設定 */
         .fade-out {
             animation: fadeOut 0.8s ease-in forwards;
         }
@@ -68,21 +73,20 @@
 </head>
 <body>
 
-    <div class="logo-container" id="container">
+    <div class="logo-container">
         <div class="logo-text">TECHSTA</div>
     </div>
 
     <script>
-        // 1.5秒間アニメーションを見せた後、フェードアウトして移動
+        // アニメーションを少し長めにしたので、待ち時間も調整
         setTimeout(() => {
             document.body.classList.add('fade-out');
             
-            // フェードアウトの完了を待ってから移動（計2.3秒後）
             setTimeout(() => {
                 window.location.href = 'text.html';
             }, 800);
             
-        }, 1500);
+        }, 2000); // 2秒間表示
     </script>
 
 </body>
