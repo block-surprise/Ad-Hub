@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TECHSTA - 技術を標準に、星を掴む体験を。</title>
+    <style>
+        :root {
+            --primary: #007AFF;
+            --accent-red: #FF3B30;
+            --bg: #ffffff;
+            --card-bg: #f5f5f7;
+            --text: #1d1d1f;
+            --sub-text: #86868b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif;
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+        /* Hero Section */
+        .hero {
+            padding: 100px 0 60px;
+            text-align: center;
+        }
+        .v-badge {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        h1 { font-size: 56px; font-weight: 800; margin: 20px 0; letter-spacing: -1px; }
+        .hero p { font-size: 20px; color: var(--sub-text); max-width: 600px; margin: 0 auto; }
+
+        /* Feature Section */
+        .section-title { font-size: 32px; font-weight: 800; text-align: center; margin: 80px 0 40px; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 28px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .card h3 { font-size: 22px; margin-top: 0; color: var(--primary); }
+
+        /* 特集: フリマ計算 */
+        .feature-highlight {
+            margin: 60px 0;
+            background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+            border-radius: 40px;
+            padding: 40px;
+            border: 2px solid var(--accent-red);
+            text-align: center;
+        }
+        .banner-img {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(255,59,48,0.2);
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+
+        /* Footer */
+        footer {
+            padding: 100px 0 40px;
+            text-align: center;
+            border-top: 1px solid #eee;
+            margin-top: 100px;
+        }
+        .copy { font-size: 14px; color: var(--sub-text); }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 36px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ヒーローエリア -->
+    <section class="hero">
+        <span class="v-badge">Ver 1.2.4</span>
+        <h1>TECHSTA</h1>
+        <p>
+            かつてSURGE PROと呼ばれたツールは、<br>
+            よりスマートに、より強力に進化を遂げました。
+        </p>
+    </section>
+
+    <!-- フリマ計算 特集 -->
+    <section class="feature-highlight">
+        <img src="watermarked_img_3232616046568285040.png" alt="フリマ利益計算バナー" class="banner-img">
+        <div style="max-width: 700px; margin: 0 auto; text-align: left;">
+            <h2 style="color: var(--accent-red); font-size: 28px;">フリマ出品の「正解」を瞬時に。</h2>
+            <p>メルカリ、Yahoo!フリマ、ラクマに対応。手数料の計算から配送方法の選択まで、テクスタなら1タップで完結します。全角数字の自動変換など、日本のクリエイターに嬉しい機能を凝縮。</p>
+        </div>
+    </section>
+
+    <h2 class="section-title">主要な機能</h2>
+    
+    <div class="grid">
+        <!-- 機能1 -->
+        <div class="card">
+            <h3>クイックメモ</h3>
+            <p>アイデアを逃さない。自動保存対応のテキストエリア。さらにその下には各ツールへのショートカットを完備し、作業のハブとして機能します。</p>
+        </div>
+        <!-- 機能2 -->
+        <div class="card">
+            <h3>全角・半角変換</h3>
+            <p>エンジニア・ライター必須のツール。不純なスペースや全角英数字を、一瞬でクリーンな半角データへと変換します。</p>
+        </div>
+        <!-- 機能3 -->
+        <div class="card">
+            <h3>文字数カウント</h3>
+            <p>YouTubeの概要欄やブログ記事の作成に。空白を含む・含まないの切り替えも自由自在です。</p>
+        </div>
+    </div>
+
+    <!-- コンセプト -->
+    <section style="margin-top: 100px; text-align: center;">
+        <h2 class="section-title">SURGEからTECHSTAへ</h2>
+        <p style="color: var(--sub-text); max-width: 700px; margin: 0 auto; font-size: 18px;">
+            「技術（Tech）をあなたの標準（Standard）に、そして星（Star）のように輝く体験を」<br>
+            開発者 Kikara_ が贈る、次世代のツールプラットフォーム。
+        </p>
+    </section>
+
+    <footer>
+        <p class="copy">&copy; 2026 TECHSTA Project. All rights reserved.</p>
+    </footer>
+</div>
+
+</body>
+</html>
