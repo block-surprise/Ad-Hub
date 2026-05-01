@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TECHSTA GAME - 遊びを標準に。</title>
     <style>
         :root {
@@ -10,10 +10,11 @@
             --bg: #ffffff;
             --card-bg: #f5f5f7;
             --text: #1d1d1f;
+            --sub-text: #86868b;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif;
             margin: 0;
             background-color: var(--bg);
             color: var(--text);
@@ -22,13 +23,9 @@
             align-items: center;
         }
 
-        header {
-            padding: 60px 20px;
-            text-align: center;
-        }
-
+        header { padding: 40px 20px 20px; text-align: center; }
         header h1 {
-            font-size: 40px;
+            font-size: 32px;
             font-weight: 800;
             margin: 0;
             background: linear-gradient(135deg, #007AFF, #5856D6);
@@ -36,12 +33,16 @@
             -webkit-text-fill-color: transparent;
         }
 
+        /* 広告用スタイル (text.htmlと統一) */
+        .ad-label { display: block; font-size: 10px; color: var(--sub-text); text-align: center; margin-bottom: 4px; }
+        .ad-box { width: 100%; text-align: center; margin: 20px 0; overflow: hidden; border-radius: 12px; }
+
         .game-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
+            gap: 20px;
             width: 100%;
-            max-width: 900px;
+            max-width: 800px;
             padding: 20px;
             box-sizing: border-box;
         }
@@ -52,75 +53,69 @@
             padding: 24px;
             text-decoration: none;
             color: inherit;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
+            transition: transform 0.2s;
             border: 1px solid rgba(0,0,0,0.05);
         }
+        .game-card:active { transform: scale(0.98); }
+        .game-icon { font-size: 40px; margin-bottom: 12px; }
+        .game-card h3 { margin: 0 0 8px; font-size: 18px; color: var(--primary); }
+        .game-card p { margin: 0; font-size: 13px; color: #666; line-height: 1.5; }
 
-        .game-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            background: #fff;
-        }
-
-        .game-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .game-card h3 {
-            margin: 0 0 10px 0;
-            font-size: 20px;
-            color: var(--primary);
-        }
-
-        .game-card p {
-            margin: 0;
-            font-size: 14px;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .back-link {
-            margin-top: 50px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
+        .back-link { margin: 30px 0 60px; color: var(--primary); text-decoration: none; font-weight: 600; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <header>
     <h1>TECHSTA GAME</h1>
-    <p>技術の合間に、最高の遊びを。</p>
+    <p style="font-size: 14px; color: var(--sub-text);">遊びを、標準に。</p>
 </header>
 
+<!-- ゲームリストの前に広告 -->
+<div class="main-container" style="width: 100%; max-width: 800px; padding: 0 20px; box-sizing: border-box;">
+    <div id="ad-game-top" class="ad-box"></div>
+</div>
+
 <div class="game-grid">
-    <!-- ランニングゲーム -->
-    <a href="gameA.html" class="game-card">
+    <a href="game_run.html" class="game-card">
         <div class="game-icon">🏃‍♂️</div>
         <h3>TECHSTA RUN</h3>
-        <p>障害物を避けてハイスコアを目指せ！シンプルながら中毒性の高いランニングゲーム。</p>
+        <p>障害物を避けてハイスコアを目指せ！</p>
     </a>
 
-    <!-- 未来のゲームスロット 1 -->
-    <a href="#" class="game-card" style="opacity: 0.6; pointer-events: none;">
-        <div class="game-icon">💻</div>
-        <h3>COMMAND BLAST</h3>
-        <p>Coming Soon... タイピングでバグを撃破するシューティングゲーム。</p>
-    </a>
+    <!-- 将来的にここにも広告カードを混ぜることも可能 -->
 
-    <!-- 未来のゲームスロット 2 -->
-    <a href="#" class="game-card" style="opacity: 0.6; pointer-events: none;">
-        <div class="game-icon">🧩</div>
-        <h3>SURGE 2048</h3>
-        <p>Coming Soon... 数字を重ねてTECHSTAを進化させるマージパズル。</p>
+    <a href="#" class="game-card" style="opacity: 0.5; pointer-events: none;">
+        <div class="game-icon">⏳</div>
+        <h3>Coming Soon...</h3>
+        <p>次回のアップデートをお楽しみに。</p>
     </a>
 </div>
 
+<div class="main-container" style="width: 100%; max-width: 800px; padding: 0 20px; box-sizing: border-box;">
+    <div id="ad-game-bottom" class="ad-box"></div>
+</div>
+
 <a href="text.html" class="back-link">← ツールに戻る</a>
+
+<script>
+    // text.html からコピーした広告データとロジック
+    const ads = [
+        `<a href="//af.moshimo.com/af/c/click?a_id=5526071&p_id=5941&pc_id=16548&pl_id=75907" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/5687/000000075907.jpg" width="100%" style="max-width:728px; border:none; border-radius:12px;"></a>`,
+        `<a href="//af.moshimo.com/af/c/click?a_id=5526070&p_id=1225&pc_id=1925&pl_id=18523" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/0349/000000018523.png" width="320" height="51" style="border:none;"></a>`
+    ];
+
+    function refreshAds() {
+        const adHtml = ads[Math.floor(Math.random() * ads.length)];
+        const fullContent = `<span class="ad-label">[広告]</span>` + adHtml;
+        document.querySelectorAll('.ad-box').forEach(box => {
+            box.innerHTML = fullContent;
+        });
+    }
+
+    // 読み込み時に実行
+    window.addEventListener('load', refreshAds);
+</script>
 
 </body>
 </html>
