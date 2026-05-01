@@ -37,7 +37,7 @@
 
         /* コンテンツエリア */
         .main-scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; }
-        .main-container { max-width: 800px; margin: 0 auto; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+        .main-container { max-width: 800px; margin: 0 auto; padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
         .view-section { display: none; }
         .view-section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -53,21 +53,17 @@
         button:active { background: #f0f0f0; transform: scale(0.98); }
         .primary-btn { background: var(--primary); color: white; margin-top: 10px; }
 
-.ad-label {
-    display: block;
-    font-size: 10px;
-    color: var(--sub-text);
-    text-align: center;
-    margin-bottom: 4px;
-}
+        /* 広告ラベル */
+        .ad-label { display: block; font-size: 10px; color: var(--sub-text); text-align: center; margin-bottom: 4px; }
+        .ad-box { width: 100%; text-align: center; margin-bottom: 24px; overflow: hidden; border-radius: 12px; }
 
-        /* ナビゲーションバー (Ver 1.2.3 調整) */
+        /* ナビゲーションバー (限界調整版) */
         .nav-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            height: calc(55px + env(safe-area-inset-bottom));
+            height: calc(52px + env(safe-area-inset-bottom)); 
             padding-bottom: env(safe-area-inset-bottom);
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px);
@@ -84,13 +80,19 @@
             justify-content: center;
             color: var(--sub-text);
             font-size: 10px;
-            padding-top: 8px; /* アイコンの位置調整 */
+            padding-top: 2px;
         }
         .nav-item.active { color: var(--primary); }
-        .nav-svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; margin-bottom: 2px; }
+        .nav-svg {
+            width: 23px;
+            height: 23px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            margin-bottom: 3px;
+        }
 
         #qrcode { background: white; padding: 15px; border-radius: 15px; display: inline-block; margin-top: 15px; }
-        .ad-box { width: 100%; text-align: center; margin: 20px 0; overflow: hidden; border-radius: 12px; }
     </style>
 </head>
 <body>
@@ -113,9 +115,9 @@
     <div style="font-size:13px; padding:12px; background:var(--card-bg); border-radius:14px; margin-bottom:10px;">
         <div style="font-weight:700; margin-bottom:4px;">Ver 1.2.3 [5/2]</div>
         <div style="color:var(--sub-text); margin-bottom:8px; line-height:1.4;">
-            ・ナビゲーションバーを最下部に固定<br>
-            ・広告エリアに「[広告]」ラベルを表示<br>
-            ・iPhoneでの操作感をさらに最適化しました。
+            ・ナビゲーションバーの位置を最適化<br>
+            ・広告表示の自動ラベル化<br>
+            ・iPhone セーフエリア対応を強化
         </div>
         <a href="update.html" style="display:block; margin-top:8px; color:var(--primary); text-decoration:none; font-weight:600; font-size:12px;">詳細を見る →</a>
     </div>
@@ -139,7 +141,6 @@
             <div class="input-card">
                 <textarea id="quickMemo" placeholder="自動保存メモ..." style="min-height: 180px;"></textarea>
             </div>
-            <span class="ad-label">[広告]</span>
             <div id="ad-home" class="ad-box"></div>
         </section>
 
@@ -155,7 +156,6 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
                 <button onclick="convert('zen')">全角</button><button onclick="convert('han')">半角</button>
             </div>
-            <span class="ad-label">[広告]</span>
             <div id="ad-count" class="ad-box"></div>
         </section>
 
@@ -165,7 +165,6 @@
             <div class="input-card"><textarea id="diffB" style="min-height:100px" placeholder="比較先..."></textarea></div>
             <button class="primary-btn" onclick="compare()">比較を実行</button>
             <div id="diffOutput" style="margin:20px 0; font-size:14px; line-height:1.8; word-break:break-all;"></div>
-            <span class="ad-label">[広告]</span>
             <div id="ad-diff" class="ad-box"></div>
         </section>
 
@@ -175,7 +174,6 @@
                 <div id="passOutput" style="font-size: 24px; font-weight:700; color:var(--primary); margin: 30px 0; word-break:break-all;">********</div>
                 <button class="primary-btn" onclick="genPass()">パスワード生成</button>
             </div>
-            <span class="ad-label">[広告]</span>
             <div id="ad-pass" class="ad-box"></div>
         </section>
 
@@ -184,7 +182,6 @@
             <div class="input-card"><input type="text" id="qrInput" placeholder="URLを入力..."></div>
             <button class="primary-btn" onclick="genQR()">QR生成</button>
             <div style="text-align:center;"><div id="qrcode"></div></div>
-            <span class="ad-label">[広告]</span>
             <div id="ad-qr" class="ad-box"></div>
         </section>
     </div>
@@ -200,17 +197,17 @@
 <script>
     const CURRENT_VERSION = '1.2.3';
 
-    // 広告データ
     const ads = [
-        `<a href="//af.moshimo.com/af/c/click?a_id=5526071&p_id=5941&pc_id=16548&pl_id=75907" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/5687/000000075907.jpg" width="100%" style="max-width:728px; border:none; border-radius:12px;"></a><img src="//i.moshimo.com/af/i/impression?a_id=5526071&p_id=5941&pc_id=16548&pl_id=75907" width="1" height="1" style="border:none;" loading="lazy">`,
-        `<a href="//af.moshimo.com/af/c/click?a_id=5526070&p_id=1225&pc_id=1925&pl_id=18523" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/0349/000000018523.png" width="320" height="51" style="border:none;"></a><img src="//i.moshimo.com/af/i/impression?a_id=5526070&p_id=1225&pc_id=1925&pl_id=18523" width="1" height="1" style="border:none;" loading="lazy">`
+        `<a href="//af.moshimo.com/af/c/click?a_id=5526071&p_id=5941&pc_id=16548&pl_id=75907" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/5687/000000075907.jpg" width="100%" style="max-width:728px; border:none; border-radius:12px;"></a>`,
+        `<a href="//af.moshimo.com/af/c/click?a_id=5526070&p_id=1225&pc_id=1925&pl_id=18523" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/0349/000000018523.png" width="320" height="51" style="border:none;"></a>`
     ];
 
-    // 全ての広告枠を更新する関数
     function refreshAds() {
         const adHtml = ads[Math.floor(Math.random() * ads.length)];
+        // 広告ラベルをスクリプトで一括挿入
+        const fullContent = `<span class="ad-label">[広告]</span>` + adHtml;
         document.querySelectorAll('.ad-box').forEach(box => {
-            box.innerHTML = adHtml;
+            box.innerHTML = fullContent;
         });
     }
 
@@ -250,30 +247,32 @@
         if(id==='count') navs[1].classList.add('active');
         if(id==='diff') navs[2].classList.add('active');
         document.querySelector('.main-scroll-area').scrollTo(0,0);
-        // 画面切り替え時に広告を新しくする（任意）
         refreshAds();
     }
 
-    // 文字数・変換・パスワード・QR・比較のロジック（1.2.2から継続）
     document.getElementById('quickMemo').addEventListener('input', (e) => localStorage.setItem('techsta_memo', e.target.value));
     const inp = document.getElementById('mainInput');
     inp.addEventListener('input', () => {
         document.getElementById('vAll').innerText = inp.value.length.toLocaleString();
         document.getElementById('vNoS').innerText = inp.value.replace(/\s/g, '').length.toLocaleString();
     });
+
     function convert(m){
         let t = inp.value;
         if(m==='zen') t = t.replace(/[!-~]/g, s => String.fromCharCode(s.charCodeAt(0) + 0xFEE0));
         if(m==='han') t = t.replace(/[！-～]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
         inp.value = t; inp.dispatchEvent(new Event('input'));
     }
+
     function genPass() {
         const c = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
         let r = ""; for(let i=0; i<16; i++) r += c.charAt(Math.floor(Math.random() * c.length));
         document.getElementById('passOutput').innerText = r;
     }
+
     let qrcodeObj = new QRCode(document.getElementById("qrcode"), { width: 160, height: 160 });
     function genQR() { const v = document.getElementById('qrInput').value; if(v) qrcodeObj.makeCode(v); }
+
     function compare(){
         const a=document.getElementById('diffA').value, b=document.getElementById('diffB').value;
         let res="";
