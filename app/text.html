@@ -143,6 +143,8 @@
             <div class="input-card">
                 <textarea id="quickMemo" placeholder="自動保存メモ..." style="min-height: 180px;"></textarea>
             </div>
+            <div id="randomAdContainer" style="width: 100%; text-align: center; margin-bottom: 25px; overflow: hidden; border-radius: 12px;">
+</div>
         </section>
 
         <!-- 各ツールセクション -->
@@ -157,6 +159,8 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                 <button onclick="convert('zen')">全角</button><button onclick="convert('han')">半角</button>
             </div>
+            <div id="randomAdContainer" style="width: 100%; text-align: center; margin-bottom: 25px; overflow: hidden; border-radius: 12px;">
+    </div>
         </section>
 
         <section id="diffView" class="view-section">
@@ -164,6 +168,8 @@
             <div class="input-card"><textarea id="diffB" style="min-height:100px" placeholder="比較先..."></textarea></div>
             <button class="primary-btn" onclick="compare()">比較を実行</button>
             <div id="diffOutput" style="margin-top:20px; font-size:14px; line-height:1.8; word-break:break-all;"></div>
+            <div id="randomAdContainer" style="width: 100%; text-align: center; margin-bottom: 25px; overflow: hidden; border-radius: 12px;">
+</div>
         </section>
 
         <section id="passView" class="view-section">
@@ -171,12 +177,16 @@
                 <div id="passOutput" style="font-size: 24px; font-weight:700; color:var(--primary); margin: 30px 0; word-break:break-all;">********</div>
                 <button class="primary-btn" onclick="genPass()">パスワード生成</button>
             </div>
+            <div id="randomAdContainer" style="width: 100%; text-align: center; margin-bottom: 25px; overflow: hidden; border-radius: 12px;">
+</div>
         </section>
 
         <section id="qrView" class="view-section">
             <div class="input-card"><input type="text" id="qrInput" placeholder="URLを入力..."></div>
             <button class="primary-btn" onclick="genQR()">QR生成</button>
             <div style="text-align:center;"><div id="qrcode"></div></div>
+            <div id="randomAdContainer" style="width: 100%; text-align: center; margin-bottom: 25px; overflow: hidden; border-radius: 12px;">
+</div>
         </section>
     </div>
 </div>
@@ -278,6 +288,24 @@
         build(a.length,b.length);
         document.getElementById('diffOutput').innerHTML=res||"一致";
     }
+</script>
+    <script>
+window.addEventListener('DOMContentLoaded', () => {
+    // 広告データの配列
+    const ads = [
+        // 1つ目の広告 (728x90)
+        `<a href="//af.moshimo.com/af/c/click?a_id=5526071&p_id=5941&pc_id=16548&pl_id=75907" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/5687/000000075907.jpg" width="100%" style="max-width:728px; border:none; display:block; margin:0 auto;"></a><img src="//i.moshimo.com/af/i/impression?a_id=5526071&p_id=5941&pc_id=16548&pl_id=75907" width="1" height="1" style="border:none;" loading="lazy">`,
+        
+        // 2つ目の広告 (320x51)
+        `<a href="//af.moshimo.com/af/c/click?a_id=5526070&p_id=1225&pc_id=1925&pl_id=18523" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/0349/000000018523.png" width="320" height="51" style="border:none; display:block; margin:0 auto;"></a><img src="//i.moshimo.com/af/i/impression?a_id=5526070&p_id=1225&pc_id=1925&pl_id=18523" width="1" height="1" style="border:none;" loading="lazy">`
+    ];
+
+    // 0か1をランダムで生成
+    const randomIndex = Math.floor(Math.random() * ads.length);
+    
+    // 選ばれた広告を表示エリアに挿入
+    document.getElementById('randomAdContainer').innerHTML = ads[randomIndex];
+});
 </script>
 </body>
 </html>
