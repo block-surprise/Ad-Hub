@@ -53,6 +53,14 @@
         button:active { background: #f0f0f0; transform: scale(0.98); }
         .primary-btn { background: var(--primary); color: white; margin-top: 10px; }
 
+.ad-label {
+    display: block;
+    font-size: 10px;
+    color: var(--sub-text);
+    text-align: center;
+    margin-bottom: 4px;
+}
+
         /* ナビゲーションバー (Ver 1.2.3 調整) */
         .nav-bar {
             position: fixed;
@@ -126,7 +134,7 @@
             <div class="input-card">
                 <textarea id="quickMemo" placeholder="自動保存メモ..." style="min-height: 180px;"></textarea>
             </div>
-            <!-- 広告枠を末尾に1つだけ配置 -->
+            <span class="ad-label">[広告]</span>
             <div id="ad-home" class="ad-box"></div>
         </section>
 
@@ -142,6 +150,7 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
                 <button onclick="convert('zen')">全角</button><button onclick="convert('han')">半角</button>
             </div>
+            <span class="ad-label">[広告]</span>
             <div id="ad-count" class="ad-box"></div>
         </section>
 
@@ -151,6 +160,7 @@
             <div class="input-card"><textarea id="diffB" style="min-height:100px" placeholder="比較先..."></textarea></div>
             <button class="primary-btn" onclick="compare()">比較を実行</button>
             <div id="diffOutput" style="margin:20px 0; font-size:14px; line-height:1.8; word-break:break-all;"></div>
+            <span class="ad-label">[広告]</span>
             <div id="ad-diff" class="ad-box"></div>
         </section>
 
@@ -160,6 +170,7 @@
                 <div id="passOutput" style="font-size: 24px; font-weight:700; color:var(--primary); margin: 30px 0; word-break:break-all;">********</div>
                 <button class="primary-btn" onclick="genPass()">パスワード生成</button>
             </div>
+            <span class="ad-label">[広告]</span>
             <div id="ad-pass" class="ad-box"></div>
         </section>
 
@@ -168,6 +179,7 @@
             <div class="input-card"><input type="text" id="qrInput" placeholder="URLを入力..."></div>
             <button class="primary-btn" onclick="genQR()">QR生成</button>
             <div style="text-align:center;"><div id="qrcode"></div></div>
+            <span class="ad-label">[広告]</span>
             <div id="ad-qr" class="ad-box"></div>
         </section>
     </div>
