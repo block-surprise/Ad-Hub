@@ -7,7 +7,8 @@
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2912/2912205.png">
+    <!-- 「いい感じ」のテック系アイコンを設定 -->
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3665/3665939.png">
 
     <style>
         :root {
@@ -120,7 +121,7 @@
         button:active { background: #f0f0f0; transform: scale(0.98); }
         .primary-btn { background: var(--primary); color: white; margin-top: 10px; }
 
-        /* ナビゲーションバー（極限まで低く調整） */
+        /* ナビゲーションバー（最新の低さ調整） */
         .nav-bar {
             height: 60px;
             padding-bottom: env(safe-area-inset-bottom);
@@ -131,7 +132,7 @@
             flex-shrink: 0;
         }
 
-        /* Webアプリ（standalone）時の最終調整 */
+        /* Webアプリ（standalone）時にバーを限界まで下げる */
         @media screen and (display-mode: standalone) {
             .nav-bar {
                 height: 55px;
@@ -160,8 +161,8 @@
 <div id="updateToast">
     <div class="update-icon">✨</div>
     <div class="update-content">
-        <b class="update-title">アップデート完了</b>
-        <span class="update-desc">最新バージョン 1.1.7 を適用しました</span>
+        <b class="update-title">SURGE PRO Update</b>
+        <span class="update-desc">バージョン 1.1.8 を適用しました</span>
     </div>
 </div>
 
@@ -192,14 +193,14 @@
             </div>
             <h2 style="margin: 30px 0 20px 5px;">クイックメモ</h2>
             <div class="input-card">
-                <textarea id="quickMemo" placeholder="自動保存メモ..." style="min-height: 180px;"></textarea>
+                <textarea id="quickMemo" placeholder="ここに入力した内容は自動保存されます..." style="min-height: 180px;"></textarea>
             </div>
         </section>
 
         <!-- 文字数カウント -->
         <section id="countView" class="view-section">
             <div class="input-card">
-                <textarea id="mainInput" placeholder="ここに入力..." style="min-height: 250px;"></textarea>
+                <textarea id="mainInput" placeholder="テキストを入力..." style="min-height: 250px;"></textarea>
                 <div style="display:flex; justify-content:space-around; padding-top:15px; border-top:1px solid var(--border); margin-top:15px;">
                     <div style="text-align:center"><span id="vAll" style="font-weight:700; color:var(--primary); display:block; font-size:20px;">0</span><span style="font-size:10px; color:var(--sub-text);">文字数</span></div>
                     <div style="text-align:center"><span id="vNoS" style="font-weight:700; color:var(--primary); display:block; font-size:20px;">0</span><span style="font-size:10px; color:var(--sub-text);">空白抜</span></div>
@@ -247,7 +248,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-    const CURRENT_VERSION = '1.1.7';
+    const CURRENT_VERSION = '1.1.8';
 
     window.addEventListener('load', () => {
         const lastVer = localStorage.getItem('surge_ver');
