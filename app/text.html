@@ -151,13 +151,11 @@
             <div class="input-card">
                 <textarea id="quickMemo" placeholder="自動保存メモ..." style="min-height: 180px;"></textarea>
             </div>
-            <div style="padding: 0 5px; margin-bottom: 30px;">
-    <button onclick="show('calc')" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: 14px; color: var(--primary); font-weight: 600;">
-        <svg style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2;" viewBox="0 0 24 24">
-            <path d="M12 2v20M2 12h20M16 16l4 4M20 16l-4 4"/>
-        </svg>
-        フリマ利益計算ツールへ
-    </button>
+<!-- フリマ計算へのジャンプリンク（画像版） -->
+<div style="padding: 0 5px; margin-bottom: 30px; text-align: center;">
+    <img src="banner_furima.png" onclick="show('calc')" alt="フリマ利益計算ツールへ" 
+         style="width: 100%; max-width: 400px; border-radius: 16px; cursor: pointer; transition: opacity 0.2s;"
+         onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
 </div>
             <div id="ad-home" class="ad-box"></div>
         </section>
