@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TECHSTA GAME - RUN</title>
     <style>
         :root {
@@ -12,65 +13,84 @@
         body {
             margin: 0;
             background: var(--bg);
-            overflow: hidden;
+            overflow-x: hidden; /* 横スクロール防止 */
             font-family: -apple-system, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-        canvas {
-            border-bottom: 2px solid #eee;
-            display: block;
+            touch-action: manipulation; /* ブラウザのダブルタップズームを無効化 */
         }
         .info {
-            margin-top: 20px;
+            margin-top: env(safe-area-inset-top, 20px);
             text-align: center;
+            z-index: 10;
         }
         #score {
-            font-size: 32px;
+            font-size: 40px;
             font-weight: 800;
             color: var(--primary);
+            line-height: 1;
+        }
+        canvas {
+            background-color: #fafafa;
+            border-bottom: 2px solid #eee;
+            display: block;
+            width: 100%; /* 画面幅いっぱいに表示 */
+            max-width: 600px; /* PCでの見えすぎ防止 */
+            height: auto;
+        }
+        .ad-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 10px auto;
+            padding: 0 10px;
+            box-sizing: border-box;
         }
         .ad-label { display: block; font-size: 10px; color: #86868b; text-align: center; margin-bottom: 4px; }
-    .ad-box { width: 100%; text-align: center; overflow: hidden; border-radius: 12px; }
+        .ad-box { width: 100%; text-align: center; overflow: hidden; border-radius: 12px; }
     </style>
 </head>
 <body>
 
     <div class="info">
         <div id="score">0</div>
-        <p>画面クリックでジャンプ！</p>
+        <p style="margin: 5px 0; font-size: 14px; color: #666;">タップでジャンプ！</p>
     </div>
+    
     <canvas id="gameCanvas"></canvas>
-    <div class="ad-container" style="width: 100%; max-width: 600px; margin: 20px auto; padding: 0 10px; box-sizing: border-box;">
-    <div id="ad-game-play" class="ad-box"></div>
-</div>
+
+    <div class="ad-container">
+        <div id="ad-game-play" class="ad-box"></div>
+    </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
 
-        // キャンバスサイズ設定
-        canvas.width = window.innerWidth;
-        canvas.height = 400;
+        // スマホ対応：画面幅に合わせてリサイズ
+        function resize() {
+            const containerWidth = Math.min(window.innerWidth, 600);
+            canvas.width = containerWidth;
+            canvas.height = 300; // スマホで見やすい高さに
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
         let score = 0;
         let gameActive = true;
 
-        // プレイヤー設定
         const player = {
-            x: 50,
+            x: 40,
             y: 200,
             width: 30,
             height: 30,
-            gravity: 0.6,
+            gravity: 0.5, // 少しふわっとさせてスマホでも避けやすく
             velocity: 0,
-            jump: -10,
+            jump: -8,
             color: '#007AFF'
         };
 
-        // 障害物
         const obstacles = [];
         let frameCount = 0;
 
@@ -82,27 +102,29 @@
         }
 
         function createObstacle() {
-            if (frameCount % 90 === 0) {
-                const height = Math.random() * (canvas.height - 100) + 50;
+            // スコアが上がるほど頻度を上げる
+            const frequency = Math.max(50, 90 - Math.floor(score / 5) * 5);
+            if (frameCount % frequency === 0) {
+                const height = Math.random() * (canvas.height - 150) + 40;
                 obstacles.push({
                     x: canvas.width,
                     y: canvas.height - height,
-                    width: 40,
+                    width: 35,
                     height: height,
-                    color: '#FF3B30'
+                    color: '#FF3B30',
+                    passed: false
                 });
             }
         }
 
         function drawObstacles() {
             obstacles.forEach((obs, index) => {
-                obs.x -= 5; // 移動速度
+                obs.x -= (5 + (score / 10)); // スコアに応じて速度アップ
                 ctx.fillStyle = obs.color;
                 ctx.beginPath();
                 ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 5);
                 ctx.fill();
 
-                // 衝突判定
                 if (
                     player.x < obs.x + obs.width &&
                     player.x + player.width > obs.x &&
@@ -112,14 +134,12 @@
                     gameOver();
                 }
 
-                // スコア加算
                 if (obs.x + obs.width < player.x && !obs.passed) {
                     score++;
                     obs.passed = true;
                     scoreElement.innerText = score;
                 }
 
-                // 画面外に出た障害物を削除
                 if (obs.x + obs.width < 0) {
                     obstacles.splice(index, 1);
                 }
@@ -131,11 +151,9 @@
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 重力処理
             player.velocity += player.gravity;
             player.y += player.velocity;
 
-            // 地面と天井の判定
             if (player.y + player.height > canvas.height) {
                 player.y = canvas.height - player.height;
                 player.velocity = 0;
@@ -155,39 +173,38 @@
 
         function gameOver() {
             gameActive = false;
-            alert(`GAME OVER! スコア: ${score}\nもう一度挑戦するにはリロードしてください。`);
-            location.reload();
+            // アラートの前に少しだけ待つと、ぶつかった瞬間が見えて納得感が出る
+            setTimeout(() => {
+                alert(`GAME OVER!\nスコア: ${score}`);
+                location.reload();
+            }, 100);
         }
 
-        // 操作設定
-        window.addEventListener('mousedown', () => {
+        // スマホ用：画面全体のどこを触っても反応
+        const handleAction = (e) => {
+            if (e.type === 'touchstart') e.preventDefault();
             if (gameActive) player.velocity = player.jump;
-        });
+        };
 
-        window.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (gameActive) player.velocity = player.jump;
-        });
+        window.addEventListener('mousedown', handleAction);
+        window.addEventListener('touchstart', handleAction, { passive: false });
 
-        update();
+        // 広告
+        const ads = [
+            `<a href="//af.moshimo.com/af/c/click?a_id=5526071&p_id=5941&pc_id=16548&pl_id=75907" rel="nofollow"><img src="//image.moshimo.com/af-img/5687/000000075907.jpg" width="100%" style="max-width:728px; border-radius:12px;"></a>`,
+            `<a href="//af.moshimo.com/af/c/click?a_id=5526070&p_id=1225&pc_id=1925&pl_id=18523" rel="nofollow"><img src="//image.moshimo.com/af-img/0349/000000018523.png" width="320" style="border:none;"></a>`
+        ];
+
+        function refreshAds() {
+            const adHtml = ads[Math.floor(Math.random() * ads.length)];
+            const box = document.getElementById('ad-game-play');
+            if (box) box.innerHTML = `<span class="ad-label">[広告]</span>` + adHtml;
+        }
+
+        window.addEventListener('load', () => {
+            refreshAds();
+            update();
+        });
     </script>
-    <script>
-    // --- 既存のゲームロジックの後に広告ロジックを追加 ---
-
-    const ads = [
-        `<a href="//af.moshimo.com/af/c/click?a_id=5526071&p_id=5941&pc_id=16548&pl_id=75907" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/5687/000000075907.jpg" width="100%" style="max-width:728px; border:none; border-radius:12px;"></a>`,
-        `<a href="//af.moshimo.com/af/c/click?a_id=5526070&p_id=1225&pc_id=1925&pl_id=18523" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/0349/000000018523.png" width="320" height="51" style="border:none;"></a>`
-    ];
-
-    function refreshAds() {
-        const adHtml = ads[Math.floor(Math.random() * ads.length)];
-        const fullContent = `<span class="ad-label">[広告]</span>` + adHtml;
-        const box = document.getElementById('ad-game-play');
-        if (box) box.innerHTML = fullContent;
-    }
-
-    // ゲーム開始時と、リロード（ゲームオーバー）時に広告をリフレッシュ
-    window.addEventListener('load', refreshAds);
-</script>
 </body>
 </html>
