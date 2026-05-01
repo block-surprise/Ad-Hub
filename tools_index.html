@@ -112,8 +112,40 @@
             }
         }
     </style>
+    <style>
+    @keyframes popupAnim {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    /* ポップアップ表示中は背景を動かさない */
+    body.modal-open { overflow: hidden; }
+</style>
 </head>
 <body>
+    <div id="renewal-overlay" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+    <div style="position: relative; background: white; width: 90%; max-width: 500px; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: popupAnim 0.4s ease-out;">
+        
+        <!-- 閉じるボタン -->
+        <button onclick="closeRenewal()" style="position: absolute; top: 15px; right: 15px; background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 18px; color: #666; font-weight: bold;">✕</button>
+
+        <!-- リニューアル画像 (ここに画像URLを入れてください) -->
+        <img src="YOUR_IMAGE_URL_HERE" alt="TECHSTAロゴ" style="width: 100%; max-width: 250px; margin-bottom: 20px; border-radius: 12px;">
+
+        <h2 style="color: #007bff; margin: 0 0 10px 0; font-size: 24px;">TECHSTAへ<br>リニューアルしました！</h2>
+        <p style="color: #555; font-size: 14px; line-height: 1.6; margin-bottom: 25px;">
+            「便利ツールボックス」は、より新しく、より使いやすく。<br>
+            新ブランド<b>「TECHSTA（テクスタ）」</b>として<br>
+            生まれ変わりました。
+        </p>
+
+        <a href="index.html" style="display: block; background: #007bff; color: white; text-decoration: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(0,123,255,0.3);">
+            新ホームへ行く
+        </a>
+        <button onclick="closeRenewal()" style="margin-top: 15px; background: none; border: none; color: #86868b; cursor: pointer; font-size: 12px; text-decoration: underline;">
+            このままツール一覧を見る
+        </button>
+    </div>
+</div>
     <div class="container">
         <h1>🛠️ 全ツール一覧</h1>
         <p style="text-align: center; margin-bottom: 30px;">現在利用可能なすべての便利なツールをまとめています。</p>
@@ -166,5 +198,15 @@
 
         document.addEventListener('DOMContentLoaded', loadAndRenderTools);
     </script>
+    <script>
+    // ページ読み込み時にモーダル用のクラスをつける
+    document.body.classList.add('modal-open');
+
+    function closeRenewal() {
+        const overlay = document.getElementById('renewal-overlay');
+        overlay.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }
+</script>
 </body>
 </html>
