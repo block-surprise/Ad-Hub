@@ -19,200 +19,216 @@
             --border: rgba(0,0,0,0.08);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
+        /* 画面全体の高さを固定して、ナビが動かないようにする */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* 全体はスクロールさせない */
+            background-color: var(--bg);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif;
-            background-color: var(--bg);
-            margin: 0;
+            display: flex;
+            flex-direction: column;
             color: var(--text);
-            overflow-x: hidden;
         }
 
-        .spacer { height: env(safe-area-inset-top); }
+        /* セーフエリア対応のスペーサー */
+        .spacer { 
+            height: env(safe-area-inset-top); 
+            flex-shrink: 0;
+            background: var(--bg);
+        }
 
+        /* ポップな通知カード（修正版：絶対に見えない設定） */
         #updateToast {
             position: fixed;
-            top: calc(15px + env(safe-area-inset-top));
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: white;
-            padding: 10px 24px;
-            border-radius: 25px;
-            font-size: 13px;
-            font-weight: 600;
-            z-index: 3000;
-            transition: transform 0.5s cubic-bezier(0.2, 0, 0.2, 1);
+            top: calc(20px + env(safe-area-inset-top));
+            left: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 16px 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            /* 非表示設定 */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-30px) scale(0.9);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             pointer-events: none;
         }
-        #updateToast.show { transform: translateX(-50%) translateY(0); }
+        #updateToast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .update-icon {
+            background: var(--primary); width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;
+        }
+
+        /* メインコンテンツエリア：ここだけスクロール */
+        .main-scroll-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* iOS用スムーズスクロール */
+            padding: 20px;
+        }
 
         .main-container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
-            padding-bottom: calc(100px + env(safe-area-inset-bottom));
+            padding-bottom: 40px; /* 下に余裕を */
         }
 
         .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeIn 0.4s ease; }
+        .view-section.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* ホーム画面タイル */
         .home-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            padding: 10px 0;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
         }
-
         .tile {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: transform 0.2s;
+            background: var(--card-bg); border-radius: 24px; padding: 24px;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            font-weight: 600; font-size: 14px; transition: transform 0.2s;
         }
         .tile:active { transform: scale(0.95); background: #e8e8ed; }
-        .tile svg { width: 32px; height: 32px; stroke: var(--primary); }
+        .tile svg { width: 32px; height: 32px; stroke: var(--primary); stroke-width: 2; fill: none; }
 
         /* 共通UI */
         .input-card { background: var(--card-bg); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
         textarea, input[type="text"] {
             width: 100%; border: none; background: transparent; font-size: 17px;
-            color: var(--text); outline: none; line-height: 1.5;
+            color: var(--text); outline: none; line-height: 1.5; font-family: inherit;
         }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         button {
             background: var(--bg); color: var(--text); border: none; padding: 14px;
             border-radius: 14px; font-size: 14px; font-weight: 600; cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            width: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         button:active { background: #f0f0f0; transform: scale(0.98); }
-        .primary-btn { background: var(--primary); color: white; width: 100%; margin-top: 10px; }
+        .primary-btn { background: var(--primary); color: white; margin-top: 10px; }
 
-        /* ナビゲーション */
+        /* 固定ナビゲーションバー */
         .nav-bar {
-            position: fixed; bottom: 0; width: 100%;
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px); border-top: 0.5px solid var(--border);
-            display: flex; padding-bottom: env(safe-area-inset-bottom); z-index: 1000;
+            height: calc(60px + env(safe-area-inset-bottom));
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid var(--border);
+            display: flex;
+            padding-bottom: env(safe-area-inset-bottom);
+            flex-shrink: 0; /* 潰れないように固定 */
         }
-        .nav-item { flex: 1; padding: 10px 0; color: var(--sub-text); font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 4px; color: var(--sub-text); font-size: 10px;
+        }
         .nav-item.active { color: var(--primary); }
         .nav-svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.5; }
-
-        /* QR表示 */
-        #qrcode { background: white; padding: 20px; border-radius: 20px; display: inline-block; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div id="updateToast">最新にアップデートしました</div>
+<div id="updateToast">
+    <div class="update-icon">✨</div>
+    <div class="update-content">
+        <b class="update-title">アップデート完了</b>
+        <span class="update-desc">最新バージョンが適用されました</span>
+    </div>
+</div>
+
 <div class="spacer"></div>
 
-<div class="main-container">
-    <!-- ホーム画面 -->
-    <section id="homeView" class="view-section active">
-        <h2 style="margin: 0 0 20px 5px; font-size: 24px;">ツール</h2>
-        <div class="home-grid">
-            <div class="tile" onclick="show('count')">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                文字数
+<div class="main-scroll-area">
+    <div class="main-container">
+        <!-- ホーム画面 -->
+        <section id="homeView" class="view-section active">
+            <h2 style="margin: 0 0 20px 5px;">ツール</h2>
+            <div class="home-grid">
+                <div class="tile" onclick="show('count')">
+                    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    <span>文字数</span>
+                </div>
+                <div class="tile" onclick="show('diff')">
+                    <svg viewBox="0 0 24 24"><path d="M16 3h5v5M8 3H3v5M12 21v-8M3 3l21 21"></path></svg>
+                    <span>比較</span>
+                </div>
             </div>
-            <div class="tile" onclick="show('diff')">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M8 3H3v5M12 21v-8M3 3l21 21"></path></svg>
-                比較
+            <h2 style="margin: 30px 0 20px 5px;">クイックメモ</h2>
+            <div class="input-card">
+                <textarea id="quickMemo" placeholder="自動保存メモ..." style="min-height: 180px;"></textarea>
             </div>
-            <div class="tile" onclick="show('pass')">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                パスワード
-            </div>
-            <div class="tile" onclick="show('qr')">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                QR作成
-            </div>
-        </div>
-        
-        <h2 style="margin: 30px 0 20px 5px; font-size: 24px;">メモ</h2>
-        <div class="input-card">
-            <textarea id="quickMemo" placeholder="ここに入力すると自動で保存されます..." style="min-height: 150px;"></textarea>
-        </div>
-    </section>
+        </section>
 
-    <!-- 各機能セクション (基本非表示) -->
-    <section id="countView" class="view-section">
-        <div class="input-card">
-            <textarea id="mainInput" placeholder="文字を入力..." style="min-height: 250px;"></textarea>
-            <div style="display: flex; justify-content: space-around; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
-                <div style="text-align:center"><span id="vAll" style="font-weight:700; color:var(--primary); display:block;">0</span><span style="font-size:10px; color:var(--sub-text);">文字数</span></div>
-                <div style="text-align:center"><span id="vNoS" style="font-weight:700; color:var(--primary); display:block;">0</span><span style="font-size:10px; color:var(--sub-text);">空白抜</span></div>
-                <div style="text-align:center"><span id="vLine" style="font-weight:700; color:var(--primary); display:block;">0</span><span style="font-size:10px; color:var(--sub-text);">行数</span></div>
+        <!-- 文字数カウント -->
+        <section id="countView" class="view-section">
+            <div class="input-card">
+                <textarea id="mainInput" placeholder="ここに入力..." style="min-height: 250px;"></textarea>
+                <div style="display:flex; justify-content:space-around; padding-top:15px; border-top:1px solid var(--border); margin-top:15px;">
+                    <div style="text-align:center"><span id="vAll" style="font-weight:700; color:var(--primary); display:block; font-size:20px;">0</span><span style="font-size:10px; color:var(--sub-text);">文字数</span></div>
+                    <div style="text-align:center"><span id="vNoS" style="font-weight:700; color:var(--primary); display:block; font-size:20px;">0</span><span style="font-size:10px; color:var(--sub-text);">空白抜</span></div>
+                    <div style="text-align:center"><span id="vLine" style="font-weight:700; color:var(--primary); display:block; font-size:20px;">0</span><span style="font-size:10px; color:var(--sub-text);">行数</span></div>
+                </div>
             </div>
-        </div>
-        <div class="btn-group">
-            <button onclick="convert('zen')">全角</button><button onclick="convert('han')">半角</button>
-            <button onclick="convert('up')">大文字</button><button onclick="convert('low')">小文字</button>
-        </div>
-    </section>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button onclick="convert('zen')">全角</button><button onclick="convert('han')">半角</button>
+            </div>
+        </section>
 
-    <section id="diffView" class="view-section">
-        <div class="input-card"><textarea id="diffA" style="min-height:100px" placeholder="比較元..."></textarea></div>
-        <div class="input-card"><textarea id="diffB" style="min-height:100px" placeholder="比較先..."></textarea></div>
-        <button class="primary-btn" onclick="compare()">比較する</button>
-        <div id="diffOutput" style="margin-top:20px; font-size:14px; line-height:1.8; word-break:break-all;"></div>
-    </section>
-
-    <section id="passView" class="view-section">
-        <div class="input-card" style="text-align:center;">
-            <div id="passOutput" style="font-size: 24px; font-weight:700; color:var(--primary); margin: 20px 0; word-break:break-all;">********</div>
-            <button class="primary-btn" onclick="genPass()">新しいパスワードを生成</button>
-        </div>
-    </section>
-
-    <section id="qrView" class="view-section">
-        <div class="input-card">
-            <input type="text" id="qrInput" placeholder="URLなどを入力...">
-        </div>
-        <button class="primary-btn" onclick="genQR()">QRコードを生成</button>
-        <div style="text-align:center;"><div id="qrcode"></div></div>
-    </section>
+        <!-- 比較 -->
+        <section id="diffView" class="view-section">
+            <div class="input-card"><textarea id="diffA" style="min-height:100px" placeholder="比較元..."></textarea></div>
+            <div class="input-card"><textarea id="diffB" style="min-height:100px" placeholder="比較先..."></textarea></div>
+            <button class="primary-btn" onclick="compare()">比較する</button>
+            <div id="diffOutput" style="margin-top:20px; font-size:14px; line-height:1.8; word-break:break-all;"></div>
+        </section>
+    </div>
 </div>
 
 <nav class="nav-bar">
-    <div class="nav-item active" onclick="show('home')"><svg class="nav-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>ホーム</span></div>
-    <div class="nav-item" onclick="show('count')"><svg class="nav-svg" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg><span>文字数</span></div>
-    <div class="nav-item" onclick="show('diff')"><svg class="nav-svg" viewBox="0 0 24 24"><path d="M16 3h5v5M8 3H3v5M12 21v-8M3 3l21 21"></path></svg><span>比較</span></div>
+    <div class="nav-item active" onclick="show('home')">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        <span>ホーム</span>
+    </div>
+    <div class="nav-item" onclick="show('count')">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path></svg>
+        <span>文字数</span>
+    </div>
+    <div class="nav-item" onclick="show('diff')">
+        <svg class="nav-svg" viewBox="0 0 24 24"><path d="M16 3h5v5M3 3l21 21"></path></svg>
+        <span>比較</span>
+    </div>
 </nav>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-    const CURRENT_VERSION = '1.1.0';
+    const CURRENT_VERSION = '1.1.2'; // 更新時にカウントアップ
 
-    // --- 起動時強制リロード ---
     window.addEventListener('load', () => {
-        const lastReload = sessionStorage.getItem('surge_reload');
-        const now = Date.now();
-        if (!lastReload || now - lastReload > 5000) {
-            sessionStorage.setItem('surge_reload', now);
-            window.location.reload(true);
-            return;
-        }
-
-        // アップデート通知
+        // --- アップデート＆リロード制御 ---
         const lastVer = localStorage.getItem('surge_ver');
         if (lastVer && lastVer !== CURRENT_VERSION) {
+            if (!sessionStorage.getItem('reloaded')) {
+                sessionStorage.setItem('reloaded', 'true');
+                localStorage.setItem('surge_ver', CURRENT_VERSION);
+                window.location.reload(true);
+                return;
+            }
             const toast = document.getElementById('updateToast');
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            setTimeout(() => toast.classList.remove('show'), 4000);
+            sessionStorage.removeItem('reloaded');
         }
         localStorage.setItem('surge_ver', CURRENT_VERSION);
 
@@ -220,71 +236,47 @@
         document.getElementById('quickMemo').value = localStorage.getItem('surge_memo') || '';
     });
 
-    // メモ保存
-    document.getElementById('quickMemo').addEventListener('input', (e) => {
-        localStorage.setItem('surge_memo', e.target.value);
-    });
-
-    // 文字数
-    const input = document.getElementById('mainInput');
-    input.addEventListener('input', () => {
-        const val = input.value;
-        document.getElementById('vAll').innerText = val.length.toLocaleString();
-        document.getElementById('vNoS').innerText = val.replace(/\s/g, '').length.toLocaleString();
-        document.getElementById('vLine').innerText = val ? val.split('\n').length : 0;
-    });
-
-    function convert(mode) {
-        let t = input.value;
-        if(mode === 'zen') t = t.replace(/[!-~]/g, s => String.fromCharCode(s.charCodeAt(0) + 0xFEE0));
-        if(mode === 'han') t = t.replace(/[！-～]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-        if(mode === 'up') t = t.toUpperCase();
-        if(mode === 'low') t = t.toLowerCase();
-        input.value = t;
-        input.dispatchEvent(new Event('input'));
-    }
-
-    // ナビ・タブ切り替え
+    // ページ切り替え
     function show(id) {
         document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
         document.getElementById(id + 'View').classList.add('active');
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        // ナビボタンの強調
-        if(id === 'home' || id === 'count' || id === 'diff') {
-            const idx = {home:0, count:1, diff:2}[id];
-            document.querySelectorAll('.nav-item')[idx].classList.add('active');
-        }
-        window.scrollTo(0,0);
+        // ナビ選択状態の更新
+        const items = document.querySelectorAll('.nav-item');
+        if(id==='home') items[0].classList.add('active');
+        if(id==='count') items[1].classList.add('active');
+        if(id==='diff') items[2].classList.add('active');
+        // スクロール位置を一番上に戻す
+        document.querySelector('.main-scroll-area').scrollTo(0,0);
     }
 
-    // パスワード生成
-    function genPass() {
-        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-        let res = "";
-        for(let i=0; i<16; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-        document.getElementById('passOutput').innerText = res;
+    // 文字数・比較などのロジック（中身は前回と同じ）
+    document.getElementById('quickMemo').addEventListener('input', (e) => localStorage.setItem('surge_memo', e.target.value));
+    const inp = document.getElementById('mainInput');
+    inp.addEventListener('input', () => {
+        const v = inp.value;
+        document.getElementById('vAll').innerText = v.length.toLocaleString();
+        document.getElementById('vNoS').innerText = v.replace(/\s/g, '').length.toLocaleString();
+        document.getElementById('vLine').innerText = v ? v.split('\n').length : 0;
+    });
+    function convert(m){
+        let t=inp.value;
+        if(m==='zen') t=t.replace(/[!-~]/g,s=>String.fromCharCode(s.charCodeAt(0)+0xFEE0));
+        if(m==='han') t=t.replace(/[！-～]/g,s=>String.fromCharCode(s.charCodeAt(0)-0xFEE0));
+        inp.value=t; inp.dispatchEvent(new Event('input'));
     }
-
-    // QR生成
-    let qrcode = new QRCode(document.getElementById("qrcode"), { width: 200, height: 200 });
-    function genQR() {
-        const val = document.getElementById('qrInput').value;
-        if(val) qrcode.makeCode(val);
-    }
-
-    // 比較
-    function compare() {
-        const a = document.getElementById('diffA').value, b = document.getElementById('diffB').value;
-        let res = "";
-        const m = Array(a.length+1).fill().map(()=>Array(b.length+1).fill(0));
-        for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++) m[i][j]=a[i-1]===b[j-1]?m[i-1][j-1]+1:Math.max(m[i-1][j], m[i][j-1]);
+    function compare(){
+        const a=document.getElementById('diffA').value, b=document.getElementById('diffB').value;
+        let res="";
+        const m=Array(a.length+1).fill().map(()=>Array(b.length+1).fill(0));
+        for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=a[i-1]===b[j-1]?m[i-1][j-1]+1:Math.max(m[i-1][j],m[i][j-1]);
         let build=(i,j)=>{
             if(i>0&&j>0&&a[i-1]===b[j-1]){build(i-1,j-1);res+=a[i-1];}
             else if(j>0&&(i===0||m[i][j-1]>=m[i-1][j])){build(i,j-1);res+=`<span style="background:#e6f7ed;color:#1a7f37">${b[j-1]}</span>`;}
             else if(i>0&&(j===0||m[i][j-1]<m[i-1][j])){build(i-1,j);res+=`<span style="background:#ffdbdb;color:#cf2222;text-decoration:line-through">${a[i-1]}</span>`;}
         };
-        build(a.length, b.length);
-        document.getElementById('diffOutput').innerHTML = res || "一致しています";
+        build(a.length,b.length);
+        document.getElementById('diffOutput').innerHTML=res||"一致";
     }
 </script>
 </body>
