@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>TECHSTA - アップデート詳細</title>
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg: #ffffff;
+            --card-bg: #f5f5f7;
+            --text: #1d1d1f;
+            --sub-text: #86868b;
+            --border: rgba(0,0,0,0.08);
+        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.6; }
+        .container { max-width: 700px; margin: 0 auto; padding: 60px 24px; }
+        header { margin-bottom: 50px; }
+        h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; }
+        .hero-card { background: var(--card-bg); border-radius: 32px; padding: 30px; margin-bottom: 40px; border: 1px solid var(--border); }
+        .hero-card h2 { margin-top: 0; color: var(--primary); }
+        
+        .version-block { margin-bottom: 50px; position: relative; padding-left: 20px; border-left: 2px solid var(--border); }
+        .version-block.latest { border-left-color: var(--primary); }
+        .v-badge { background: var(--text); color: #fff; padding: 4px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+        .latest .v-badge { background: var(--primary); }
+        .date { font-size: 14px; color: var(--sub-text); margin-left: 10px; }
+        
+        h3 { font-size: 20px; margin: 15px 0 10px; }
+        p { font-size: 16px; color: #3a3a3c; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 12px; }
+        b { color: var(--text); }
+        
+        .footer { margin-top: 80px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; color: var(--sub-text); font-size: 13px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <span class="v-badge">DOCS</span>
+        <h1>アップデート詳細</h1>
+        <p>SURGEからTECHSTAへ。ツールの枠を超えた進化の記録。</p>
+    </header>
+
+    <div class="hero-card">
+        <h2>"TECHSTA" の由来</h2>
+        <p><b>Technology × Standard × Star</b><br>
+        「技術（Tech）をあなたの標準（Standard）に、そして星（Star）のように輝く体験を」という想いを込めて、SURGE PROから名称を変更しました。単なる検索や文字数カウントのツールではなく、エンジニアリングとクリエイティビティを支える「土台」となることを目指しています。</p>
+    </div>
+
+    <!-- Ver 1.2.2 -->
+    <div class="version-block latest">
+        <span class="v-badge">NEW</span><span class="v-badge">1.2.2</span><span class="date">2026年5月1日</span>
+        <h3>安定性の向上と内部同期</h3>
+        <ul>
+            <li><b>通知ロジックの再構築:</b> ブラウザキャッシュによる更新の遅延を防ぐため、リロード時に強制的にパラメータを付与するシステムを導入。</li>
+            <li><b>データの独立性:</b> 以前のSURGEシリーズのデータと混同しないよう、LocalStorageのキーを <code>techsta_</code> プレフィックスに完全移行。</li>
+            <li><b>UIの微調整:</b> 通知トースト（🚀）の表示時間を5秒に延長し、読みやすさを向上。</li>
+        </ul>
+    </div>
+
+    <!-- Ver 1.2.0 -->
+    <div class="version-block">
+        <span class="v-badge">1.2.0</span><span class="date">2026年4月30日</span>
+        <h3>ブランド・リバイバル</h3>
+        <ul>
+            <li><b>TECHSTAへの移行:</b> SURGE PROのUIをベースに、より洗練されたタイポグラフィとアイコンを採用。</li>
+            <li><b>変換ツールの最適化:</b> 使用頻度の低かった「大文字・小文字変換」を整理し、代わりに「全角・半角変換」の精度を向上。日本語入力環境での利便性を追求しました。</li>
+            <li><b>コードの軽量化:</b> 不要なDOM要素を削減し、起動速度を約15%高速化（理論値）。</li>
+        </ul>
+    </div>
+
+    <!-- Ver 1.1.0 -->
+    <div class="version-block">
+        <span class="v-badge">1.1.0</span><span class="date">2026年3月15日</span>
+        <h3>マルチツール・コンソール</h3>
+        <ul>
+            <li><b>QRコード生成機能:</b> 入力されたURLから即時にQRコードを生成するライブラリを統合。</li>
+            <li><b>文字数比較ツール:</b> 2つの文章の差分を色分けして表示する「Diff機能」を搭載。</li>
+            <li><b>セキュアパスワード生成:</b> 記号を含む16桁の強力なパスワードをワンタップで作成可能に。</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        &copy; 2026 TECHSTA Project. All rights reserved.
+    </div>
+</div>
+</body>
+</html>
