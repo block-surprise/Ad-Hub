@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>ユーティリティ</title>
     
-    <!-- PWA設定 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2912/2912205.png">
@@ -14,27 +13,44 @@
         :root {
             --primary: #007AFF;
             --bg: #ffffff;
-            --card-bg: #f2f2f7;
-            --text: #1c1c1e;
-            --sub-text: #8e8e93;
+            --card-bg: #f5f5f7;
+            --text: #1d1d1f;
+            --sub-text: #86868b;
             --border: rgba(0,0,0,0.05);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif;
             background-color: var(--bg);
             margin: 0;
             color: var(--text);
-            -webkit-user-select: none;
+            overflow-x: hidden;
         }
 
-        /* ヘッダーを消して余白のみ調整 */
-        .spacer {
-            height: env(safe-area-inset-top);
-            background: var(--bg);
+        .spacer { height: env(safe-area-inset-top); }
+
+        /* アップデート通知トースト */
+        #updateToast {
+            position: fixed;
+            top: calc(10px + env(safe-area-inset-top));
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 2000;
+            transition: transform 0.5s cubic-bezier(0.2, 0, 0.2, 1);
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
+        #updateToast.show { transform: translateX(-50%) translateY(0); }
 
         .main-container {
             max-width: 1000px;
@@ -44,15 +60,14 @@
         }
 
         .view-section { display: none; }
-        .view-section.active { display: block; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .view-section.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.2, 0, 0.2, 1); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 入力エリア */
         .input-card {
             background: var(--card-bg);
-            border-radius: 20px;
-            padding: 15px;
-            margin-bottom: 20px;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 24px;
         }
 
         textarea {
@@ -63,70 +78,65 @@
             color: var(--text);
             resize: none;
             outline: none;
-            min-height: 200px;
+            min-height: 220px;
             padding: 0;
-            -webkit-user-select: text;
+            line-height: 1.5;
         }
 
-        /* カウント表示 */
         .status-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 15px;
+            gap: 12px;
+            margin-top: 20px;
         }
 
         .status-item { text-align: center; }
-        .num { font-size: 22px; font-weight: 700; color: var(--primary); display: block; }
-        .label { font-size: 11px; color: var(--sub-text); }
+        .num { font-size: 20px; font-weight: 600; color: var(--primary); display: block; }
+        .label { font-size: 10px; color: var(--sub-text); font-weight: 500; }
 
-        /* 整形ボタン */
         .tool-row {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 15px;
+            gap: 10px;
         }
 
         button {
-            background: white;
+            background: var(--card-bg);
             color: var(--text);
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 12px;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            transition: all 0.2s;
         }
-        button:active { background: #ebebeb; transform: scale(0.98); }
-        button.main-btn { background: var(--primary); color: white; border: none; }
+        button:active { background: #e8e8ed; transform: scale(0.97); }
+        button.main-btn { background: var(--primary); color: white; margin-top: 10px; }
 
-        /* 比較用 */
-        .diff-container { display: flex; flex-direction: column; gap: 10px; }
         .diff-box {
-            background: #f8f8f8;
-            padding: 15px;
-            border-radius: 15px;
-            font-family: monospace;
+            background: #fbfbfd;
+            padding: 18px;
+            border-radius: 20px;
+            font-family: "SF Mono", Menlo, monospace;
             white-space: pre-wrap;
             word-break: break-all;
-            margin-top: 15px;
+            margin-top: 20px;
             font-size: 14px;
             border: 1px solid var(--border);
+            line-height: 1.8;
         }
-        del { background: #ffdbdb; color: #b91d1d; text-decoration: none; border-radius: 2px; }
-        ins { background: #e6f7ed; color: #1db954; text-decoration: none; border-radius: 2px; }
+        del { background: #ffdada; color: #cf2222; text-decoration: none; border-radius: 3px; padding: 0 2px; }
+        ins { background: #e2f5e9; color: #1a7f37; text-decoration: none; border-radius: 3px; padding: 0 2px; }
 
-        /* ボトムナビ */
         .nav-bar {
             position: fixed;
             bottom: 0;
             width: 100%;
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-top: 0.5px solid rgba(0,0,0,0.1);
+            border-top: 0.5px solid rgba(0,0,0,0.08);
             display: flex;
             padding-bottom: env(safe-area-inset-bottom);
             z-index: 1000;
@@ -134,19 +144,31 @@
 
         .nav-item {
             flex: 1;
-            padding: 12px 0;
-            text-align: center;
+            padding: 10px 0;
             color: var(--sub-text);
             font-size: 10px;
-            font-weight: 600;
-            transition: 0.2s;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
 
         .nav-item.active { color: var(--primary); }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+
+        .nav-svg {
+            width: 24px;
+            height: 24px;
+            stroke-width: 1.5;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
 
         @media (min-width: 768px) {
-            .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+            .main-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
             .view-section { display: block !important; }
             .nav-bar { display: none; }
         }
@@ -154,56 +176,85 @@
 </head>
 <body>
 
+<!-- 通知用トースト -->
+<div id="updateToast">アプリを最新に更新しました</div>
+
 <div class="spacer"></div>
 
 <div class="main-container">
-    <!-- カウント・整形 -->
     <section id="countView" class="view-section active">
         <div class="input-card">
-            <textarea id="mainInput" placeholder="ここに文字を入力..."></textarea>
+            <textarea id="mainInput" placeholder="ここに入力..."></textarea>
             <div class="status-grid">
-                <div class="status-item"><span id="vAll" class="num">0</span><span class="label">すべて</span></div>
+                <div class="status-item"><span id="vAll" class="num">0</span><span class="label">文字数</span></div>
                 <div class="status-item"><span id="vNoS" class="num">0</span><span class="label">空白なし</span></div>
                 <div class="status-item"><span id="vLine" class="num">0</span><span class="label">行数</span></div>
             </div>
         </div>
         <div class="tool-row">
-            <button onclick="convert('zen')">全角に変換</button>
-            <button onclick="convert('han')">半角に変換</button>
+            <button onclick="convert('zen')">全角</button>
+            <button onclick="convert('han')">半角</button>
             <button onclick="convert('up')">大文字</button>
             <button onclick="convert('low')">小文字</button>
         </div>
     </section>
 
-    <!-- 比較 -->
     <section id="diffView" class="view-section">
-        <div class="diff-container">
-            <div class="input-card" style="min-height: 100px; margin-bottom: 0;">
-                <textarea id="diffA" style="min-height: 80px;" placeholder="比較元テキスト"></textarea>
-            </div>
-            <div class="input-card" style="min-height: 100px; margin-bottom: 0;">
-                <textarea id="diffB" style="min-height: 80px;" placeholder="比較先テキスト"></textarea>
-            </div>
-            <button class="main-btn" onclick="compare()">内容を比較</button>
-            <div id="diffOutput" class="diff-box">比較結果がここに表示されます</div>
+        <div class="input-card" style="margin-bottom: 12px;">
+            <textarea id="diffA" style="min-height: 100px;" placeholder="比較元のテキスト"></textarea>
         </div>
+        <div class="input-card" style="margin-bottom: 12px;">
+            <textarea id="diffB" style="min-height: 100px;" placeholder="比較先のテキスト"></textarea>
+        </div>
+        <button class="main-btn" style="width:100%" onclick="compare()">内容を比較する</button>
+        <div id="diffOutput" class="diff-box"></div>
     </section>
 </div>
 
 <nav class="nav-bar">
     <div class="nav-item active" onclick="show('count')">
-        <span class="nav-icon">✍️</span>文字数
+        <svg class="nav-svg" viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        <span>文字数</span>
     </div>
     <div class="nav-item" onclick="show('diff')">
-        <span class="nav-icon">⚖️</span>比較
+        <svg class="nav-svg" viewBox="0 0 24 24">
+            <path d="M16 3h5v5"></path>
+            <path d="M8 3H3v5"></path>
+            <path d="M12 21v-8"></path>
+            <path d="M3 3l21 21"></path>
+        </svg>
+        <span>比較</span>
     </div>
 </nav>
 
 <script>
-    // バージョン管理用 (更新反映対策)
-    const APP_VERSION = '1.0.2'; 
+    // --- バージョン管理とアップデート通知 ---
+    const CURRENT_VERSION = '1.0.4'; // ← コードを更新するたびにこの数字を増やす
 
-    // カウントロジック
+    window.addEventListener('load', () => {
+        const lastVersion = localStorage.getItem('app_version');
+        
+        // 前回とバージョンが違う場合のみ通知を出す
+        if (lastVersion && lastVersion !== CURRENT_VERSION) {
+            const toast = document.getElementById('updateToast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000); // 3秒後に消える
+        }
+        
+        // 今のバージョンを記録
+        localStorage.setItem('app_version', CURRENT_VERSION);
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js?v=' + CURRENT_VERSION).then(reg => reg.update());
+        }
+    });
+
+    // --- 各種機能ロジック ---
     const input = document.getElementById('mainInput');
     input.addEventListener('input', () => {
         const val = input.value;
@@ -212,7 +263,6 @@
         document.getElementById('vLine').innerText = val ? val.split('\n').length : 0;
     });
 
-    // 整形ロジック
     function convert(mode) {
         let t = input.value;
         if(mode === 'zen') t = t.replace(/[!-~]/g, s => String.fromCharCode(s.charCodeAt(0) + 0xFEE0));
@@ -223,7 +273,6 @@
         input.dispatchEvent(new Event('input'));
     }
 
-    // タブ切り替え
     function show(page) {
         if (window.innerWidth >= 768) return;
         document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
@@ -232,13 +281,13 @@
         event.currentTarget.classList.add('active');
     }
 
-    // 比較ロジック
     function compare() {
         const a = document.getElementById('diffA').value;
         const b = document.getElementById('diffB').value;
         const out = document.getElementById('diffOutput');
+        if(!a && !b) { out.innerHTML = "テキストを入力してください"; return; }
         
-        let i = 0, j = 0, res = "";
+        let res = "";
         const m = Array(a.length + 1).fill().map(() => Array(b.length + 1).fill(0));
         for(let i=1; i<=a.length; i++) {
             for(let j=1; j<=b.length; j++) {
@@ -246,26 +295,13 @@
             }
         }
         let build = (i, j) => {
-            if (i > 0 && j > 0 && a[i-1] === b[j-1]) {
-                build(i-1, j-1); res += a[i-1];
-            } else if (j > 0 && (i === 0 || m[i][j-1] >= m[i-1][j])) {
-                build(i, j-1); res += `<ins>${b[j-1]}</ins>`;
-            } else if (i > 0 && (j === 0 || m[i][j-1] < m[i-1][j])) {
-                build(i-1, j); res += `<del>${a[i-1]}</del>`;
-            }
+            if (i > 0 && j > 0 && a[i-1] === b[j-1]) { build(i-1, j-1); res += a[i-1]; }
+            else if (j > 0 && (i === 0 || m[i][j-1] >= m[i-1][j])) { build(i, j-1); res += `<ins>${b[j-1]}</ins>`; }
+            else if (i > 0 && (j === 0 || m[i][j-1] < m[i-1][j])) { build(i-1, j); res += `<del>${a[i-1]}</del>`; }
         };
         build(a.length, b.length);
         out.innerHTML = res || "一致しています";
     }
-
-    // 更新対策: ページ読み込み時にキャッシュをチェック
-    window.addEventListener('load', () => {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js?v=' + APP_VERSION).then(reg => {
-                reg.update(); // 起動時に強制的に更新をチェックさせる
-            });
-        }
-    });
 </script>
 </body>
 </html>
