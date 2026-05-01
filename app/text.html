@@ -112,14 +112,24 @@
 
 <div id="notifMenu">
     <h3 style="margin:0 0 12px; font-size:14px;">通知履歴</h3>
+    <!-- Ver 1.2.4 -->
     <div style="font-size:13px; padding:12px; background:var(--card-bg); border-radius:14px; margin-bottom:10px;">
+        <div style="font-weight:700; margin-bottom:4px;">Ver 1.2.4 [5/4]</div>
+        <div style="color:var(--sub-text); margin-bottom:8px; line-height:1.4;">
+            ・フリマ利益計算ツールを新規実装<br>
+            ・クイックメモ下に計算ツールへのショートカットを追加<br>
+            ・メルカリ / Yahoo! / ラクマの手数料計算に対応
+        </div>
+        <a href="update.html" style="display:block; margin-top:8px; color:var(--primary); text-decoration:none; font-weight:600; font-size:12px;">詳細を見る →</a>
+    </div>
+    <!-- Ver 1.2.3 -->
+    <div style="font-size:13px; padding:12px; background:var(--card-bg); border-radius:14px; opacity: 0.8;">
         <div style="font-weight:700; margin-bottom:4px;">Ver 1.2.3 [5/2]</div>
         <div style="color:var(--sub-text); margin-bottom:8px; line-height:1.4;">
             ・ナビゲーションバーの位置を最適化<br>
             ・広告表示の自動ラベル化<br>
             ・iPhone セーフエリア対応を強化
         </div>
-        <a href="update.html" style="display:block; margin-top:8px; color:var(--primary); text-decoration:none; font-weight:600; font-size:12px;">詳細を見る →</a>
     </div>
 </div>
 
@@ -141,6 +151,14 @@
             <div class="input-card">
                 <textarea id="quickMemo" placeholder="自動保存メモ..." style="min-height: 180px;"></textarea>
             </div>
+            <div style="padding: 0 5px; margin-bottom: 30px;">
+    <button onclick="show('calc')" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: 14px; color: var(--primary); font-weight: 600;">
+        <svg style="width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2;" viewBox="0 0 24 24">
+            <path d="M12 2v20M2 12h20M16 16l4 4M20 16l-4 4"/>
+        </svg>
+        フリマ利益計算ツールへ
+    </button>
+</div>
             <div id="ad-home" class="ad-box"></div>
         </section>
 
@@ -184,6 +202,47 @@
             <div style="text-align:center;"><div id="qrcode"></div></div>
             <div id="ad-qr" class="ad-box"></div>
         </section>
+        <!-- フリマ計算セクション -->
+<section id="calcView" class="view-section">
+    <div class="input-card">
+        <div style="margin-bottom:15px;">
+            <label style="font-size:12px; color:var(--sub-text);">販売価格 (円)</label>
+            <input type="text" id="calcPrice" placeholder="例: 3000" style="font-size:32px; font-weight:bold; color:var(--primary); width:100%; border:none; outline:none; background:transparent;">
+        </div>
+        
+        <div style="margin-bottom:15px;">
+            <label style="font-size:12px; color:var(--sub-text);">サービス（手数料）</label>
+            <div style="display:flex; gap:8px; margin-top:5px;">
+                <button id="fee-m" onclick="setFee(0.1, 'm')" style="flex:1; background:#eee;">メルカリ</button>
+                <button id="fee-y" onclick="setFee(0.05, 'y')" style="flex:1; background:#eee;">Yahoo!</button>
+                <button id="fee-r" onclick="setFee(0.1, 'r')" style="flex:1; background:#eee;">ラクマ</button>
+            </div>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label style="font-size:12px; color:var(--sub-text);">送料 (円)</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:5px; margin-bottom:10px;">
+                <button onclick="setShip(210)">ネコポス</button>
+                <button onclick="setShip(180)">ゆうパケミニ</button>
+                <button onclick="setShip(450)">宅急便コン</button>
+                <button onclick="setShip(750)">宅急便60</button>
+            </div>
+            <input type="text" id="calcShip" placeholder="手入力..." style="width:100%; border:none; border-bottom:1px solid var(--border); background:transparent; padding:5px 0;">
+        </div>
+
+        <div style="margin-top:20px; padding-top:20px; border-top:2px dashed var(--border);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span style="color:var(--sub-text);">販売手数料</span>
+                <span id="resFee">0 円</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:24px; font-weight:800;">
+                <span>販売利益</span>
+                <span id="resProfit" style="color:#ff3b30;">0 円</span>
+            </div>
+        </div>
+    </div>
+    <button onclick="show('home')" style="margin-top:10px; background:none; color:var(--sub-text); font-weight:normal;">← ホームへ戻る</button>
+</section>
     </div>
 </div>
 
@@ -195,7 +254,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-    const CURRENT_VERSION = '1.2.3';
+    const CURRENT_VERSION = '1.2.4';
 
     const ads = [
         `<a href="//af.moshimo.com/af/c/click?a_id=5526071&p_id=5941&pc_id=16548&pl_id=75907" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/5687/000000075907.jpg" width="100%" style="max-width:728px; border:none; border-radius:12px;"></a>`,
@@ -286,6 +345,42 @@
         build(a.length,b.length);
         document.getElementById('diffOutput').innerHTML=res||"一致";
     }
+
+    let currentFeeRate = 0.1; // 初期値：メルカリ
+
+function setFee(rate, id) {
+    currentFeeRate = rate;
+    ['m','y','r'].forEach(i => {
+        const btn = document.getElementById('fee-'+i);
+        btn.style.background = '#eee';
+        btn.style.color = 'var(--text)';
+    });
+    const activeBtn = document.getElementById('fee-'+id);
+    activeBtn.style.background = 'var(--primary)';
+    activeBtn.style.color = 'white';
+    runCalc();
+}
+
+function setShip(price) {
+    document.getElementById('calcShip').value = price;
+    runCalc();
+}
+
+function runCalc() {
+    let p = document.getElementById('calcPrice').value;
+    // 全角数字を半角に変換
+    p = p.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248)).replace(/[^0-9]/g, '');
+    document.getElementById('calcPrice').value = p;
+    
+    let price = parseInt(p) || 0;
+    let ship = parseInt(document.getElementById('calcShip').value) || 0;
+    
+    let fee = Math.floor(price * currentFeeRate);
+    let profit = price - fee - ship;
+    
+    document.getElementById('resFee').innerText = fee.toLocaleString() + " 円";
+    document.getElementById('resProfit').innerText = profit.toLocaleString() + " 円";
+}
 </script>
 </body>
 </html>
