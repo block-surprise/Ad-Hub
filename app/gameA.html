@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>TECHSTA GAME - RUN</title>
+    <style>
+        :root {
+            --primary: #007AFF;
+            --danger: #FF3B30;
+            --bg: #ffffff;
+        }
+        body {
+            margin: 0;
+            background: var(--bg);
+            overflow: hidden;
+            font-family: -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            border-bottom: 2px solid #eee;
+            display: block;
+        }
+        .info {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #score {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="info">
+        <div id="score">0</div>
+        <p>画面クリックでジャンプ！</p>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+
+        // キャンバスサイズ設定
+        canvas.width = window.innerWidth;
+        canvas.height = 400;
+
+        let score = 0;
+        let gameActive = true;
+
+        // プレイヤー設定
+        const player = {
+            x: 50,
+            y: 200,
+            width: 30,
+            height: 30,
+            gravity: 0.6,
+            velocity: 0,
+            jump: -10,
+            color: '#007AFF'
+        };
+
+        // 障害物
+        const obstacles = [];
+        let frameCount = 0;
+
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.roundRect(player.x, player.y, player.width, player.height, 8);
+            ctx.fill();
+        }
+
+        function createObstacle() {
+            if (frameCount % 90 === 0) {
+                const height = Math.random() * (canvas.height - 100) + 50;
+                obstacles.push({
+                    x: canvas.width,
+                    y: canvas.height - height,
+                    width: 40,
+                    height: height,
+                    color: '#FF3B30'
+                });
+            }
+        }
+
+        function drawObstacles() {
+            obstacles.forEach((obs, index) => {
+                obs.x -= 5; // 移動速度
+                ctx.fillStyle = obs.color;
+                ctx.beginPath();
+                ctx.roundRect(obs.x, obs.y, obs.width, obs.height, 5);
+                ctx.fill();
+
+                // 衝突判定
+                if (
+                    player.x < obs.x + obs.width &&
+                    player.x + player.width > obs.x &&
+                    player.y < obs.y + obs.height &&
+                    player.y + player.height > obs.y
+                ) {
+                    gameOver();
+                }
+
+                // スコア加算
+                if (obs.x + obs.width < player.x && !obs.passed) {
+                    score++;
+                    obs.passed = true;
+                    scoreElement.innerText = score;
+                }
+
+                // 画面外に出た障害物を削除
+                if (obs.x + obs.width < 0) {
+                    obstacles.splice(index, 1);
+                }
+            });
+        }
+
+        function update() {
+            if (!gameActive) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 重力処理
+            player.velocity += player.gravity;
+            player.y += player.velocity;
+
+            // 地面と天井の判定
+            if (player.y + player.height > canvas.height) {
+                player.y = canvas.height - player.height;
+                player.velocity = 0;
+            }
+            if (player.y < 0) {
+                player.y = 0;
+                player.velocity = 0;
+            }
+
+            drawPlayer();
+            createObstacle();
+            drawObstacles();
+
+            frameCount++;
+            requestAnimationFrame(update);
+        }
+
+        function gameOver() {
+            gameActive = false;
+            alert(`GAME OVER! スコア: ${score}\nもう一度挑戦するにはリロードしてください。`);
+            location.reload();
+        }
+
+        // 操作設定
+        window.addEventListener('mousedown', () => {
+            if (gameActive) player.velocity = player.jump;
+        });
+
+        window.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameActive) player.velocity = player.jump;
+        });
+
+        update();
+    </script>
+</body>
+</html>
