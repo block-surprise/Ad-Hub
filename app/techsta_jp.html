@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>TECHSTA</title>
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--bg);
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", sans-serif;
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo-text {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            color: var(--primary);
+            /* 初期の状態：ぼやけて透明 */
+            filter: blur(20px);
+            opacity: 0;
+            transform: scale(0.9);
+            /* アニメーション設定 */
+            animation: reveal 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        }
+
+        /* ぼやけながら浮かび上がるアニメーション */
+        @keyframes reveal {
+            0% {
+                filter: blur(20px);
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            100% {
+                filter: blur(0px);
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* 画面全体が最後にフェードアウトする設定 */
+        .fade-out {
+            animation: fadeOut 0.8s ease-in forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container" id="container">
+        <div class="logo-text">TECHSTA</div>
+    </div>
+
+    <script>
+        // 1.5秒間アニメーションを見せた後、フェードアウトして移動
+        setTimeout(() => {
+            document.body.classList.add('fade-out');
+            
+            // フェードアウトの完了を待ってから移動（計2.3秒後）
+            setTimeout(() => {
+                window.location.href = 'text.html';
+            }, 800);
+            
+        }, 1500);
+    </script>
+
+</body>
+</html>
