@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>COMMAND BLAST - TECHSTA GAME</title>
+    <style>
+        :root { --primary: #00FF41; --bg: #0a0a0a; --text: #00FF41; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Courier New', Courier, monospace; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+        #game-container { position: relative; width: 100%; max-width: 600px; height: 500px; border: 2px solid #333; margin-top: 20px; overflow: hidden; }
+        .enemy { position: absolute; font-weight: bold; white-space: nowrap; transition: top 0.1s linear; }
+        #input-area { margin-top: 20px; font-size: 24px; background: transparent; border-bottom: 2px solid var(--primary); color: white; outline: none; text-align: center; width: 80%; }
+        .ad-label { display: block; font-size: 10px; color: #888; text-align: center; margin-top: 20px; }
+        .ad-box { width: 100%; text-align: center; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div style="margin-top: 20px;">SCORE: <span id="score">0</span></div>
+    
+    <div id="game-container">
+        <!-- ここに敵（コマンド）が生成されます -->
+    </div>
+
+    <input type="text" id="input-area" placeholder="Type command here..." autofocus>
+
+    <!-- 広告エリア -->
+    <div class="ad-label">[広告]</div>
+    <div id="ad-game-cmd" class="ad-box"></div>
+
+    <script>
+        const container = document.getElementById('game-container');
+        const inputArea = document.getElementById('input-area');
+        const scoreElement = document.getElementById('score');
+        
+        const commands = ['/tp', '/give', '/fill', 'function', '/gamemode', 'execute', 'summon', '/kill', '/setblock', 'scoreboard'];
+        let score = 0;
+        let activeEnemies = [];
+
+        // 敵の生成
+        function spawnEnemy() {
+            const cmd = commands[Math.floor(Math.random() * commands.length)];
+            const div = document.createElement('div');
+            div.className = 'enemy';
+            div.innerText = cmd;
+            div.style.left = Math.random() * (container.offsetWidth - 100) + 'px';
+            div.style.top = '0px';
+            container.appendChild(div);
+            activeEnemies.push({ element: div, text: cmd, top: 0 });
+        }
+
+        // ゲームループ
+        function update() {
+            activeEnemies.forEach((enemy, index) => {
+                enemy.top += 1.5; // 落下速度
+                enemy.element.style.top = enemy.top + 'px';
+
+                if (enemy.top > container.offsetHeight) {
+                    gameOver();
+                }
+            });
+            requestAnimationFrame(update);
+        }
+
+        // 入力判定
+        inputArea.addEventListener('input', () => {
+            const val = inputArea.value;
+            const targetIndex = activeEnemies.findIndex(e => e.text === val);
+            
+            if (targetIndex !== -1) {
+                container.removeChild(activeEnemies[targetIndex].element);
+                activeEnemies.splice(targetIndex, 1);
+                score += 100;
+                scoreElement.innerText = score;
+                inputArea.value = '';
+            }
+        });
+
+        function gameOver() {
+            alert("SYSTEM FAILURE (Game Over)\nScore: " + score);
+            location.reload();
+        }
+
+        // 広告ロジック
+        const ads = [
+            `<a href="//af.moshimo.com/af/c/click?a_id=5526071&p_id=5941&pc_id=16548&pl_id=75907" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/5687/000000075907.jpg" width="100%" style="max-width:728px; border:none; border-radius:12px;"></a>`,
+            `<a href="//af.moshimo.com/af/c/click?a_id=5526070&p_id=1225&pc_id=1925&pl_id=18523" rel="nofollow" referrerpolicy="no-referrer-when-downgrade" attributionsrc><img src="//image.moshimo.com/af-img/0349/000000018523.png" width="320" height="51" style="border:none;"></a>`
+        ];
+        document.getElementById('ad-game-cmd').innerHTML = ads[Math.floor(Math.random() * ads.length)];
+
+        setInterval(spawnEnemy, 2000);
+        update();
+    </script>
+</body>
+</html>
