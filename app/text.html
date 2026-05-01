@@ -2,204 +2,245 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SURGE Utility</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SURGE PRO Utility</title>
     
-    <!-- PWA用の設定 -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <!-- シンプルなマニフェストをインラインで定義 -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJpZCI6ICIvIiwKICAic2hvcnRfbmFtZSI6ICJTVVJHRSBVdGlsIiwKICAibmFtZSI6ICJTVVJHRSBVdGlsaXR5IFRvb2wiLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2Y1ZjdkYSIsCiAgInRoZW1lX2NvbG9yIjogIiM0YTkwZTIiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGljb24uY29tLzUxMi8yOTEyLzI5MTIyMDUucG5nIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiCiAgICB9CiAgXQp9">
-
     <style>
         :root {
-            --primary-color: #4a90e2;
-            --accent-color: #50e3c2;
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --safe-area-inset-top: env(safe-area-inset-top);
+            --primary-color: #007AFF;
+            --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-main: #1C1C1E;
+            --text-sub: #8E8E93;
+            --border-color: #C6C6C8;
+            --diff-del: #ffdbdb;
+            --diff-del-text: #b91d1d;
+            --diff-ins: #e6f7ed;
+            --diff-ins-text: #1db954;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Hiragino Kaku Gothic ProN, "Hiragino Sans", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
-            padding: calc(20px + var(--safe-area-inset-top)) 15px 20px;
-            color: #333;
-            -webkit-tap-highlight-color: transparent;
+            color: var(--text-main);
         }
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            font-size: 1.5rem;
+        header {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: calc(15px + env(safe-area-inset-top)) 20px 10px;
+            z-index: 100;
+            border-bottom: 0.5px solid var(--border-color);
             text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 25px;
-            letter-spacing: 1px;
         }
+
+        header h1 { margin: 0; font-size: 17px; font-weight: 600; }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+
+        .view-section { display: none; }
+        .view-section.active { display: block; }
 
         .card {
             background: var(--card-bg);
-            padding: 18px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             margin-bottom: 20px;
         }
 
-        h2 {
-            margin-top: 0;
-            font-size: 1rem;
-            color: #555;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        h2 { font-size: 14px; color: var(--text-sub); margin-top: 0; margin-bottom: 12px; }
 
         textarea {
             width: 100%;
-            height: 120px;
-            padding: 12px;
             border: 1px solid #eee;
-            border-radius: 12px;
-            background-color: #fafafa;
-            font-size: 16px; /* 16px以上にするとiPhoneでズームされない */
+            border-radius: 8px;
+            font-size: 16px;
+            padding: 10px;
             box-sizing: border-box;
             outline: none;
-            transition: all 0.2s;
-            margin-top: 10px;
+            min-height: 120px;
         }
 
-        textarea:focus {
-            border-color: var(--primary-color);
-            background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-        }
-
-        .stats {
-            margin-top: 12px;
-            font-size: 0.85rem;
-            color: #888;
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-        }
-
-        .compare-grid {
+        /* カウント結果のグリッド */
+        .count-grid {
             display: grid;
-            gap: 12px;
-            margin-bottom: 15px;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
         }
+
+        .count-item {
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .val { font-size: 20px; font-weight: bold; color: var(--primary-color); display: block; }
+        .lbl { font-size: 10px; color: var(--text-sub); }
+
+        /* 差分表示エリア */
+        .diff-output {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.6;
+            border: 1px solid #eee;
+        }
+
+        del { background-color: var(--diff-del); color: var(--diff-del-text); text-decoration: none; border-radius: 2px; }
+        ins { background-color: var(--diff-ins); color: var(--diff-ins-text); text-decoration: none; border-radius: 2px; }
 
         button {
             width: 100%;
-            padding: 14px;
-            background-color: var(--primary-color);
+            background: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.1s, opacity 0.2s;
-        }
-
-        button:active {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
-
-        #compareResult {
-            margin-top: 15px;
-            padding: 12px;
+            padding: 14px;
             border-radius: 10px;
-            text-align: center;
-            font-size: 0.9rem;
             font-weight: bold;
-            display: none;
-            animation: fadeIn 0.3s ease;
+            margin-top: 12px;
+            cursor: pointer;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
+        @media (min-width: 768px) {
+            .main-container { display: grid; grid-template-columns: 1fr 1fr; }
+            .view-section { display: block !important; }
+            .tab-bar { display: none !important; }
         }
 
-        .match { background-color: #e6f7ed; color: #1db954; border: 1px solid #d4edda; }
-        .diff { background-color: #fff0f0; color: #e91e63; border: 1px solid #f8d7da; }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid var(--border-color);
+            display: flex;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
 
-        /* スクロールバー非表示（デザイン用） */
-        textarea::-webkit-scrollbar { width: 0; }
+        .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 0; color: var(--text-sub); }
+        .tab-item.active { color: var(--primary-color); }
+        .tab-label { font-size: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>SURGE UTILITY</h1>
+<header><h1>SURGE PRO Utility</h1></header>
 
-    <div class="card">
-        <h2><span>📝</span> 文字数カウント</h2>
-        <textarea id="counterInput" placeholder="入力してください..."></textarea>
-        <div class="stats">
-            <span>文字数: <strong id="charCount">0</strong></span>
-            <span>行数: <strong id="lineCount">0</strong></span>
+<div class="main-container">
+    <section id="countSection" class="view-section active">
+        <div class="card">
+            <h2>文字数カウント</h2>
+            <textarea id="counterInput" placeholder="入力してください..."></textarea>
+            <div class="count-grid">
+                <div class="count-item"><span id="cAll" class="val">0</span><span class="lbl">すべて</span></div>
+                <div class="count-item"><span id="cNoSpace" class="val">0</span><span class="lbl">空白なし</span></div>
+                <div class="count-item"><span id="cLines" class="val">0</span><span class="lbl">行数</span></div>
+                <div class="count-item"><span id="cPara" class="val">0</span><span class="lbl">段落</span></div>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <div class="card">
-        <h2><span>⚖️</span> 文字列比較</h2>
-        <div class="compare-grid">
-            <textarea id="textA" style="height: 80px;" placeholder="比較元テキスト"></textarea>
-            <textarea id="textB" style="height: 80px;" placeholder="比較先テキスト"></textarea>
+    <section id="compareSection" class="view-section">
+        <div class="card">
+            <h2>文字列比較 (Diff)</h2>
+            <textarea id="diffA" style="min-height: 80px; font-size: 14px;" placeholder="比較元..."></textarea>
+            <div style="height: 10px;"></div>
+            <textarea id="diffB" style="min-height: 80px; font-size: 14px;" placeholder="比較先..."></textarea>
+            <button onclick="runDiff()">差分をハイライト</button>
+            <div id="diffResult" class="diff-output">比較結果がここに表示されます</div>
         </div>
-        <button onclick="compareTexts()">比較を実行</button>
-        <div id="compareResult"></div>
-    </div>
+    </section>
 </div>
 
+<nav class="tab-bar">
+    <div class="tab-item active" onclick="showTab('count')"><span class="tab-label">カウント</span></div>
+    <div class="tab-item" onclick="showTab('compare')"><span class="tab-label">比較</span></div>
+</nav>
+
 <script>
-    // カウント機能
-    const counterInput = document.getElementById('counterInput');
-    const charCount = document.getElementById('charCount');
-    const lineCount = document.getElementById('lineCount');
-
-    counterInput.addEventListener('input', () => {
-        const val = counterInput.value;
-        charCount.textContent = val.length.toLocaleString();
-        lineCount.textContent = val ? val.split('\n').length : 0;
-    });
-
-    // 比較機能
-    function compareTexts() {
-        const a = document.getElementById('textA').value;
-        const b = document.getElementById('textB').value;
-        const res = document.getElementById('compareResult');
-
-        res.style.display = 'block';
-        if (a === b && a !== "") {
-            res.textContent = "完全に一致しました ✅";
-            res.className = "match";
-        } else if (a === "" && b === "") {
-            res.textContent = "テキストを入力してください";
-            res.className = "";
-            res.style.backgroundColor = "#eee";
+    // タブ切り替え
+    function showTab(tab) {
+        if (window.innerWidth >= 768) return;
+        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        if(tab === 'count') {
+            document.getElementById('countSection').classList.add('active');
+            document.querySelectorAll('.tab-item')[0].classList.add('active');
         } else {
-            res.textContent = "違いがあります ❌";
-            res.className = "diff";
+            document.getElementById('compareSection').classList.add('active');
+            document.querySelectorAll('.tab-item')[1].classList.add('active');
         }
     }
 
-    // PWA Service Workerの登録（オフライン対応の準備）
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGU9PmV2ZW50LnJlc3BvbmRXaXRoKGZldGNoKGUucmVxdWVzdCkpKTs=');
-        });
+    // 文字数カウント (空白除外ロジック追加)
+    document.getElementById('counterInput').addEventListener('input', (e) => {
+        const text = e.target.value;
+        const noSpace = text.replace(/\s+/g, ''); // スペース、タブ、改行をすべて除去
+        
+        document.getElementById('cAll').innerText = text.length.toLocaleString();
+        document.getElementById('cNoSpace').innerText = noSpace.length.toLocaleString();
+        document.getElementById('cLines').innerText = text ? text.split('\n').length : 0;
+        document.getElementById('cPara').innerText = text ? text.split(/\n+/).filter(p => p.trim() !== "").length : 0;
+    });
+
+    // 簡易Diffロジック (文字単位)
+    function runDiff() {
+        const a = document.getElementById('diffA').value;
+        const b = document.getElementById('diffB').value;
+        const out = document.getElementById('diffResult');
+        
+        if (!a && !b) { out.innerText = "テキストを入力してください"; return; }
+
+        // シンプルな最長共通部分列(LCS)ではなく、視覚的な簡易比較アルゴリズム
+        // 今回は文字単位の差分を表示
+        let resultHTML = "";
+        let i = 0, j = 0;
+
+        // 外部ライブラリなしで動く簡易的な比較表示
+        // ※ 本格的なDiffにはdiff-match-patch等が使われますが、単一ファイルで動くよう自作
+        const matrix = Array(a.length + 1).fill().map(() => Array(b.length + 1).fill(0));
+        for(let i=1; i<=a.length; i++) {
+            for(let j=1; j<=b.length; j++) {
+                matrix[i][j] = a[i-1] === b[j-1] ? matrix[i-1][j-1] + 1 : Math.max(matrix[i-1][j], matrix[i][j-1]);
+            }
+        }
+
+        let backtrack = (i, j) => {
+            if (i > 0 && j > 0 && a[i-1] === b[j-1]) {
+                backtrack(i-1, j-1);
+                resultHTML += a[i-1];
+            } else if (j > 0 && (i === 0 || matrix[i][j-1] >= matrix[i-1][j])) {
+                backtrack(i, j-1);
+                resultHTML += `<ins>${b[j-1]}</ins>`;
+            } else if (i > 0 && (j === 0 || matrix[i][j-1] < matrix[i-1][j])) {
+                backtrack(i-1, j);
+                resultHTML += `<del>${a[i-1]}</del>`;
+            }
+        };
+        
+        backtrack(a.length, b.length);
+        out.innerHTML = resultHTML || "変化なし";
     }
 </script>
-
 </body>
 </html>
