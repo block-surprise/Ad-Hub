@@ -120,9 +120,9 @@
         button:active { background: #f0f0f0; transform: scale(0.98); }
         .primary-btn { background: var(--primary); color: white; margin-top: 10px; }
 
-        /* ナビゲーションバーの高さ調整 */
+        /* ナビゲーションバー（極限まで低く調整） */
         .nav-bar {
-            height: 65px; 
+            height: 60px;
             padding-bottom: env(safe-area-inset-bottom);
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -131,23 +131,28 @@
             flex-shrink: 0;
         }
 
-        /* Webアプリ起動時の調整 */
+        /* Webアプリ（standalone）時の最終調整 */
         @media screen and (display-mode: standalone) {
             .nav-bar {
-                height: calc(60px + env(safe-area-inset-bottom));
-                padding-bottom: calc(env(safe-area-inset-bottom) * 0.5);
+                height: 55px;
+                padding-bottom: 5px;
+            }
+            .nav-item {
+                justify-content: flex-end;
+                padding-bottom: 8px;
+                gap: 0px;
             }
         }
 
         .nav-item {
             flex: 1; display: flex; flex-direction: column; align-items: center;
             justify-content: center; gap: 2px; color: var(--sub-text); font-size: 10px;
-            padding-top: 5px;
         }
         .nav-item.active { color: var(--primary); }
         .nav-svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; }
 
         #qrcode { background: white; padding: 15px; border-radius: 15px; display: inline-block; margin-top: 15px; }
+        #qrcode img { display: block; margin: 0 auto; }
     </style>
 </head>
 <body>
@@ -156,7 +161,7 @@
     <div class="update-icon">✨</div>
     <div class="update-content">
         <b class="update-title">アップデート完了</b>
-        <span class="update-desc">最新バージョン 1.1.6 を適用しました</span>
+        <span class="update-desc">最新バージョン 1.1.7 を適用しました</span>
     </div>
 </div>
 
@@ -202,7 +207,7 @@
                 </div>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <button onclick="convert('zen')">全角に変換</button><button onclick="convert('han')">半角に変換</button>
+                <button onclick="convert('zen')">全角</button><button onclick="convert('han')">半角</button>
                 <button onclick="convert('up')">大文字</button><button onclick="convert('low')">小文字</button>
             </div>
         </section>
@@ -211,7 +216,7 @@
         <section id="diffView" class="view-section">
             <div class="input-card"><textarea id="diffA" style="min-height:100px" placeholder="比較元..."></textarea></div>
             <div class="input-card"><textarea id="diffB" style="min-height:100px" placeholder="比較先..."></textarea></div>
-            <button class="primary-btn" onclick="compare()">比較を実行する</button>
+            <button class="primary-btn" onclick="compare()">比較を実行</button>
             <div id="diffOutput" style="margin-top:20px; font-size:14px; line-height:1.8; word-break:break-all;"></div>
         </section>
 
@@ -219,7 +224,7 @@
         <section id="passView" class="view-section">
             <div class="input-card" style="text-align:center;">
                 <div id="passOutput" style="font-size: 24px; font-weight:700; color:var(--primary); margin: 30px 0; word-break:break-all;">********</div>
-                <button class="primary-btn" onclick="genPass()">新しいパスワードを生成</button>
+                <button class="primary-btn" onclick="genPass()">パスワードを生成</button>
             </div>
         </section>
 
@@ -242,7 +247,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-    const CURRENT_VERSION = '1.1.6';
+    const CURRENT_VERSION = '1.1.7';
 
     window.addEventListener('load', () => {
         const lastVer = localStorage.getItem('surge_ver');
