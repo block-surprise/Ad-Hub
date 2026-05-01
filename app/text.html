@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SURGE Utility</title>
+    
+    <!-- PWA用の設定 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- シンプルなマニフェストをインラインで定義 -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJpZCI6ICIvIiwKICAic2hvcnRfbmFtZSI6ICJTVVJHRSBVdGlsIiwKICAibmFtZSI6ICJTVVJHRSBVdGlsaXR5IFRvb2wiLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2Y1ZjdkYSIsCiAgInRoZW1lX2NvbG9yIjogIiM0YTkwZTIiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi1pY29ucy1wbmcuZmxhdGljb24uY29tLzUxMi8yOTEyLzI5MTIyMDUucG5nIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiCiAgICB9CiAgXQp9">
+
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --accent-color: #50e3c2;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --safe-area-inset-top: env(safe-area-inset-top);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Hiragino Kaku Gothic ProN, "Hiragino Sans", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: calc(20px + var(--safe-area-inset-top)) 15px 20px;
+            color: #333;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 18px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background-color: #fafafa;
+            font-size: 16px; /* 16px以上にするとiPhoneでズームされない */
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .stats {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #888;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .compare-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        #compareResult {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .match { background-color: #e6f7ed; color: #1db954; border: 1px solid #d4edda; }
+        .diff { background-color: #fff0f0; color: #e91e63; border: 1px solid #f8d7da; }
+
+        /* スクロールバー非表示（デザイン用） */
+        textarea::-webkit-scrollbar { width: 0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>SURGE UTILITY</h1>
+
+    <div class="card">
+        <h2><span>📝</span> 文字数カウント</h2>
+        <textarea id="counterInput" placeholder="入力してください..."></textarea>
+        <div class="stats">
+            <span>文字数: <strong id="charCount">0</strong></span>
+            <span>行数: <strong id="lineCount">0</strong></span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2><span>⚖️</span> 文字列比較</h2>
+        <div class="compare-grid">
+            <textarea id="textA" style="height: 80px;" placeholder="比較元テキスト"></textarea>
+            <textarea id="textB" style="height: 80px;" placeholder="比較先テキスト"></textarea>
+        </div>
+        <button onclick="compareTexts()">比較を実行</button>
+        <div id="compareResult"></div>
+    </div>
+</div>
+
+<script>
+    // カウント機能
+    const counterInput = document.getElementById('counterInput');
+    const charCount = document.getElementById('charCount');
+    const lineCount = document.getElementById('lineCount');
+
+    counterInput.addEventListener('input', () => {
+        const val = counterInput.value;
+        charCount.textContent = val.length.toLocaleString();
+        lineCount.textContent = val ? val.split('\n').length : 0;
+    });
+
+    // 比較機能
+    function compareTexts() {
+        const a = document.getElementById('textA').value;
+        const b = document.getElementById('textB').value;
+        const res = document.getElementById('compareResult');
+
+        res.style.display = 'block';
+        if (a === b && a !== "") {
+            res.textContent = "完全に一致しました ✅";
+            res.className = "match";
+        } else if (a === "" && b === "") {
+            res.textContent = "テキストを入力してください";
+            res.className = "";
+            res.style.backgroundColor = "#eee";
+        } else {
+            res.textContent = "違いがあります ❌";
+            res.className = "diff";
+        }
+    }
+
+    // PWA Service Workerの登録（オフライン対応の準備）
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGU9PmV2ZW50LnJlc3BvbmRXaXRoKGZldGNoKGUucmVxdWVzdCkpKTs=');
+        });
+    }
+</script>
+
+</body>
+</html>
