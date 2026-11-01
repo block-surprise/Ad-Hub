@@ -1,99 +1,103 @@
-/* すっきり読みやすく、少しだけ色を足した個人サイト */
+
 :root {
   --ink: #263445;
-  --muted: #667486;
-  --paper: #f4f7fb;
-  --card: #ffffff;
-  --line: #dce4ed;
-  --blue: #2867a8;
-  --blue-dark: #194c80;
-  --mint: #e5f4ef;
-  --accent: #e8a35a;
+  --muted: #66758a;
+  --blue: #3569a8;
+  --blue-dark: #244d80;
+  --blue-pale: #eaf3ff;
+  --orange: #e58b42;
+  --paper: #ffffff;
+  --page: #f2f6fb;
+  --line: #dce5ef;
+  --mint: #e8f5f0;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
+  background: var(--page);
   color: var(--ink);
-  background: var(--paper);
-  font-family: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
-  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", Meiryo, sans-serif;
   line-height: 1.85;
+  overflow-wrap: anywhere;
 }
-a { color: var(--blue); text-underline-offset: 3px; }
+a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 a:hover { color: var(--blue-dark); }
-header {
-  background: var(--card);
-  border-bottom: 3px solid var(--blue);
+.site-header {
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
 }
-.header-inner, main, .footer-inner {
-  width: min(100% - 32px, 1000px);
-  margin: 0 auto;
+.header-inner, .layout, .footer-inner {
+  width: min(100% - 32px, 980px);
+  margin-inline: auto;
 }
-.header-inner { padding: 20px 0 15px; }
-.site-title { margin: 0; font-size: 1.85rem; font-weight: 800; letter-spacing: .02em; }
+.header-inner { padding: 22px 0 16px; }
+.site-title { margin: 0; font-size: clamp(1.55rem, 4vw, 2.15rem); line-height: 1.3; letter-spacing: .02em; }
 .site-title a { color: var(--ink); text-decoration: none; }
-.site-subtitle { margin: 2px 0 15px; color: var(--muted); font-size: .9rem; }
-nav { display: flex; flex-wrap: wrap; gap: 8px 18px; border-top: 1px solid var(--line); padding-top: 10px; }
-nav a { font-size: .92rem; font-weight: 600; text-decoration: none; }
-nav a:hover { text-decoration: underline; }
-main { padding: 28px 0 48px; }
-.columns { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 24px; align-items: start; }
-.panel {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 22px;
-  margin-bottom: 20px;
-  box-shadow: 0 3px 12px rgba(38, 52, 69, .045);
+.tagline { margin: 7px 0 16px; color: var(--muted); font-size: .92rem; }
+.nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.nav a {
+  display: inline-block; padding: 5px 12px; border-radius: 999px;
+  background: var(--blue-pale); color: var(--blue-dark); text-decoration: none;
+  font-size: .9rem; font-weight: 600;
 }
-h1 { font-size: 1.8rem; line-height: 1.45; margin: 0 0 16px; padding-left: 13px; border-left: 5px solid var(--accent); }
-h2 { color: var(--blue-dark); font-size: 1.35rem; line-height: 1.5; border-bottom: 2px solid var(--mint); padding-bottom: 7px; margin: 28px 0 12px; }
-h3 { font-size: 1.08rem; margin: 20px 0 6px; }
-p { margin: 0 0 16px; }
-.muted { color: var(--muted); font-size: .9rem; }
-.tag { display: inline-block; color: #24564c; background: var(--mint); border-radius: 4px; padding: 1px 8px; font-size: .78rem; margin-right: 6px; }
-.article-list { list-style: none; padding: 0; margin: 0; }
-.article-list li { padding: 15px 0; border-bottom: 1px solid #e8edf3; }
-.article-list li:first-child { padding-top: 0; }
-.article-list li:last-child { border-bottom: 0; }
-.article-list a { font-size: 1.08rem; font-weight: bold; text-decoration: none; }
-.article-list a:hover { text-decoration: underline; }
-.article-list p { color: var(--muted); font-size: .9rem; margin: 5px 0 0; }
-.sidebar .panel { padding: 17px; }
-.sidebar h2 { font-size: 1.1rem; margin: 0 0 10px; }
-.sidebar ul { margin: 0; padding-left: 20px; }
-.sidebar li { margin: 4px 0; }
-.article-meta { color: var(--muted); font-size: .85rem; margin-bottom: 10px; }
-.article-body h2:first-child { margin-top: 24px; }
-blockquote { margin: 20px 0; padding: 10px 16px; background: #f0f6fb; border-left: 4px solid var(--blue); border-radius: 0 6px 6px 0; }
-.notice { background: #fff5e7; border: 1px solid #f0d3ad; border-radius: 7px; padding: 12px 15px; font-size: .9rem; }
-/* 320×100のスマホ向け広告。PCでは非表示、スマホでは親枠の幅に縛らず全幅で配置 */
-.ad-panel { display: none; }
-.ad-label { margin: 0 0 4px; font-size: .72rem; color: var(--muted); text-align: center; }
-.ad-content { width: 320px; max-width: 100vw; margin: 0 auto; overflow: visible; }
-.ad-content iframe, .ad-content img { max-width: none !important; }
-footer { background: #e8eef5; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
-.footer-inner { padding: 18px 0; }
-footer p { margin: 0; }
+.nav a:hover { background: #d9e9ff; }
+.layout { padding: 24px 0 40px; }
+.hero {
+  padding: clamp(20px, 4vw, 34px); border-radius: 14px;
+  background: linear-gradient(120deg, #e7f2ff, #f4f8ff 68%, #fff3e7);
+  border: 1px solid #d9e6f4; margin-bottom: 22px;
+}
+.eyebrow { color: var(--blue); font-size: .82rem; font-weight: 800; letter-spacing: .08em; }
+.hero h2 { margin: 5px 0 8px; font-size: clamp(1.5rem, 4vw, 2rem); line-height: 1.45; }
+.hero p { margin: 0; color: #4e5f73; }
+.content-grid { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 22px; align-items: start; }
+.main-column, .sidebar { min-width: 0; }
+.panel, .article-card, .sidebar-section {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 12px;
+}
+.panel { padding: clamp(18px, 3vw, 28px); }
+.article-card { padding: 18px 20px; margin-bottom: 12px; }
+.article-card h3 { margin: 0 0 5px; font-size: 1.12rem; line-height: 1.5; }
+.article-card p { margin: 4px 0 0; color: var(--muted); font-size: .94rem; }
+.article-meta { color: var(--muted); font-size: .82rem; }
+.section-title { margin: 0 0 15px; padding-left: 12px; border-left: 4px solid var(--orange); font-size: 1.25rem; line-height: 1.45; }
+.sidebar-section { padding: 17px; margin-bottom: 14px; }
+.sidebar-section h3 { margin: 0 0 9px; font-size: 1rem; }
+.sidebar-section ul { margin: 0; padding-left: 1.2rem; }
+.sidebar-section li { margin: 5px 0; }
+.category-list { display: flex; flex-wrap: wrap; gap: 7px; }
+.category-list a { padding: 4px 9px; background: var(--mint); border-radius: 7px; font-size: .86rem; text-decoration: none; }
+.article h1 { margin: 0 0 8px; font-size: clamp(1.55rem, 4vw, 2.1rem); line-height: 1.45; }
+.article h2 { margin-top: 1.7em; padding-bottom: 6px; border-bottom: 2px solid var(--blue-pale); font-size: 1.28rem; }
+.article h3 { margin-top: 1.4em; font-size: 1.08rem; }
+.article p { margin: 1em 0; }
+.article blockquote { margin: 1.2em 0; padding: 12px 16px; border-left: 4px solid var(--orange); background: #fff7ef; }
+.article .note { padding: 14px 16px; background: var(--blue-pale); border-radius: 8px; }
+.back-link { display: inline-block; margin-top: 22px; }
+.site-footer { background: #e5edf6; border-top: 1px solid var(--line); color: var(--muted); }
+.footer-inner { padding: 20px 0; font-size: .88rem; }
+.footer-inner p { margin: 4px 0; }
+.tag { display: inline-block; margin-right: 5px; padding: 2px 8px; border-radius: 5px; background: var(--blue-pale); color: var(--blue-dark); font-size: .78rem; }
+.ad-slot { display: none; }
 @media (max-width: 700px) {
-  .columns { grid-template-columns: 1fr; gap: 8px; }
-  .header-inner, main, .footer-inner { width: min(100% - 22px, 1000px); }
-  .header-inner { padding-top: 15px; }
-  .panel { padding: 17px; border-radius: 8px; }
-  h1 { font-size: 1.55rem; }
-  /* サイドバー内にあっても、広告だけ画面の左右端まで広げる */
-  .ad-panel {
-    display: block;
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
-    padding: 5px 0;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    overflow: visible;
-    text-align: center;
-    box-shadow: none;
+  .header-inner, .layout, .footer-inner { width: min(100% - 24px, 620px); }
+  .header-inner { padding: 17px 0 13px; }
+  .layout { padding-top: 16px; }
+  .content-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .sidebar { display: grid; grid-template-columns: 1fr; }
+  .hero { border-radius: 10px; }
+  .article-card { padding: 16px; }
+  /* Mobile-only 320x100 ad. Keep it outside content cards; do not force the ad itself to shrink. */
+  .ad-slot {
+    display: flex; width: 100%; min-height: 100px; justify-content: center; align-items: center;
+    margin: 0; padding: 0; overflow: visible; background: transparent; border: 0; border-radius: 0;
   }
-  .ad-content { width: 320px; max-width: 100vw; margin: 0 auto; }
+  .ad-slot > * { max-width: none !important; }
+  .ad-slot iframe { display: block; margin-inline: auto; }
+  .ad-top { margin-bottom: 14px; }
+  .ad-bottom { margin-top: 18px; }
+}
+@media (min-width: 701px) {
+  .ad-slot { display: none !important; }
 }
