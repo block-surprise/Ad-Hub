@@ -1,0 +1,186 @@
+@charset "UTF-8";
+
+:root {
+  --bg: #f7f7f5;
+  --paper: #ffffff;
+  --text: #252525;
+  --muted: #777872;
+  --line: #e6e5df;
+  --accent: #526c5b;
+  --accent-soft: #edf2ed;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+    "Yu Gothic", Meiryo, sans-serif;
+  line-height: 1.9;
+  letter-spacing: .025em;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.site-header {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 35px 28px 22px;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 4px 20px;
+}
+
+.site-name {
+  color: var(--text);
+  font-family: Georgia, "Yu Mincho", serif;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1.2;
+}
+.site-name span { color: var(--accent); }
+.site-tagline { margin: 8px 0 0; color: var(--muted); font-size: .82rem; }
+nav { display: flex; gap: 20px; font-size: .85rem; }
+nav a { color: var(--muted); }
+
+.layout {
+  max-width: 1080px;
+  margin: 38px auto 70px;
+  padding: 0 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 700px) minmax(220px, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.post {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: clamp(25px, 5vw, 58px);
+  min-width: 0;
+}
+
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+.category {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 4px;
+  padding: 2px 10px;
+}
+
+h1, h2, h3 { line-height: 1.5; }
+h1 {
+  margin: 22px 0 14px;
+  font-size: clamp(2rem, 5vw, 2.7rem);
+  letter-spacing: .015em;
+}
+.lead { color: #62645f; font-size: 1.05rem; margin: 0; }
+.rule { height: 1px; background: var(--line); margin: 30px 0; }
+
+.post h2 {
+  margin: 38px 0 14px;
+  padding-left: 13px;
+  border-left: 3px solid var(--accent);
+  font-size: 1.35rem;
+}
+.post h3 { margin: 25px 0 8px; font-size: 1.05rem; }
+.post p { margin: 0 0 17px; }
+.post ul { padding-left: 1.35em; margin: 12px 0 22px; }
+.post li { padding-left: 4px; margin: 9px 0; }
+.post strong { color: #344b3b; }
+
+blockquote {
+  margin: 28px 0;
+  padding: 18px 22px;
+  border-left: 3px solid #aab9ac;
+  background: #f6f8f5;
+  color: #465448;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: 1.05rem;
+}
+
+.post-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.sidebar { display: grid; gap: 18px; }
+.side-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px;
+}
+.side-label {
+  margin: 0 0 7px;
+  color: var(--accent);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .13em;
+}
+.side-card h2 { margin: 0 0 8px; font-size: 1.2rem; }
+.side-card p { margin: 0; font-size: .9rem; }
+.side-card .small { color: var(--muted); font-size: .82rem; }
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  text-align: center;
+  color: var(--muted);
+  padding: 24px;
+  font-size: .8rem;
+}
+.site-footer p { margin: 0; }
+
+@media (max-width: 760px) {
+  .site-header {
+    padding: 25px 20px 18px;
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  nav { margin-top: 15px; }
+  .layout {
+    margin-top: 20px;
+    padding: 0 14px;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .post { padding: 25px 21px; }
+  .sidebar { grid-template-columns: 1fr; }
+  .post h2 { margin-top: 31px; }
+}
+
+.article-link {
+  display: block;
+  padding: 20px 0;
+  color: inherit;
+  border-bottom: 1px solid var(--line);
+}
+.article-link h2 { margin: 12px 0 6px; padding: 0; border: 0; }
+.article-link p { margin: 0 0 10px; color: var(--muted); }
+.article-link > span { color: var(--accent); font-size: .88rem; }
+.article-link:hover { text-decoration: none; }
+.article-link:hover h2 { color: var(--accent); }
