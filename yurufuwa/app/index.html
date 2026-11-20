@@ -14,7 +14,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="ゆるふわ知恵袋">
 <script>
-(function(){try{fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){var cur=localStorage.getItem("yf_appver");if(v.version&&cur&&cur!==v.version){localStorage.setItem("yf_appver",v.version);var u=new URL(location.href);u.searchParams.set("v",v.version);location.replace(u.toString());}else if(v.version){localStorage.setItem("yf_appver",v.version);}}).catch(function(){});}catch(e){}})();
+window.APP_VERSION = "202611210028";
+(function(){try{fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(v){
+  if(!v || !v.version) return;
+  if(v.version === window.APP_VERSION){ try{sessionStorage.removeItem("yf_reload_try");}catch(e){} return; }
+  var tries = 0; try{ tries = +(sessionStorage.getItem("yf_reload_try") || 0); }catch(e){}
+  if(tries >= 3) return;
+  try{ sessionStorage.setItem("yf_reload_try", tries + 1); }catch(e){}
+  var u = new URL(location.href); u.searchParams.set("v", v.version); u.searchParams.set("t", Date.now());
+  location.replace(u.toString());
+}).catch(function(){});}catch(e){}})();
 </script>
 <script>
 (function(){try{var t=localStorage.getItem("yf_theme")||"auto";var dark=t==="dark"||(t==="auto"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=dark?"dark":"light";}catch(e){document.documentElement.dataset.theme="light";}})();
