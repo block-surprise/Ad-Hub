@@ -78,6 +78,10 @@ nav.tabs button:active{color:var(--accent-deep)}
 .lockbox{text-align:center;padding:14px 6px 4px}
 .lockbox .lk{width:56px;height:56px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:var(--accent-deep)}
 .lockbox .lk svg{width:27px;height:27px}
+.gbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#3c4043;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px}
+.gbtn:active{opacity:.85}
+.gbtn svg{width:19px;height:19px;flex:none}
+.ordiv{text-align:center;color:var(--sub);font-size:12.5px;margin:12px 0 0}
 *{box-sizing:border-box}
 body{margin:0;font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding-bottom:80px;-webkit-text-size-adjust:100%}
 body.large .body-txt, body.large .face p, body.large .sheet .pts{font-size:16.5px}
@@ -197,7 +201,7 @@ nav.tabs svg{width:22px;height:22px}
 <body>
 <header class="app">
   <img src="../IMG_4679.png" alt="ゆるふわ知恵袋">
-  <div><h1>ゆるふわ知恵袋アプリ</h1><p>大人のための雑学図鑑</p></div>
+  <div><h1>ゆるふわ知恵袋</h1></div>
   <div class="streak" id="streak">連続 <b>1</b> 日</div>
   <button class="bellbtn" id="account-btn" aria-label="マイページ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5 a7.5 7.5 0 0 1 15 0"/></svg></button>
   <button class="bellbtn" id="bell" aria-label="お知らせ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9 a6 6 0 1 0-12 0 c0 6-2.5 7-2.5 7 h17 S18 15 18 9"/><path d="M10 20 a2.2 2.2 0 0 0 4 0"/></svg><span class="badge" id="bell-badge"></span></button>
@@ -789,7 +793,10 @@ function authError(e){
     "auth/invalid-credential": "メールアドレスかパスワードが違うようです。",
     "auth/operation-not-allowed": "Firebase側でメール/パスワード認証が有効になっていません。管理者の設定が必要です。",
     "auth/network-request-failed": "通信エラーです。電波の良いところでもう一度試してください。",
-    "auth/too-many-requests": "試行回数が多すぎます。少し待ってから試してください。"
+    "auth/too-many-requests": "試行回数が多すぎます。少し待ってから試してください。",
+    "auth/popup-closed-by-user": "ログイン画面が閉じられました。もう一度試してください。",
+    "auth/unauthorized-domain": "このサイトのドメインがFirebaseの承認済みドメインに登録されていません。管理者の設定が必要です。",
+    "auth/account-exists-with-different-credential": "そのメールアドレスは別の方法で登録されています。メールとパスワードでログインしてみてください。"
   };
   return map[code] || ("エラーが発生しました（" + code + "）");
 }
@@ -813,6 +820,8 @@ function openAccount(){
     $("sheet-panel").innerHTML =
       '<h3 style="margin-top:2px">マイページ</h3>' +
       '<div class="benefits"><b>会員になると（無料）</b><ul style="margin:6px 0 2px;padding-left:20px"><li>会員限定の豆知識（3件）が読める</li><li>記録をクラウドに保存して、機種変更や別の端末でも引き継げる</li><li>会員限定のお知らせが読める</li></ul></div>' +
+      '<button class="gbtn" onclick="doGoogle()"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.3 c0-.9-.1-1.5-.3-2.2 H12 v4.3 h6.5 c-.1 1.1-.8 2.7-2.4 3.8 l3.7 2.9 c2.3-2.1 3.7-5.2 3.7-9 z"/><path fill="#34A853" d="M12 24 c3.2 0 5.9-1.1 7.9-2.9 l-3.7-2.9 c-1 .7-2.4 1.2-4.2 1.2 -3.2 0-5.9-2.1-6.8-5 l-3.9 3 C3.3 21.3 7.3 24 12 24 z"/><path fill="#FBBC05" d="M5.2 14.4 c-.2-.7-.4-1.5-.4-2.4 s.1-1.7.4-2.4 l-3.9-3 C.5 8.2 0 10 0 12 s.5 3.8 1.3 5.4 z"/><path fill="#EA4335" d="M12 4.7 c1.8 0 3 .8 3.7 1.4 l3.3-3.2 C17.9 1.1 15.2 0 12 0 7.3 0 3.3 2.7 1.3 6.6 l3.9 3 c.9-2.8 3.6-4.9 6.8-4.9 z"/></svg>Googleでログイン</button>' +
+      '<div class="ordiv">またはメールアドレスで</div>' +
       '<div class="seg" style="margin:12px 0 4px"><button id="am-login" class="on" onclick="setAuthMode(\'login\')">ログイン</button><button id="am-register" onclick="setAuthMode(\'register\')">新規登録</button></div>' +
       '<div class="field" id="name-field" style="display:none"><label>ニックネーム</label><input type="text" id="acct-name" autocomplete="nickname" placeholder="例：ゆるふわ太郎"></div>' +
       '<div class="field"><label>メールアドレス</label><input type="email" id="acct-email" autocomplete="email" placeholder="example@mail.com"></div>' +
@@ -838,6 +847,11 @@ function submitAuth(){
   } else {
     window.YF_AUTH.login(email, pass).then(function(){ toast("ログインしました"); openAccount(); }).catch(function(e){ err.textContent = authError(e); }).then(done);
   }
+}
+function doGoogle(){
+  if(!window.YF_AUTH || !YF_AUTH.loginGoogle) return;
+  var err = $("acct-err"); if(err) err.textContent = "";
+  window.YF_AUTH.loginGoogle().then(function(u){ if(u){ toast("ログインしました"); openAccount(); } }).catch(function(e){ var er = $("acct-err"); if(er) er.textContent = authError(e); });
 }
 function doLogout(){
   if(!window.YF_AUTH) return;
@@ -870,7 +884,7 @@ streakInit(); applyFont(); applyTheme(); updateBell(); renderChips(); renderDeck
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyDFpQp6uHYBzjiIgtNNFJM0shX7rdXjyu8",
@@ -901,6 +915,19 @@ window.YF_AUTH = {
     return cred.user;
   },
   async logout(){ await signOut(auth); },
+  async loginGoogle(){
+    const provider = new GoogleAuthProvider();
+    try {
+      const cred = await signInWithPopup(auth, provider);
+      return cred.user;
+    } catch(e) {
+      if(e && (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment" || e.code === "auth/cancelled-popup-request")){
+        await signInWithRedirect(auth, provider);
+        return null;
+      }
+      throw e;
+    }
+  },
   async loadData(){
     if(!currentUser || !db) return null;
     const snap = await getDoc(doc(db, "users", currentUser.uid));
@@ -912,12 +939,21 @@ window.YF_AUTH = {
   }
 };
 if(auth){
+  getRedirectResult(auth).catch(function(){});
   onAuthStateChanged(auth, async function(u){
     currentUser = u;
     window.YF_AUTH.user = u;
     window.YF_AUTH.profile = null;
     if(u && db){
-      try { const snap = await getDoc(doc(db, "users", u.uid)); if(snap.exists()) window.YF_AUTH.profile = snap.data(); } catch(e){}
+      try {
+        const snap = await getDoc(doc(db, "users", u.uid));
+        if(snap.exists()) { window.YF_AUTH.profile = snap.data(); }
+        else {
+          const init = {name: u.displayName || "", createdAt: serverTimestamp(), data: window.YF_SNAPSHOT ? window.YF_SNAPSHOT() : {}};
+          await setDoc(doc(db, "users", u.uid), init);
+          window.YF_AUTH.profile = init;
+        }
+      } catch(e){}
     }
     window.dispatchEvent(new CustomEvent("yf-auth"));
   });
