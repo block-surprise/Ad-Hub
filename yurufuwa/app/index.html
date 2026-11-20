@@ -62,6 +62,22 @@ nav.tabs button:active{color:var(--accent-deep)}
 .news-item:active{background:var(--accent-soft)}
 .news-item .chev{color:var(--accent);font-weight:700;float:right;font-size:17px}
 .news-detail p{font-size:14.5px;margin:10px 0}
+.member-card{background:linear-gradient(140deg,#fff3df,#ffe9ee);border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center}
+[data-theme="dark"] .member-card{background:linear-gradient(140deg,#2c2115,#2c1e22)}
+.member-card .avatar{width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.member-card .mname{font-size:19px;font-weight:800}
+.member-card .mrank{display:inline-block;background:var(--accent);color:#fff;font-size:12px;font-weight:800;border-radius:999px;padding:3px 12px;margin-top:6px}
+.member-card .msince{font-size:12px;color:var(--sub);margin-top:8px}
+.field{margin:10px 0}
+.field label{display:block;font-size:12.5px;color:var(--sub);font-weight:700;margin-bottom:4px}
+.field input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:11px;font-size:16px;background:var(--surface);color:var(--text)}
+.field input:focus{outline:none;border-color:var(--accent)}
+.err{color:var(--bad);font-size:13.5px;min-height:20px;margin:8px 0 0}
+.benefits{background:var(--chip);border-radius:12px;padding:12px 16px;font-size:14px;margin:12px 0}
+.benefits li{margin:4px 0}
+.lockbox{text-align:center;padding:14px 6px 4px}
+.lockbox .lk{width:56px;height:56px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:var(--accent-deep)}
+.lockbox .lk svg{width:27px;height:27px}
 *{box-sizing:border-box}
 body{margin:0;font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding-bottom:80px;-webkit-text-size-adjust:100%}
 body.large .body-txt, body.large .face p, body.large .sheet .pts{font-size:16.5px}
@@ -183,6 +199,7 @@ nav.tabs svg{width:22px;height:22px}
   <img src="../IMG_4679.png" alt="ゆるふわ知恵袋">
   <div><h1>ゆるふわ知恵袋アプリ</h1><p>大人のための雑学図鑑</p></div>
   <div class="streak" id="streak">連続 <b>1</b> 日</div>
+  <button class="bellbtn" id="account-btn" aria-label="マイページ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5 a7.5 7.5 0 0 1 15 0"/></svg></button>
   <button class="bellbtn" id="bell" aria-label="お知らせ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9 a6 6 0 1 0-12 0 c0 6-2.5 7-2.5 7 h17 S18 15 18 9"/><path d="M10 20 a2.2 2.2 0 0 0 4 0"/></svg><span class="badge" id="bell-badge"></span></button>
 </header>
 <main>
@@ -311,30 +328,33 @@ nav.tabs svg{width:22px;height:22px}
 
 <script>
 var ICONS = {"fuji": "<svg viewBox=\"0 0 48 48\"><circle cx=\"36\" cy=\"11\" r=\"6\" fill=\"#ff7043\"/><path d=\"M4 40 L24 12 L44 40 Z\" fill=\"#42a5f5\"/><path d=\"M18.5 21 L24 12 L29.5 21 L26 18.5 L24 21 L22 18.5 Z\" fill=\"#fff\"/></svg>", "coin": "<svg viewBox=\"0 0 48 48\"><circle cx=\"24\" cy=\"24\" r=\"15\" fill=\"#ffca28\" stroke=\"#f9a825\" stroke-width=\"3\"/><text x=\"24\" y=\"31\" font-size=\"17\" font-weight=\"bold\" text-anchor=\"middle\" fill=\"#8d6e00\">¥</text></svg>", "bank": "<svg viewBox=\"0 0 48 48\"><path d=\"M24 6 L44 18 H4 Z\" fill=\"#8d6e63\"/><rect x=\"9\" y=\"22\" width=\"5\" height=\"14\" fill=\"#a1887f\"/><rect x=\"17\" y=\"22\" width=\"5\" height=\"14\" fill=\"#a1887f\"/><rect x=\"25\" y=\"22\" width=\"5\" height=\"14\" fill=\"#a1887f\"/><rect x=\"33\" y=\"22\" width=\"5\" height=\"14\" fill=\"#a1887f\"/><rect x=\"5\" y=\"38\" width=\"38\" height=\"4\" fill=\"#8d6e63\"/></svg>", "dice": "<svg viewBox=\"0 0 48 48\"><rect x=\"7\" y=\"7\" width=\"34\" height=\"34\" rx=\"8\" fill=\"#fff\" stroke=\"#37474f\" stroke-width=\"3\"/><circle cx=\"24\" cy=\"24\" r=\"7\" fill=\"#e53935\"/></svg>", "robot": "<svg viewBox=\"0 0 48 48\"><rect x=\"10\" y=\"14\" width=\"28\" height=\"24\" rx=\"7\" fill=\"#26a69a\"/><line x1=\"24\" y1=\"14\" x2=\"24\" y2=\"7\" stroke=\"#26a69a\" stroke-width=\"3\"/><circle cx=\"24\" cy=\"5\" r=\"3\" fill=\"#26a69a\"/><circle cx=\"18\" cy=\"24\" r=\"3\" fill=\"#fff\"/><circle cx=\"30\" cy=\"24\" r=\"3\" fill=\"#fff\"/><rect x=\"18\" y=\"31\" width=\"12\" height=\"3\" rx=\"1.5\" fill=\"#fff\"/></svg>", "post": "<svg viewBox=\"0 0 48 48\"><rect x=\"10\" y=\"10\" width=\"28\" height=\"30\" rx=\"9\" fill=\"#e53935\"/><rect x=\"16\" y=\"17\" width=\"16\" height=\"4\" rx=\"2\" fill=\"#fff\"/><rect x=\"20\" y=\"40\" width=\"8\" height=\"4\" fill=\"#b71c1c\"/></svg>", "river": "<svg viewBox=\"0 0 48 48\"><path d=\"M4 16 Q14 10 24 16 T44 16\" stroke=\"#42a5f5\" stroke-width=\"4\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M4 26 Q14 20 24 26 T44 26\" stroke=\"#64b5f6\" stroke-width=\"4\" fill=\"none\" stroke-linecap=\"round\"/><path d=\"M4 36 Q14 30 24 36 T44 36\" stroke=\"#90caf9\" stroke-width=\"4\" fill=\"none\" stroke-linecap=\"round\"/></svg>", "tower": "<svg viewBox=\"0 0 48 48\"><path d=\"M24 4 L32 40 H16 Z\" fill=\"#ef5350\"/><rect x=\"12\" y=\"40\" width=\"24\" height=\"4\" fill=\"#c62828\"/><line x1=\"19\" y1=\"24\" x2=\"29\" y2=\"24\" stroke=\"#fff\" stroke-width=\"2.4\"/><line x1=\"21\" y1=\"15\" x2=\"27\" y2=\"15\" stroke=\"#fff\" stroke-width=\"2.4\"/></svg>", "bill": "<svg viewBox=\"0 0 48 48\"><rect x=\"5\" y=\"13\" width=\"38\" height=\"22\" rx=\"3\" fill=\"#a5d6a7\" stroke=\"#43a047\" stroke-width=\"2.4\"/><circle cx=\"24\" cy=\"24\" r=\"6\" fill=\"#fff\" stroke=\"#43a047\" stroke-width=\"2\"/></svg>", "bowl": "<svg viewBox=\"0 0 48 48\"><path d=\"M8 22 H40 A16 12 0 0 1 8 22 Z\" fill=\"#ff7043\"/><path d=\"M14 14 Q17 9 14 5 M24 14 Q27 9 24 5 M34 14 Q37 9 34 5\" stroke=\"#90a4ae\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\"/><rect x=\"16\" y=\"36\" width=\"16\" height=\"3.4\" fill=\"#bf360c\"/></svg>", "sushi": "<svg viewBox=\"0 0 48 48\"><ellipse cx=\"24\" cy=\"36\" rx=\"17\" ry=\"5\" fill=\"#90caf9\"/><rect x=\"15\" y=\"20\" width=\"18\" height=\"11\" rx=\"5\" fill=\"#fff\" stroke=\"#cfd8dc\" stroke-width=\"1.6\"/><path d=\"M15 24 A9 6 0 0 1 33 24 Z\" fill=\"#ef5350\"/></svg>", "tree": "<svg viewBox=\"0 0 48 48\"><path d=\"M24 5 L36 20 H30 L39 32 H9 L18 20 H12 Z\" fill=\"#43a047\"/><rect x=\"21.6\" y=\"32\" width=\"4.8\" height=\"9\" fill=\"#6d4c41\"/></svg>", "steps": "<svg viewBox=\"0 0 48 48\"><path d=\"M6 38 H16 V30 H26 V22 H36 V14 H44\" stroke=\"#fb8c00\" stroke-width=\"4.4\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>", "drop": "<svg viewBox=\"0 0 48 48\"><path d=\"M24 5 C24 5 10 22 10 30 A14 12 0 0 0 38 30 C38 22 24 5 24 5 Z\" fill=\"#4fc3f7\"/></svg>"};
-var TRIVIA = [{"id": "fuji1", "cat": "日本", "icon": "fuji", "color": "#e3f2fd", "title": "富士山の8合目から上は神社の土地", "short": "山頂は国の土地ではなく、神社の境内地です。", "body": "富士山の8合目以上は、富士山本宮浅間大社の境内地です。広さは約385万平方メートルで、東京ドーム約82個分。登山道の後半は、神社の境内を登っていることになります。", "points": ["広さは約385万平方メートル（東京ドーム約82個分）", "所有者は富士山本宮浅間大社（静岡県富士宮市）", "山頂に立つ場所は「神社の境内」"], "source": "富士山本宮浅間大社・静岡県の文化財資料など", "page": "../fuji.html", "isNew": false}, {"id": "fuji2", "cat": "日本", "icon": "fuji", "color": "#e3f2fd", "title": "富士山の土地を決めたのは徳川家康", "short": "1609年の朱印状から、2004年の正式返還まで。", "body": "富士山山頂部の権利の出発点は、1609年に徳川家康が浅間大社へ与えた朱印状です。明治時代に一度は国の土地になりましたが、1974年の最高裁判決で神社の所有が認められ、2004年に正式に返還されました。", "points": ["1609年：家康の朱印状", "1974年：最高裁で神社の所有が確定", "2004年：正式に譲渡（返還）"], "source": "静岡県「史跡富士山 保存管理計画」など", "page": "../fuji.html", "isNew": false}, {"id": "senen1", "cat": "お金", "icon": "coin", "color": "#fff8e1", "title": "1万円玉を作らない理由は偽造対策", "short": "「作ればいいじゃん」への答えは、偽造の儲け。", "body": "安い金属で1万円玉を作ると、額面1万円に対して材料費がわずかなので、偽造すれば大儲けになってしまいます。防ぐには高い金属を使うか大きく重く作るしかなく、どちらも現実的ではありません。だから高額は、高度な偽造防止を入れられるお札が担っています。", "points": ["安い金属＝偽造が儲かりすぎる", "高い金属＝相場が上がると溶かされるリスク", "お札は透かし・ホログラムなど高度な対策が可能"], "source": "造幣局・国立印刷局の公開情報など", "page": "../senen.html", "isNew": false}, {"id": "senen2", "cat": "お金", "icon": "coin", "color": "#fff8e1", "title": "500円玉は偽造で大問題になった", "short": "世界有数の高額硬貨ゆえの事件と、緊急の作り直し。", "body": "500円硬貨は、普通に流通する硬貨としては世界でも有数の高額硬貨です。外国の低価値硬貨を加工した変造硬貨が大量に出回る事件が起き、2000年に素材を変えた新しい500円玉への緊急の作り直しが行われました。2021年には2色・3層構造のバイカラー・クラッドが採用されています。", "points": ["500円硬貨は世界でも有数の高額な流通硬貨", "2000年に素材変更＋偽造対策を強化", "2021年にバイカラー・クラッド採用"], "source": "造幣局の硬貨資料など", "page": "../senen.html", "isNew": false}, {"id": "senen3", "cat": "お金", "icon": "bill", "color": "#fff8e1", "title": "お札は1枚約1グラム", "short": "500円玉20枚との差は、約142倍。", "body": "お札の重さは1枚約1グラム。一方、500円玉は1枚7.1グラムあるので、1万円分を500円玉で持つと20枚で約142グラムになります。大きな金額を持ち運ぶ軽さでも、お札が圧倒的に有利です。", "points": ["お札：1枚約1グラム", "500円玉：1枚7.1グラム", "1万円分＝500円玉20枚で約142グラム"], "source": "国立印刷局・造幣局の公開情報など", "page": "../senen.html", "isNew": false}, {"id": "nichigin1", "cat": "日本", "icon": "bank", "color": "#efebe9", "title": "日銀の形は「円」に見える", "short": "でも完成当時の漢字は「圓」でした。", "body": "日本銀行本店を上から見ると「円」の字に見えます。ところが建物が完成した1896年当時、お金の単位の漢字は「圓」。設計で今の「円」を狙ったわけではなく、後の増築の結果として生まれた、奇跡のような形だと言われています。", "points": ["完成は1896年（明治29年）", "当時の表記は「圓」", "今の形は増築の結果"], "source": "日本銀行の公開資料など", "page": "../nichigin.html", "isNew": false}, {"id": "saikoro1", "cat": "くらし", "icon": "dice", "color": "#fce4ec", "title": "サイコロの赤い「1」は日本だけ", "short": "日の丸に見立てたのが始まり、という説。", "body": "海外のサイコロは、すべての目が黒など同色なのが一般的です。1だけ赤いのは日本のサイコロの特徴で、1926年に和歌山の業者が「1」を日の丸に見立てて赤く塗ったところ大ヒットした、という説があります。", "points": ["海外のサイコロは全目が同色が一般的", "始まりは1926年という説", "日の丸に見立てて赤く塗った"], "source": "各種報道・資料で紹介される説", "page": "../saikoro.html", "isNew": false}, {"id": "muse1", "cat": "テクノロジー", "icon": "robot", "color": "#e0f2f1", "title": "AIに無茶振りしたら全部やってきた件", "short": "「ゲーム作って」→39種類、「予定入れて」→109件。", "body": "「対戦ゲーム作って」と頼んだら39種類が完成し、「予定を全部入れて」と頼んだら109件が入力されました。質問に答えるだけでなく、調べる・作る・入力するといった作業そのものを実行するのが、エージェント型AIの特徴です。", "points": ["対戦ゲームは実際に39種類完成", "予定入力は実際に109件", "数字はすべて実話ベース"], "source": "ゆるふわ知恵袋の制作記録", "page": "../muse.html", "isNew": false}, {"id": "app-ichien", "cat": "お金", "icon": "drop", "color": "#e1f5fe", "title": "1円玉は水に浮く", "short": "重さちょうど1グラム、そっと置くと浮きます。", "body": "1円玉は純アルミニウム製で、直径20ミリ、重さはちょうど1グラム。乾いた1円玉を水面に平行にそっと置くと、表面張力と浮力が釣り合って、水に浮かせることができます。表面には「若木」のデザインが描かれています。", "points": ["直径20ミリ・重さちょうど1グラム", "素材は純アルミニウム（1955年〜）", "表面張力で水に浮く"], "source": "造幣局の硬貨規格など", "page": null, "isNew": true}, {"id": "app-ichiencost", "cat": "お金", "icon": "coin", "color": "#fff8e1", "title": "1円玉を作るのに約3円かかる", "short": "額面より高い製造コスト。", "body": "1円硬貨1枚を作る製造コストは、額面の1円を上回ります。2015年時点の試算では約3円とされていました。アルミニウムの価格や製造方法で変動しますが、「作るほど赤字」という逆転現象が起きている硬貨です。5円・10円硬貨も同様に額面以上のコストとされています。", "points": ["製造コストは額面以上", "2015年時点の試算で約3円", "5円・10円も同様とされる"], "source": "造幣局への取材報道など", "page": null, "isNew": true}, {"id": "app-post", "cat": "くらし", "icon": "post", "color": "#ffebee", "title": "郵便ポストは、最初は黒かった", "short": "勘違い事件がきっかけで赤になりました。", "body": "日本の郵便ポストは、始まりの1871年当時は木製や黒塗りでした。ところが黒いポストは夜に見えにくく、「郵便」を「垂便」と読み違える勘違いまで発生。そこで1901年に鉄製の赤いポストが試験導入され、「目立って分かりやすい色」として赤が定着し、1908年に正式に定められました。", "points": ["1871年の開始当初は黒や木製", "1901年に赤い鉄製ポストを試験導入", "理由は「目立って分かりやすく」"], "source": "郵便ポストの歴史資料・逓信省年報など", "page": null, "isNew": true}, {"id": "app-butsu", "cat": "日本", "icon": "river", "color": "#e3f2fd", "title": "日本一短い川は、わずか13.5メートル", "short": "和歌山の「ぶつぶつ川」。始まりから終わりまで見渡せます。", "body": "和歌山県那智勝浦町を流れる「ぶつぶつ川」は、全長わずか13.5メートル、幅約1メートルの川です。2008年に二級河川に指定されたことで、河川法上の川としては日本一短い川になりました。名前の由来は、川底から湧き出す水の泡の音だと言われています。", "points": ["全長13.5メートル・幅約1メートル", "2008年に二級河川指定で「日本一短い川」に", "水源は湧き水"], "source": "和歌山県・那智勝浦町の公開情報など", "page": null, "isNew": true}, {"id": "app-shinano", "cat": "日本", "icon": "river", "color": "#e3f2fd", "title": "日本一長い川は信濃川、367キロ", "short": "最短の川との差は約27,000倍。", "body": "日本一長い川は、長野県から新潟県へ流れて日本海に注ぐ信濃川で、長さは367キロメートルです。日本一短いぶつぶつ川（13.5メートル）と比べると、約27,000倍の差があります。同じ「川」という言葉の幅の広さが分かる組み合わせです。", "points": ["信濃川は367キロメートル", "長野県から新潟県、日本海へ", "最短の川との差は約27,000倍"], "source": "国土交通省の河川資料など", "page": null, "isNew": true}, {"id": "app-skytree", "cat": "日本", "icon": "tower", "color": "#fce4ec", "title": "東京スカイツリーの高さ634mは「ムサシ」", "short": "数字の語呂合わせで決まった高さ。", "body": "東京スカイツリーの高さは634メートル。この数字は、東京・埼玉・神奈川一帯の旧国名「武蔵（むさし）」の語呂合わせとして知られています。世界一高いタワーの高さが、日本の古い地名に由来しているというのは、ちょっと面白い決まり方です。", "points": ["高さは634メートル", "「武蔵（ムサシ）」の語呂合わせ", "世界一高いタワー"], "source": "東京スカイツリー公式情報など", "page": null, "isNew": true}, {"id": "app-shinsatsu", "cat": "お金", "icon": "bill", "color": "#fff8e1", "title": "2024年の新しいお札、肖像はこの3人", "short": "一万円＝渋沢栄一、五千円＝津田梅子、千円＝北里柴三郎。", "body": "2024年に発行された新しいお札の肖像は、一万円札が渋沢栄一、五千円札が津田梅子、千円札が北里柴三郎です。実業・教育・医学と、それぞれの分野で日本の近代化を支えた人物が選ばれました。裏面にも各地の名所や花が描かれています。", "points": ["一万円：渋沢栄一（実業）", "五千円：津田梅子（教育）", "千円：北里柴三郎（医学）"], "source": "財務省・国立印刷局の公開情報など", "page": null, "isNew": true}, {"id": "app-dice7", "cat": "くらし", "icon": "dice", "color": "#fce4ec", "title": "サイコロの向かい合う面は、足すと必ず7", "short": "1の裏は6、2の裏は5、3の裏は4。", "body": "一般的なサイコロは、向かい合う面の数字を足すと必ず7になるよう作られています。1の裏は6、2の裏は5、3の裏は4。どの面を上に出しても、裏側との合計が一定になるという、シンプルで美しいルールです。手元のサイコロで確かめてみてください。", "points": ["1の裏は6、2の裏は5、3の裏は4", "合計はいつも7", "ボードゲーム用サイコロの基本ルール"], "source": "サイコロの一般的な規格", "page": null, "isNew": true}, {"id": "app-ramen", "cat": "食べ物", "icon": "bowl", "color": "#fff3e0", "title": "インスタントラーメンは1958年の発明", "short": "安藤百福のチキンラーメンが最初。", "body": "インスタントラーメンは、1958年に安藤百福が発明した「チキンラーメン」が始まりとされています。お湯をかけるだけで食べられる手軽さが受けて世界中に広がり、1971年にはカップ麺も登場。今では世界中で年間1,000億食以上が食べられる食べ物になりました。", "points": ["1958年、安藤百福が発明", "最初はチキンラーメン", "カップ麺は1971年登場"], "source": "カップヌードルミュージアム等の資料", "page": null, "isNew": true}, {"id": "app-kaiten", "cat": "食べ物", "icon": "sushi", "color": "#e0f2f1", "title": "回転寿司は大阪生まれ", "short": "ヒントは工場のベルトコンベア。", "body": "回転寿司は、1958年に大阪で開店した「元禄寿司」が始まりとされています。店主がビール工場のベルトコンベアを見て「寿司も流せばいい」とひらめいたのがきっかけだと言われています。職人の数に限らず多くの客に寿司を提供できる仕組みとして、全国に広がりました。", "points": ["1958年、大阪の元禄寿司が始まりとされる", "ヒントは工場のベルトコンベア", "今や世界中で見かける形式に"], "source": "回転寿司の歴史資料など", "page": null, "isNew": true}, {"id": "app-forest", "cat": "日本", "icon": "tree", "color": "#e8f5e9", "title": "日本の国土の約3分の2は森林", "short": "先進国でも有数の森林大国。", "body": "日本の国土に占める森林の割合は約67パーセントで、国土のおよそ3分の2が森林です。これは世界的に見ても高い割合で、日本は先進国の中でも有数の森林国と言われます。山が多い地形と、雨の多い気候が背景にあります。", "points": ["森林率は約67パーセント", "国土の約3分の2が森林", "先進国でも有数の割合"], "source": "林野庁の統計など", "page": null, "isNew": true}, {"id": "app-escalator", "cat": "くらし", "icon": "steps", "color": "#fff3e0", "title": "エスカレーター、東京と大阪で立つ側が逆", "short": "東京は左、大阪は右が一般的。", "body": "エスカレーターで片側を空けるとき、東京では左側に立ち、大阪では右側に立つ人が多いと言われています。急ぐ人のために片側を空ける習慣自体は各地にありますが、「どちら側か」は地域で違うという面白い例です。最近は「歩かずに両側に立つ」呼びかけも増えています。", "points": ["東京：左に立つことが多い", "大阪：右に立つことが多い", "最近は両側立ちの呼びかけも"], "source": "各地の利用習慣に関する報道など", "page": null, "isNew": true}];
+var TRIVIA = [{"id": "fuji1", "cat": "日本", "icon": "fuji", "color": "#e3f2fd", "title": "富士山の8合目から上は神社の土地", "short": "山頂は国の土地ではなく、神社の境内地です。", "body": "富士山の8合目以上は、富士山本宮浅間大社の境内地です。広さは約385万平方メートルで、東京ドーム約82個分。登山道の後半は、神社の境内を登っていることになります。", "points": ["広さは約385万平方メートル（東京ドーム約82個分）", "所有者は富士山本宮浅間大社（静岡県富士宮市）", "山頂に立つ場所は「神社の境内」"], "source": "富士山本宮浅間大社・静岡県の文化財資料など", "page": "../fuji.html", "isNew": false}, {"id": "fuji2", "cat": "日本", "icon": "fuji", "color": "#e3f2fd", "title": "富士山の土地を決めたのは徳川家康", "short": "1609年の朱印状から、2004年の正式返還まで。", "body": "富士山山頂部の権利の出発点は、1609年に徳川家康が浅間大社へ与えた朱印状です。明治時代に一度は国の土地になりましたが、1974年の最高裁判決で神社の所有が認められ、2004年に正式に返還されました。", "points": ["1609年：家康の朱印状", "1974年：最高裁で神社の所有が確定", "2004年：正式に譲渡（返還）"], "source": "静岡県「史跡富士山 保存管理計画」など", "page": "../fuji.html", "isNew": false}, {"id": "senen1", "cat": "お金", "icon": "coin", "color": "#fff8e1", "title": "1万円玉を作らない理由は偽造対策", "short": "「作ればいいじゃん」への答えは、偽造の儲け。", "body": "安い金属で1万円玉を作ると、額面1万円に対して材料費がわずかなので、偽造すれば大儲けになってしまいます。防ぐには高い金属を使うか大きく重く作るしかなく、どちらも現実的ではありません。だから高額は、高度な偽造防止を入れられるお札が担っています。", "points": ["安い金属＝偽造が儲かりすぎる", "高い金属＝相場が上がると溶かされるリスク", "お札は透かし・ホログラムなど高度な対策が可能"], "source": "造幣局・国立印刷局の公開情報など", "page": "../senen.html", "isNew": false}, {"id": "senen2", "cat": "お金", "icon": "coin", "color": "#fff8e1", "title": "500円玉は偽造で大問題になった", "short": "世界有数の高額硬貨ゆえの事件と、緊急の作り直し。", "body": "500円硬貨は、普通に流通する硬貨としては世界でも有数の高額硬貨です。外国の低価値硬貨を加工した変造硬貨が大量に出回る事件が起き、2000年に素材を変えた新しい500円玉への緊急の作り直しが行われました。2021年には2色・3層構造のバイカラー・クラッドが採用されています。", "points": ["500円硬貨は世界でも有数の高額な流通硬貨", "2000年に素材変更＋偽造対策を強化", "2021年にバイカラー・クラッド採用"], "source": "造幣局の硬貨資料など", "page": "../senen.html", "isNew": false}, {"id": "senen3", "cat": "お金", "icon": "bill", "color": "#fff8e1", "title": "お札は1枚約1グラム", "short": "500円玉20枚との差は、約142倍。", "body": "お札の重さは1枚約1グラム。一方、500円玉は1枚7.1グラムあるので、1万円分を500円玉で持つと20枚で約142グラムになります。大きな金額を持ち運ぶ軽さでも、お札が圧倒的に有利です。", "points": ["お札：1枚約1グラム", "500円玉：1枚7.1グラム", "1万円分＝500円玉20枚で約142グラム"], "source": "国立印刷局・造幣局の公開情報など", "page": "../senen.html", "isNew": false}, {"id": "nichigin1", "cat": "日本", "icon": "bank", "color": "#efebe9", "title": "日銀の形は「円」に見える", "short": "でも完成当時の漢字は「圓」でした。", "body": "日本銀行本店を上から見ると「円」の字に見えます。ところが建物が完成した1896年当時、お金の単位の漢字は「圓」。設計で今の「円」を狙ったわけではなく、後の増築の結果として生まれた、奇跡のような形だと言われています。", "points": ["完成は1896年（明治29年）", "当時の表記は「圓」", "今の形は増築の結果"], "source": "日本銀行の公開資料など", "page": "../nichigin.html", "isNew": false}, {"id": "saikoro1", "cat": "くらし", "icon": "dice", "color": "#fce4ec", "title": "サイコロの赤い「1」は日本だけ", "short": "日の丸に見立てたのが始まり、という説。", "body": "海外のサイコロは、すべての目が黒など同色なのが一般的です。1だけ赤いのは日本のサイコロの特徴で、1926年に和歌山の業者が「1」を日の丸に見立てて赤く塗ったところ大ヒットした、という説があります。", "points": ["海外のサイコロは全目が同色が一般的", "始まりは1926年という説", "日の丸に見立てて赤く塗った"], "source": "各種報道・資料で紹介される説", "page": "../saikoro.html", "isNew": false}, {"id": "muse1", "cat": "テクノロジー", "icon": "robot", "color": "#e0f2f1", "title": "AIに無茶振りしたら全部やってきた件", "short": "「ゲーム作って」→39種類、「予定入れて」→109件。", "body": "「対戦ゲーム作って」と頼んだら39種類が完成し、「予定を全部入れて」と頼んだら109件が入力されました。質問に答えるだけでなく、調べる・作る・入力するといった作業そのものを実行するのが、エージェント型AIの特徴です。", "points": ["対戦ゲームは実際に39種類完成", "予定入力は実際に109件", "数字はすべて実話ベース"], "source": "ゆるふわ知恵袋の制作記録", "page": "../muse.html", "isNew": false}, {"id": "app-ichien", "cat": "お金", "icon": "drop", "color": "#e1f5fe", "title": "1円玉は水に浮く", "short": "重さちょうど1グラム、そっと置くと浮きます。", "body": "1円玉は純アルミニウム製で、直径20ミリ、重さはちょうど1グラム。乾いた1円玉を水面に平行にそっと置くと、表面張力と浮力が釣り合って、水に浮かせることができます。表面には「若木」のデザインが描かれています。", "points": ["直径20ミリ・重さちょうど1グラム", "素材は純アルミニウム（1955年〜）", "表面張力で水に浮く"], "source": "造幣局の硬貨規格など", "page": null, "isNew": true}, {"id": "app-ichiencost", "cat": "お金", "icon": "coin", "color": "#fff8e1", "title": "1円玉を作るのに約3円かかる", "short": "額面より高い製造コスト。", "body": "1円硬貨1枚を作る製造コストは、額面の1円を上回ります。2015年時点の試算では約3円とされていました。アルミニウムの価格や製造方法で変動しますが、「作るほど赤字」という逆転現象が起きている硬貨です。5円・10円硬貨も同様に額面以上のコストとされています。", "points": ["製造コストは額面以上", "2015年時点の試算で約3円", "5円・10円も同様とされる"], "source": "造幣局への取材報道など", "page": null, "isNew": true}, {"id": "app-post", "cat": "くらし", "icon": "post", "color": "#ffebee", "title": "郵便ポストは、最初は黒かった", "short": "勘違い事件がきっかけで赤になりました。", "body": "日本の郵便ポストは、始まりの1871年当時は木製や黒塗りでした。ところが黒いポストは夜に見えにくく、「郵便」を「垂便」と読み違える勘違いまで発生。そこで1901年に鉄製の赤いポストが試験導入され、「目立って分かりやすい色」として赤が定着し、1908年に正式に定められました。", "points": ["1871年の開始当初は黒や木製", "1901年に赤い鉄製ポストを試験導入", "理由は「目立って分かりやすく」"], "source": "郵便ポストの歴史資料・逓信省年報など", "page": null, "isNew": true}, {"id": "app-butsu", "cat": "日本", "icon": "river", "color": "#e3f2fd", "title": "日本一短い川は、わずか13.5メートル", "short": "和歌山の「ぶつぶつ川」。始まりから終わりまで見渡せます。", "body": "和歌山県那智勝浦町を流れる「ぶつぶつ川」は、全長わずか13.5メートル、幅約1メートルの川です。2008年に二級河川に指定されたことで、河川法上の川としては日本一短い川になりました。名前の由来は、川底から湧き出す水の泡の音だと言われています。", "points": ["全長13.5メートル・幅約1メートル", "2008年に二級河川指定で「日本一短い川」に", "水源は湧き水"], "source": "和歌山県・那智勝浦町の公開情報など", "page": null, "isNew": true}, {"id": "app-shinano", "cat": "日本", "icon": "river", "color": "#e3f2fd", "title": "日本一長い川は信濃川、367キロ", "short": "最短の川との差は約27,000倍。", "body": "日本一長い川は、長野県から新潟県へ流れて日本海に注ぐ信濃川で、長さは367キロメートルです。日本一短いぶつぶつ川（13.5メートル）と比べると、約27,000倍の差があります。同じ「川」という言葉の幅の広さが分かる組み合わせです。", "points": ["信濃川は367キロメートル", "長野県から新潟県、日本海へ", "最短の川との差は約27,000倍"], "source": "国土交通省の河川資料など", "page": null, "isNew": true}, {"id": "app-skytree", "cat": "日本", "icon": "tower", "color": "#fce4ec", "title": "東京スカイツリーの高さ634mは「ムサシ」", "short": "数字の語呂合わせで決まった高さ。", "body": "東京スカイツリーの高さは634メートル。この数字は、東京・埼玉・神奈川一帯の旧国名「武蔵（むさし）」の語呂合わせとして知られています。世界一高いタワーの高さが、日本の古い地名に由来しているというのは、ちょっと面白い決まり方です。", "points": ["高さは634メートル", "「武蔵（ムサシ）」の語呂合わせ", "世界一高いタワー"], "source": "東京スカイツリー公式情報など", "page": null, "isNew": true}, {"id": "app-shinsatsu", "cat": "お金", "icon": "bill", "color": "#fff8e1", "title": "2024年の新しいお札、肖像はこの3人", "short": "一万円＝渋沢栄一、五千円＝津田梅子、千円＝北里柴三郎。", "body": "2024年に発行された新しいお札の肖像は、一万円札が渋沢栄一、五千円札が津田梅子、千円札が北里柴三郎です。実業・教育・医学と、それぞれの分野で日本の近代化を支えた人物が選ばれました。裏面にも各地の名所や花が描かれています。", "points": ["一万円：渋沢栄一（実業）", "五千円：津田梅子（教育）", "千円：北里柴三郎（医学）"], "source": "財務省・国立印刷局の公開情報など", "page": null, "isNew": true}, {"id": "app-dice7", "cat": "くらし", "icon": "dice", "color": "#fce4ec", "title": "サイコロの向かい合う面は、足すと必ず7", "short": "1の裏は6、2の裏は5、3の裏は4。", "body": "一般的なサイコロは、向かい合う面の数字を足すと必ず7になるよう作られています。1の裏は6、2の裏は5、3の裏は4。どの面を上に出しても、裏側との合計が一定になるという、シンプルで美しいルールです。手元のサイコロで確かめてみてください。", "points": ["1の裏は6、2の裏は5、3の裏は4", "合計はいつも7", "ボードゲーム用サイコロの基本ルール"], "source": "サイコロの一般的な規格", "page": null, "isNew": true}, {"id": "app-ramen", "cat": "食べ物", "icon": "bowl", "color": "#fff3e0", "title": "インスタントラーメンは1958年の発明", "short": "安藤百福のチキンラーメンが最初。", "body": "インスタントラーメンは、1958年に安藤百福が発明した「チキンラーメン」が始まりとされています。お湯をかけるだけで食べられる手軽さが受けて世界中に広がり、1971年にはカップ麺も登場。今では世界中で年間1,000億食以上が食べられる食べ物になりました。", "points": ["1958年、安藤百福が発明", "最初はチキンラーメン", "カップ麺は1971年登場"], "source": "カップヌードルミュージアム等の資料", "page": null, "isNew": true}, {"id": "app-kaiten", "cat": "食べ物", "icon": "sushi", "color": "#e0f2f1", "title": "回転寿司は大阪生まれ", "short": "ヒントは工場のベルトコンベア。", "body": "回転寿司は、1958年に大阪で開店した「元禄寿司」が始まりとされています。店主がビール工場のベルトコンベアを見て「寿司も流せばいい」とひらめいたのがきっかけだと言われています。職人の数に限らず多くの客に寿司を提供できる仕組みとして、全国に広がりました。", "points": ["1958年、大阪の元禄寿司が始まりとされる", "ヒントは工場のベルトコンベア", "今や世界中で見かける形式に"], "source": "回転寿司の歴史資料など", "page": null, "isNew": true}, {"id": "app-forest", "cat": "日本", "icon": "tree", "color": "#e8f5e9", "title": "日本の国土の約3分の2は森林", "short": "先進国でも有数の森林大国。", "body": "日本の国土に占める森林の割合は約67パーセントで、国土のおよそ3分の2が森林です。これは世界的に見ても高い割合で、日本は先進国の中でも有数の森林国と言われます。山が多い地形と、雨の多い気候が背景にあります。", "points": ["森林率は約67パーセント", "国土の約3分の2が森林", "先進国でも有数の割合"], "source": "林野庁の統計など", "page": null, "isNew": true}, {"id": "app-escalator", "cat": "くらし", "icon": "steps", "color": "#fff3e0", "title": "エスカレーター、東京と大阪で立つ側が逆", "short": "東京は左、大阪は右が一般的。", "body": "エスカレーターで片側を空けるとき、東京では左側に立ち、大阪では右側に立つ人が多いと言われています。急ぐ人のために片側を空ける習慣自体は各地にありますが、「どちら側か」は地域で違うという面白い例です。最近は「歩かずに両側に立つ」呼びかけも増えています。", "points": ["東京：左に立つことが多い", "大阪：右に立つことが多い", "最近は両側立ちの呼びかけも"], "source": "各地の利用習慣に関する報道など", "page": null, "isNew": true}, {"id": "mem-tenpo", "cat": "日本", "icon": "fuji", "color": "#e3f2fd", "title": "日本一低い山は大阪の天保山？", "short": "標高わずか4.53メートル。でも異論もあります。", "body": "大阪市港区にある天保山は、標高わずか4.53メートル。江戸時代に川の土砂を積み上げてできた人工の山で、長い間「日本一低い山」として知られてきました。ただし、仙台市の日和山（標高3メートル）を日本一低いとする見方もあり、どちらが一番かは定義によって意見が分かれる、豆知識らしいテーマです。", "points": ["天保山の標高は4.53メートル", "もとは川の土砂を積んだ人工の山", "日和山（3メートル）という説もある"], "source": "地理の各種資料など", "page": null, "isNew": false, "member": true}, {"id": "mem-tower", "cat": "日本", "icon": "tower", "color": "#fce4ec", "title": "東京タワーの高さは333メートル", "short": "1958年の完成当時は、世界一高い自立式鉄塔でした。", "body": "東京タワーの高さは333メートル。1958年の完成当時、自立式の鉄塔としては世界一の高さでした。東京スカイツリー（634メートル）に抜かれるまで、日本一高い建造物でもありました。色は「インターナショナルオレンジ」という航空法で定められた色と白の組み合わせです。", "points": ["高さは333メートル", "完成は1958年", "当時は世界一高い自立式鉄塔"], "source": "東京タワー公式情報など", "page": null, "isNew": false, "member": true}, {"id": "mem-goen", "cat": "お金", "icon": "coin", "color": "#fff8e1", "title": "5円玉に穴が空いている理由", "short": "材料の節約と、見分けやすさのためと言われています。", "body": "5円硬貨の真ん中に穴が空いているのは、材料を節約するためと、他の硬貨と見分けやすくするためだと言われています。発行が始まった1949年当時は物資が不足していた時代で、金属の節約は切実な課題でした。穴があるおかげで、触っただけでも5円玉だと分かります。", "points": ["発行開始は1949年", "理由は材料の節約と識別性と言われる", "触って見分けられる工夫"], "source": "造幣局の硬貨資料など", "page": null, "isNew": false, "member": true}];
 var QUIZ = [{"q": "富士山の8合目から上は、誰の土地？", "a": ["神社", "国", "静岡県"], "c": 0, "ex": "富士山本宮浅間大社の境内地です。広さは東京ドーム約82個分。", "rel": "fuji1"}, {"q": "500円玉が2000年に作り直された大きな理由は？", "a": ["軽くするため", "偽造が大問題になったから", "色を変えたかったから"], "c": 1, "ex": "変造硬貨の事件を受けて、素材変更と偽造対策の強化が行われました。", "rel": "senen2"}, {"q": "サイコロの「1」だけ赤いのは？", "a": ["世界共通", "ヨーロッパだけ", "日本だけ"], "c": 2, "ex": "日の丸に見立てて赤く塗ったのが始まり、という説が有力です。", "rel": "saikoro1"}, {"q": "日銀の建物が「円」に見える形になったのは？", "a": ["増築の結果の偶然", "最初から狙った設計", "法律で決まっている"], "c": 0, "ex": "完成当時の表記は「圓」で、今の形は増築の結果です。", "rel": "nichigin1"}, {"q": "1万円玉を作らない大きな理由は？", "a": ["重すぎるから", "金属が足りないから", "偽造が儲かりすぎるから"], "c": 2, "ex": "安い金属だと額面と材料費の差が大きく、偽造が割に合ってしまいます。", "rel": "senen1"}, {"q": "1円玉1枚の重さは？", "a": ["0.5グラム", "1グラム", "5グラム"], "c": 1, "ex": "直径20ミリ、重さちょうど1グラム。だから水に浮かせることもできます。", "rel": "app-ichien"}, {"q": "日本一短い川「ぶつぶつ川」の長さは？", "a": ["13.5メートル", "135メートル", "1.35キロ"], "c": 0, "ex": "和歌山県那智勝浦町の川で、2008年の二級河川指定で日本一短い川になりました。", "rel": "app-butsu"}, {"q": "郵便ポストが赤くなった理由は？", "a": ["赤い塗料が安かったから", "目立って分かりやすくするため", "法律で赤と決まっていたから"], "c": 1, "ex": "黒いポストは夜に見えにくく、勘違いも起きたため、目立つ赤になりました。", "rel": "app-post"}, {"q": "日本一長い川は？", "a": ["利根川", "信濃川", "石狩川"], "c": 1, "ex": "信濃川は367キロメートル。日本一短い川との差は約27,000倍です。", "rel": "app-shinano"}, {"q": "サイコロの向かい合う面の数字を足すと？", "a": ["いつも6", "いつも7", "バラバラ"], "c": 1, "ex": "1の裏は6、2の裏は5、3の裏は4。合計はいつも7です。", "rel": "app-dice7"}];
 var CATS = ["すべて","お金","日本","くらし","食べ物","テクノロジー"];
 var CATCOLOR = {"お金":["#fbf0da","#a86e14"],"日本":["#e8f0f8","#3d6ea5"],"くらし":["#fae9ef","#b04a72"],"食べ物":["#fbeedd","#b45f22"],"テクノロジー":["#e4f2ef","#2f7a6e"]};
 var STAR = '<svg viewBox="0 0 24 24" fill="FILL" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.6 L14.7 9.1 L20.7 10 L16.3 14.2 L17.4 20.2 L12 17.3 L6.6 20.2 L7.7 14.2 L3.3 10 L9.3 9.1 Z"/></svg>';
 var $ = function(id){ return document.getElementById(id); };
 function load(k, d){ try { return JSON.parse(localStorage.getItem(k)) || d; } catch(e){ return d; } }
-function save(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+function save(k, v){ localStorage.setItem(k, JSON.stringify(v)); queueSync(); }
 var favs = load("yf_favs", []), read = load("yf_read", []), learned = load("yf_learned", []);
 var recent = load("yf_recent", []), wrong = load("yf_wrong", []);
 function isFav(id){ return favs.indexOf(id) >= 0; }
 function isRead(id){ return read.indexOf(id) >= 0; }
+function isMember(){ return !!(window.YF_AUTH && YF_AUTH.user); }
+function isLocked(it){ return !!(it.member && !isMember()); }
 function byId(id){ for(var i=0;i<TRIVIA.length;i++) if(TRIVIA[i].id===id) return TRIVIA[i]; return null; }
 function markRead(id){ if(!isRead(id)){ read.push(id); save("yf_read", read); } renderStats(); }
 function toggleFav(id, ev){ if(ev) ev.stopPropagation(); var i = favs.indexOf(id); if(i>=0) favs.splice(i,1); else { favs.push(id); toast("お気に入りに追加しました"); } save("yf_favs", favs); refresh(); }
 var toastTimer = null;
 function toast(msg){ var t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 1800); }
 function catTag(it){ var c = CATCOLOR[it.cat] || ["#f7ecdc","#97826a"]; return '<span class="tag" style="background:' + c[0] + ';color:' + c[1] + '">' + it.cat + '</span>'; }
-function tags(it){ var h = ""; if(!it.page) h += '<span class="tag app">アプリ限定</span>'; if(it.isNew) h += '<span class="tag new">NEW</span>'; if(isRead(it.id)) h += '<span class="tag">既読</span>'; return h; }
+function tags(it){ var h = ""; if(it.member) h += '<span class="tag app">会員限定</span>'; if(!it.page) h += '<span class="tag app">アプリ限定</span>'; if(it.isNew) h += '<span class="tag new">NEW</span>'; if(isRead(it.id)) h += '<span class="tag">既読</span>'; return h; }
 function tile(it, sm){ return '<div class="tile' + (sm ? " sm" : "") + '" style="background:' + it.color + '">' + ICONS[it.icon] + '</div>'; }
 function starBtn(it){ return '<button class="starbtn' + (isFav(it.id) ? " on" : "") + '" data-fav="' + it.id + '" aria-label="お気に入り">' + STAR.replace("FILL", isFav(it.id) ? "currentColor" : "none") + '</button>'; }
 function rowHTML(it){
+  var locked = isLocked(it);
   return '<div class="rowitem" data-detail="' + it.id + '">' + tile(it, true) +
-    '<span class="grow"><span class="ttl">' + tags(it) + it.title + '</span><span class="dsc">' + it.cat + ' ・ ' + it.short + '</span></span>' +
+    '<span class="grow"><span class="ttl">' + tags(it) + it.title + '</span><span class="dsc">' + it.cat + ' ・ ' + (locked ? '会員限定の豆知識です' : it.short) + '</span></span>' +
     starBtn(it) + '</div>';
 }
 function bindRows(root){
@@ -368,6 +388,18 @@ function pushRecent(id){
 }
 function openDetail(id){
   var it = byId(id); if(!it) return;
+  if(isLocked(it)){
+    stopSpeech();
+    $("sheet-panel").innerHTML =
+      '<div class="lockbox"><div class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11 V7.5 a4 4 0 0 1 8 0 V11"/></svg></div>' +
+      '<h3 style="margin:4px 0 6px">' + it.title + '</h3>' +
+      '<p class="body-txt">この豆知識は会員限定です。会員登録（無料）すると読めるようになります。</p></div>' +
+      '<div class="benefits"><b>会員になると</b><ul style="margin:6px 0 2px;padding-left:20px"><li>会員限定の豆知識（3件）が読める</li><li>記録をクラウドに保存して、機種変更や別の端末でも引き継げる</li><li>会員限定のお知らせが読める</li></ul></div>' +
+      '<div class="abtns"><button class="primary full" onclick="openAccount()">会員登録・ログインへ</button><button class="full" onclick="closeDetail()">閉じる</button></div>';
+    var lp = $("sheet-panel-wrap"); lp.style.transform = ""; lp.style.animation = ""; lp.scrollTop = 0;
+    $("sheet").classList.add("open");
+    return;
+  }
   markRead(id); pushRecent(id);
   var pts = it.points.map(function(p){ return "<li>" + p + "</li>"; }).join("");
   var rel = TRIVIA.filter(function(t){ return t.cat === it.cat && t.id !== it.id; }).slice(0, 3);
@@ -452,7 +484,7 @@ function shareTrivia(id){
   else toast("この端末ではシェアできませんでした");
 }
 function jumpQuiz(){ closeDetail(); switchView("v-quiz"); }
-function todayItem(){ var n = new Date(); var seed = n.getFullYear()*10000 + (n.getMonth()+1)*100 + n.getDate(); return TRIVIA[seed % TRIVIA.length]; }
+function todayItem(){ var pool = TRIVIA.filter(function(t){ return !isLocked(t); }); var n = new Date(); var seed = n.getFullYear()*10000 + (n.getMonth()+1)*100 + n.getDate(); return pool[seed % pool.length]; }
 function renderHome(){
   var it = todayItem(); var n = new Date();
   $("today-box").innerHTML =
@@ -460,7 +492,7 @@ function renderHome(){
     '<p class="body-txt">' + it.short + '</p>' +
     '<div class="actions"><button class="tbtn" onclick="openDetail(\'' + it.id + '\')">詳しく見る</button>' +
     '<button class="tbtn plain" onclick="toggleFav(\'' + it.id + '\')">' + (isFav(it.id) ? "お気に入り済み" : "お気に入りに追加") + '</button></div>';
-  var unread = TRIVIA.filter(function(t){ return !isRead(t.id); });
+  var unread = TRIVIA.filter(function(t){ return !isRead(t.id) && !isLocked(t); });
   var daySeed = n.getFullYear()*1000 + (n.getMonth()+1)*50 + n.getDate();
   var picks = [];
   if(unread.length){ for(var i = 0; i < Math.min(3, unread.length); i++){ picks.push(unread[(daySeed + i * 7) % unread.length]); } }
@@ -516,6 +548,7 @@ var deck = [], deckIdx = 0, deckCat = "すべて";
 var DECKCHIPS = ["すべて","お金","日本","くらし","食べ物","テクノロジー","まだ覚えていない"];
 function buildDeck(){
   deck = TRIVIA.filter(function(t){
+    if(isLocked(t)) return false;
     if(deckCat === "まだ覚えていない") return learned.indexOf(t.id) < 0;
     return deckCat === "すべて" || t.cat === deckCat;
   });
@@ -632,6 +665,7 @@ function switchView(id){
 }
 document.querySelectorAll("nav.tabs button").forEach(function(b){ b.onclick = function(){ switchView(b.dataset.v); }; });
 var NEWS = [
+  {id:"20261121-06", date:"2026年11月21日", title:"【会員限定】会員制度が始まりました", body:"会員登録すると、限定の豆知識や記録のクラウド保存が使えます。このお知らせの詳細は会員だけが読めます。", detail:"会員制度が始まりました。\n会員になると、会員限定の豆知識3件（天保山・東京タワー・5円玉の穴）が読めるようになります。\n記録（お気に入り・読んだ数・覚えたカード・クイズの記録）はクラウドに保存されるので、機種変更や別の端末でログインしても引き継げます。\n今後、会員限定のお知らせや先行コンテンツもここに届く予定です。登録は無料です。", member:true, act:{label:"マイページを開く", type:"account"}},
   {id:"20261120-05", date:"2026年11月20日", title:"お知らせ機能と読み上げを追加しました", body:"ヘッダーのベルからお知らせが見られるようになりました。詳細画面では「読み上げ」ボタンで豆知識を音声で聞けます。テーマ（自動／ライト／ダーク）や達成率も追加しました。", detail:"ヘッダー右上のベルをタップすると、このお知らせ一覧が開きます。新しいお知らせがあるときは、ベルに赤い数字のバッジが付きます。\n豆知識の詳細画面には「読み上げ」ボタンを追加しました。タップするとタイトルと解説、ポイントを音声で読み上げます。もう一度押すと止まり、シートを閉じても自動で止まります。\n設定には「テーマ」を追加しました。自動（端末の設定に合わせる）／ライト／ダークから選べます。記録のところには「総合達成率」も追加しました。", act:{label:"豆知識の一覧を見る", type:"view", id:"v-list"}},
   {id:"20261120-04", date:"2026年11月20日", title:"デザインと操作感を改善しました", body:"色味と余白のバランスを調整し、詳細シートは下へ引いて閉じられるようになりました。関連する豆知識や「最近見た」も追加しています。", detail:"色が強すぎず・弱すぎないよう、温かみのあるクリーム色と淡い桃色を基調に調整しました。\n詳細シートは、上の横棒だけでなくシート全体を下へ引いて閉じられるようになりました。少しだけ引いて離せば元に戻ります。\n詳細画面の下には「関連する豆知識」、ホームには「次に読む（未読から）」と「最近見た豆知識」を追加しました。クイズには「間違えた問題だけ」の復習モード、カードには「まだ覚えていない」の絞り込みも入っています。", act:{label:"今日の豆知識を見る", type:"today"}},
   {id:"20261120-02", date:"2026年11月20日", title:"アプリ限定の豆知識を12件追加しました", body:"「1円玉は水に浮く」「郵便ポストは最初は黒かった」など、動画でまだ紹介していない豆知識をアプリ限定で収録しました。一覧の「アプリ限定」から探せます。", detail:"動画（YouTubeショート／Instagram）でまだ紹介していない、アプリだけの豆知識を12件追加しました。\n・1円玉は水に浮く\n・1円玉を作るのに約3円かかる\n・郵便ポストは、最初は黒かった\n・日本一短い川は、わずか13.5メートル\n・日本一長い川は信濃川、367キロ\n・東京スカイツリーの高さ634mは「ムサシ」\n・2024年の新しいお札、肖像はこの3人\n・サイコロの向かい合う面は、足すと必ず7\n・インスタントラーメンは1958年の発明\n・回転寿司は大阪生まれ\n・日本の国土の約3分の2は森林\n・エスカレーター、東京と大阪で立つ側が逆", act:{label:"アプリ限定の豆知識を見る", type:"cat", id:"アプリ限定"}},
@@ -642,7 +676,7 @@ function updateBell(){ var u = newsUnread(); var b = $("bell-badge"); b.textCont
 function openNews(){
   stopSpeech();
   var h = '<h3 style="margin-top:2px">お知らせ</h3><p style="font-size:12.5px;color:var(--sub);margin:0 0 6px">タップすると詳細が見られます。</p>';
-  NEWS.forEach(function(n, i){ h += '<div class="news-item" data-news="' + i + '"><div class="nd">' + n.date + '</div><div class="nt">' + n.title + '<span class="chev">›</span></div><div class="nb">' + n.body + '</div></div>'; });
+  NEWS.forEach(function(n, i){ h += '<div class="news-item" data-news="' + i + '"><div class="nd">' + n.date + '</div><div class="nt">' + (n.member ? '<span class="tag app">会員限定</span>' : '') + n.title + '<span class="chev">›</span></div><div class="nb">' + n.body + '</div></div>'; });
   h += '<div class="abtns"><button class="primary full" onclick="closeDetail()">閉じる</button></div>';
   $("sheet-panel").innerHTML = h;
   var panel = $("sheet-panel-wrap");
@@ -655,6 +689,16 @@ function openNews(){
 function openNewsDetail(i){
   var n = NEWS[i]; if(!n) return;
   stopSpeech();
+  if(n.member && !isMember()){
+    $("sheet-panel").innerHTML =
+      '<button class="tbtn" onclick="openNews()" style="padding-left:0">‹ お知らせ一覧へ</button>' +
+      '<div class="lockbox"><div class="lk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11 V7.5 a4 4 0 0 1 8 0 V11"/></svg></div>' +
+      '<h3 style="margin:4px 0 6px">' + n.title + '</h3>' +
+      '<p class="body-txt">このお知らせの詳細は会員限定です。会員登録（無料）すると読めるようになります。</p></div>' +
+      '<div class="abtns"><button class="primary full" onclick="openAccount()">会員登録・ログインへ</button><button class="full" onclick="openNews()">お知らせ一覧へ</button></div>';
+    var np = $("sheet-panel-wrap"); np.style.transform = ""; np.scrollTop = 0;
+    return;
+  }
   var paras = (n.detail || n.body).split("\n").map(function(t){ return t.indexOf("・") === 0 ? '<p style="margin:4px 0 4px 8px">' + t + '</p>' : '<p>' + t + '</p>'; }).join("");
   var actBtn = n.act ? '<button class="primary full" onclick="newsAct(' + i + ')">' + n.act.label + '</button>' : "";
   $("sheet-panel").innerHTML =
@@ -668,7 +712,8 @@ function openNewsDetail(i){
 function newsAct(i){
   var n = NEWS[i]; if(!n || !n.act) return;
   var act = n.act;
-  if(act.type === "cat"){ closeDetail(); gotoCat(act.id); }
+  if(act.type === "account"){ openAccount(); }
+  else if(act.type === "cat"){ closeDetail(); gotoCat(act.id); }
   else if(act.type === "view"){ closeDetail(); switchView(act.id); }
   else if(act.type === "today"){ openDetail(todayItem().id); }
   else if(act.type === "trivia"){ openDetail(act.id); }
@@ -701,8 +746,182 @@ $("theme-auto").onclick = function(){ localStorage.setItem("yf_theme", "auto"); 
 $("theme-light").onclick = function(){ localStorage.setItem("yf_theme", "light"); applyTheme(); };
 $("theme-dark").onclick = function(){ localStorage.setItem("yf_theme", "dark"); applyTheme(); };
 if(window.matchMedia){ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){ if((localStorage.getItem("yf_theme") || "auto") === "auto") applyTheme(); }); }
+window.YF_SNAPSHOT = function(){ return {favs: favs, read: read, learned: learned, wrong: wrong, best: +(localStorage.getItem("yf_best") || 0)}; };
+var syncTimer = null;
+function queueSync(){
+  if(!isMember()) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(function(){ if(window.YF_AUTH && YF_AUTH.saveData){ YF_AUTH.saveData(window.YF_SNAPSHOT()).catch(function(){}); } }, 1500);
+}
+function unionArr(a, b){ var r = a.slice(); (b || []).forEach(function(x){ if(r.indexOf(x) < 0) r.push(x); }); return r; }
+function memberRank(){
+  var pct = Math.round((read.length + learned.length) / (2 * TRIVIA.length) * 100);
+  if(pct >= 70) return "ゴールド会員";
+  if(pct >= 30) return "シルバー会員";
+  return "ブロンズ会員";
+}
+function renderAccountBtn(){
+  var b = $("account-btn"); if(!b) return;
+  if(isMember()){
+    var name = (window.YF_AUTH.user.displayName || window.YF_AUTH.user.email || "会");
+    b.innerHTML = '<span style="font-weight:800;font-size:15px">' + name.charAt(0).toUpperCase() + '</span>';
+  } else {
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5 a7.5 7.5 0 0 1 15 0"/></svg>';
+  }
+}
+var authMode = "login";
+function setAuthMode(m){
+  authMode = m;
+  $("am-login").classList.toggle("on", m === "login");
+  $("am-register").classList.toggle("on", m === "register");
+  $("name-field").style.display = m === "register" ? "" : "none";
+  $("acct-submit").textContent = m === "register" ? "登録する" : "ログインする";
+  $("acct-err").textContent = "";
+}
+function authError(e){
+  var code = (e && e.code) || "";
+  var map = {
+    "auth/email-already-in-use": "そのメールアドレスは登録済みです。ログインしてみてください。",
+    "auth/invalid-email": "メールアドレスの形式が違うようです。",
+    "auth/weak-password": "パスワードは6文字以上にしてください。",
+    "auth/user-not-found": "そのメールアドレスは登録されていません。",
+    "auth/wrong-password": "パスワードが違うようです。",
+    "auth/invalid-credential": "メールアドレスかパスワードが違うようです。",
+    "auth/operation-not-allowed": "Firebase側でメール/パスワード認証が有効になっていません。管理者の設定が必要です。",
+    "auth/network-request-failed": "通信エラーです。電波の良いところでもう一度試してください。",
+    "auth/too-many-requests": "試行回数が多すぎます。少し待ってから試してください。"
+  };
+  return map[code] || ("エラーが発生しました（" + code + "）");
+}
+function openAccount(){
+  stopSpeech();
+  var panel = $("sheet-panel-wrap");
+  if(!window.YF_AUTH){
+    $("sheet-panel").innerHTML = '<h3 style="margin-top:2px">マイページ</h3><p class="body-txt">会員機能を読み込めませんでした。通信環境を確認して、ページを開き直してください。</p><div class="abtns"><button class="primary full" onclick="closeDetail()">閉じる</button></div>';
+  } else if(isMember()){
+    var u = window.YF_AUTH.user, prof = window.YF_AUTH.profile || {};
+    var since = "—";
+    if(prof.createdAt && prof.createdAt.toDate){ var d = prof.createdAt.toDate(); since = d.getFullYear() + "年" + (d.getMonth()+1) + "月" + d.getDate() + "日"; }
+    var nm = u.displayName || prof.name || "会員";
+    $("sheet-panel").innerHTML =
+      '<h3 style="margin-top:2px">マイページ</h3>' +
+      '<div class="member-card"><div class="avatar">' + nm.charAt(0).toUpperCase() + '</div><div class="mname">' + nm + '</div><div><span class="mrank">' + memberRank() + '</span></div><div class="msince">' + u.email + '<br>会員登録日：' + since + '</div></div>' +
+      '<div class="benefits"><b>あなたの特典</b><ul style="margin:6px 0 2px;padding-left:20px"><li>会員限定の豆知識（3件）が読めます</li><li>記録はクラウドに保存されています（別の端末でも引き継げます）</li><li>会員限定のお知らせが読めます</li></ul></div>' +
+      '<p style="font-size:12.5px;color:var(--sub)">記録は操作のたびに自動でクラウドへ保存されます。</p>' +
+      '<div class="abtns"><button onclick="manualSync()">今すぐクラウドに保存</button><button onclick="doLogout()">ログアウト</button><button class="full" onclick="closeDetail()">閉じる</button></div>';
+  } else {
+    $("sheet-panel").innerHTML =
+      '<h3 style="margin-top:2px">マイページ</h3>' +
+      '<div class="benefits"><b>会員になると（無料）</b><ul style="margin:6px 0 2px;padding-left:20px"><li>会員限定の豆知識（3件）が読める</li><li>記録をクラウドに保存して、機種変更や別の端末でも引き継げる</li><li>会員限定のお知らせが読める</li></ul></div>' +
+      '<div class="seg" style="margin:12px 0 4px"><button id="am-login" class="on" onclick="setAuthMode('login')">ログイン</button><button id="am-register" onclick="setAuthMode('register')">新規登録</button></div>' +
+      '<div class="field" id="name-field" style="display:none"><label>ニックネーム</label><input type="text" id="acct-name" autocomplete="nickname" placeholder="例：ゆるふわ太郎"></div>' +
+      '<div class="field"><label>メールアドレス</label><input type="email" id="acct-email" autocomplete="email" placeholder="example@mail.com"></div>' +
+      '<div class="field"><label>パスワード（6文字以上）</label><input type="password" id="acct-pass" autocomplete="current-password" placeholder="パスワード"></div>' +
+      '<p class="err" id="acct-err"></p>' +
+      '<div class="abtns"><button class="primary full" id="acct-submit" onclick="submitAuth()">ログインする</button><button class="full" onclick="closeDetail()">閉じる</button></div>' +
+      '<p style="font-size:12px;color:var(--sub);margin-top:10px">パスワードはFirebase（Googleの認証基盤）で管理され、このアプリやサイトに保存されることはありません。</p>';
+  }
+  panel.style.transform = ""; panel.style.animation = ""; panel.scrollTop = 0;
+  $("sheet").classList.add("open");
+}
+$("account-btn").onclick = openAccount;
+function submitAuth(){
+  if(!window.YF_AUTH) return;
+  var email = $("acct-email").value.trim(), pass = $("acct-pass").value;
+  var err = $("acct-err"), btn = $("acct-submit");
+  if(!email || !pass){ err.textContent = "メールアドレスとパスワードを入力してください。"; return; }
+  btn.disabled = true; btn.textContent = "処理中…"; err.textContent = "";
+  var done = function(){ btn.disabled = false; };
+  if(authMode === "register"){
+    var name = $("acct-name").value.trim() || "会員";
+    window.YF_AUTH.register(name, email, pass).then(function(){ toast("会員登録が完了しました"); openAccount(); }).catch(function(e){ err.textContent = authError(e); }).then(done);
+  } else {
+    window.YF_AUTH.login(email, pass).then(function(){ toast("ログインしました"); openAccount(); }).catch(function(e){ err.textContent = authError(e); }).then(done);
+  }
+}
+function doLogout(){
+  if(!window.YF_AUTH) return;
+  window.YF_AUTH.logout().then(function(){ toast("ログアウトしました"); closeDetail(); }).catch(function(){ toast("ログアウトできませんでした"); });
+}
+function manualSync(){
+  if(window.YF_AUTH && YF_AUTH.saveData){ YF_AUTH.saveData(window.YF_SNAPSHOT()).then(function(){ toast("クラウドに保存しました"); }).catch(function(){ toast("保存できませんでした"); }); }
+}
+window.addEventListener("yf-auth", function(){
+  renderAccountBtn();
+  if(isMember() && window.YF_AUTH.loadData){
+    window.YF_AUTH.loadData().then(function(remote){
+      if(remote){
+        favs = unionArr(favs, remote.favs); save("yf_favs", favs);
+        read = unionArr(read, remote.read); save("yf_read", read);
+        learned = unionArr(learned, remote.learned); save("yf_learned", learned);
+        wrong = unionArr(wrong, remote.wrong); save("yf_wrong", wrong);
+        var rb = +(remote.best || 0), lb = +(localStorage.getItem("yf_best") || 0);
+        if(rb > lb) localStorage.setItem("yf_best", rb);
+        queueSync();
+      }
+      refresh();
+    }).catch(function(){ refresh(); });
+  } else {
+    refresh();
+  }
+});
 function refresh(){ renderStats(); renderHome(); renderList(); renderFavs(); }
 streakInit(); applyFont(); applyTheme(); updateBell(); renderChips(); renderDeckChips(); buildDeck(); refresh(); startQuiz();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDFpQp6uHYBzjiIgtNNFJM0shX7rdXjyu8",
+  authDomain: "yurufuwa-f1025.firebaseapp.com",
+  projectId: "yurufuwa-f1025",
+  storageBucket: "yurufuwa-f1025.firebasestorage.app",
+  messagingSenderId: "426691907824",
+  appId: "1:426691907824:web:394014aad4f9cc9ed0f235",
+  measurementId: "G-V27LHLJL39"
+};
+let auth = null, db = null, currentUser = null;
+try {
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+} catch(e) { console.warn("Firebase init failed", e); }
+window.YF_AUTH = {
+  user: null,
+  profile: null,
+  async register(name, email, pass){
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    try { await updateProfile(cred.user, {displayName: name}); } catch(e){}
+    if(db){ try { await setDoc(doc(db, "users", cred.user.uid), {name: name, createdAt: serverTimestamp(), data: window.YF_SNAPSHOT ? window.YF_SNAPSHOT() : {}}, {merge: true}); } catch(e){} }
+    return cred.user;
+  },
+  async login(email, pass){
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    return cred.user;
+  },
+  async logout(){ await signOut(auth); },
+  async loadData(){
+    if(!currentUser || !db) return null;
+    const snap = await getDoc(doc(db, "users", currentUser.uid));
+    return snap.exists() ? (snap.data().data || null) : null;
+  },
+  async saveData(data){
+    if(!currentUser || !db) return;
+    await setDoc(doc(db, "users", currentUser.uid), {name: currentUser.displayName || "", data: data, updatedAt: serverTimestamp()}, {merge: true});
+  }
+};
+if(auth){
+  onAuthStateChanged(auth, async function(u){
+    currentUser = u;
+    window.YF_AUTH.user = u;
+    window.YF_AUTH.profile = null;
+    if(u && db){
+      try { const snap = await getDoc(doc(db, "users", u.uid)); if(snap.exists()) window.YF_AUTH.profile = snap.data(); } catch(e){}
+    }
+    window.dispatchEvent(new CustomEvent("yf-auth"));
+  });
+}
 </script>
 </body>
 </html>
