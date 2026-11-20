@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ゆるふわクイズ｜ゆるふわ知恵袋</title>
+<meta name="description" content="ゆるふわ知恵袋の動画から出題する5問クイズ。">
+<link rel="icon" href="a.png">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-3571574988222927">
+<link rel="stylesheet" href="style.css">
+<meta property="og:title" content="ゆるふわクイズ｜ゆるふわ知恵袋">
+<meta property="og:description" content="ゆるふわ知恵袋の動画から出題する5問クイズ。">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://ad-hub.f5.si/yurufuwa/a.png">
+</head><body>
+
+<nav class="main"><div class="inner">
+<a href="index.html">トップ</a><a href="index.html#works">作品一覧</a><a href="mame.html">豆知識まとめ</a><a href="quiz.html">クイズ</a><a href="about.html">このサイトについて</a><a href="request.html">ネタリクエスト</a><a href="faq.html">よくある質問</a>
+</div></nav>
+
+<header class="hero"><h1 style="font-size:30px">ゆるふわクイズ</h1><p class="sub">動画の豆知識から5問出題</p></header>
+<div class="wrap">
+<p>各問題で正しいと思う答えを押してください。全問答えると結果が出ます。</p>
+<div id="quiz"></div>
+<p id="score"></p>
+<button class="chip" onclick="build()">もう一度やる</button>
+</div>
+<script>
+var QS=[
+ {q:"富士山の8合目から上は、誰の土地？",a:["神社","国","静岡県"],c:0},
+ {q:"500円玉が2000年に作り直された大きな理由は？",a:["軽くするため","偽造が大問題になったから","色を変えたかったから"],c:1},
+ {q:"サイコロの「1」だけ赤いのは？",a:["世界共通","ヨーロッパだけ","日本だけ"],c:2},
+ {q:"日銀の建物が「円」に見える形になったのは？",a:["増築の結果の偶然","最初から狙った設計","法律で決まっている"],c:0},
+ {q:"1万円玉を作らない大きな理由は？",a:["重すぎるから","金属が足りないから","偽造が儲かりすぎるから"],c:2}
+];
+var answered=0,score=0;
+function build(){
+  answered=0;score=0;document.getElementById('score').textContent='';
+  var h='';
+  QS.forEach(function(item,i){
+    h+='<div class="quiz-q"><h3>Q'+(i+1)+'. '+item.q+'</h3>';
+    item.a.forEach(function(t,j){h+='<button onclick="ans(this,'+i+','+j+')">'+t+'</button>';});
+    h+='</div>';
+  });
+  document.getElementById('quiz').innerHTML=h;
+}
+function ans(btn,i,j){
+  var box=btn.parentNode;
+  if(box.dataset.done)return;
+  box.dataset.done=1;answered++;
+  var ok=j===QS[i].c;
+  btn.classList.add(ok?'ok':'ng');
+  if(ok)score++;
+  if(answered===QS.length){
+    document.getElementById('score').textContent='結果：'+score+' / '+QS.length+' 問正解！'+(score===QS.length?' 全問正解、立派な知恵袋です。':' 動画を見直すと全問正解できます。');
+  }
+}
+build();
+</script>
+
+<footer>
+<nav><a href="index.html">トップ</a><a href="mame.html">豆知識まとめ</a><a href="quiz.html">クイズ</a><a href="about.html">このサイトについて</a><a href="request.html">ネタリクエスト</a><a href="faq.html">よくある質問</a></nav>
+<p>ゆるふわ知恵袋 ― 大人のための雑学図鑑</p>
+</footer>
+</body></html>

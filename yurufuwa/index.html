@@ -1,97 +1,128 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
+<html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ゆるふわ知恵袋 公式サイト｜大人のための雑学図鑑</title>
-<meta name="description" content="短い動画で豆知識を届ける「ゆるふわ知恵袋」の公式サイト。富士山の私有地、1000円からお札の理由、サイコロの1が赤い理由など、これまでの作品をまとめています。">
+<meta name="description" content="短い動画で豆知識を届ける「ゆるふわ知恵袋」の公式サイト。YouTubeショートとInstagramに投稿した作品と豆知識をまとめています。">
+<link rel="icon" href="a.png">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3571574988222927" crossorigin="anonymous"></script>
 <meta name="google-adsense-account" content="ca-pub-3571574988222927">
 <link rel="stylesheet" href="style.css">
 <meta property="og:title" content="ゆるふわ知恵袋 公式サイト｜大人のための雑学図鑑">
-<meta property="og:description" content="短い動画で豆知識を届ける「ゆるふわ知恵袋」の公式サイト。富士山の私有地、1000円からお札の理由、サイコロの1が赤い理由など、これまでの作品をまとめています。">
+<meta property="og:description" content="短い動画で豆知識を届ける「ゆるふわ知恵袋」の公式サイト。YouTubeショートとInstagramに投稿した作品と豆知識をまとめています。">
 <meta property="og:type" content="website">
-</head>
-<body>
+<meta property="og:image" content="https://ad-hub.f5.si/yurufuwa/a.png">
+</head><body>
+
+<nav class="main"><div class="inner">
+<a href="index.html">トップ</a><a href="index.html#works">作品一覧</a><a href="mame.html">豆知識まとめ</a><a href="quiz.html">クイズ</a><a href="about.html">このサイトについて</a><a href="request.html">ネタリクエスト</a><a href="faq.html">よくある質問</a>
+</div></nav>
 
 <header class="hero">
-  <span class="badge">公式サイト</span>
+  <img class="logo" src="a.png" alt="ゆるふわ知恵袋 アイコン" onerror="this.style.display='none';document.getElementById('logo-fb').style.display='flex'">
+  <div class="logo-fallback" id="logo-fb">ゆ</div>
+  <div style="margin-top:14px"><span class="badge">公式サイト</span></div>
   <h1>ゆるふわ知恵袋</h1>
   <p class="sub">大人のための雑学図鑑</p>
-  <p class="desc">「え、そうだったの？」を、20〜40秒の短い動画で。日常の当たり前に隠れた、思わず誰かに話したくなる豆知識を集めています。</p>
+  <p class="desc">「え、そうだったの？」を、20〜40秒の短い動画で。日常の当たり前に隠れた、思わず誰かに話したくなる豆知識を集めています。動画はYouTubeショートとInstagramの両方に投稿しています。</p>
 </header>
 <div class="wrap">
 
-<h2 class="sec">📱 SNS</h2>
+<h2 class="sec">SNS</h2>
 <div class="sns">
-  <a href="https://www.instagram.com/yurufuwa_chie/" target="_blank" rel="noopener">📷 Instagram<br>@yurufuwa_chie</a>
-  <a href="https://www.threads.net/@yurufuwa_chie" target="_blank" rel="noopener">🧵 Threads<br>@yurufuwa_chie</a>
+  <a href="https://youtube.com/channel/UC2oY_zQTNzcEiUoRQn2hFyw" target="_blank" rel="noopener"><span class="tile" style="background:#ff0000"><svg width="30" height="30" viewBox="0 0 48 48"><rect x="5" y="11" width="38" height="26" rx="7" fill="#fff"/><path d="M20 18 L31 24 L20 30 Z" fill="#ff0000"/></svg></span>YouTube<br>ゆるふわ知恵袋</a>
+  <a href="https://www.instagram.com/yurufuwa_chie/" target="_blank" rel="noopener"><span class="tile" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)"><svg width="30" height="30" viewBox="0 0 48 48"><rect x="6" y="6" width="36" height="36" rx="10" fill="none" stroke="#fff" stroke-width="4"/><circle cx="24" cy="24" r="8" fill="none" stroke="#fff" stroke-width="4"/><circle cx="34.5" cy="13.5" r="2.6" fill="#fff"/></svg></span>Instagram<br>@yurufuwa_chie</a>
+  <a href="https://www.threads.net/@yurufuwa_chie" target="_blank" rel="noopener"><span class="tile" style="background:#000"><svg width="30" height="30" viewBox="0 0 48 48"><text x="24" y="33" font-size="26" font-weight="bold" text-anchor="middle" fill="#fff">@</text></svg></span>Threads<br>@yurufuwa_chie</a>
 </div>
-<p style="font-size:13px;color:#777">YouTubeショートでも同じネタをショート動画用に作り直して展開中です。</p>
 
-<h2 class="sec">🎬 作品一覧</h2>
-<div class="grid">
-
-  <div class="card">
-    <div class="emoji">🗻</div>
-    <span class="tag yt">YouTubeショート</span><span class="tag pre">制作済み</span>
+<h2 class="sec" id="works">作品一覧</h2>
+<div class="search">
+  <input type="text" id="q" placeholder="タイトルやキーワードで検索（例：富士山、お金、サイコロ）">
+</div>
+<div style="margin-bottom:14px">
+  <button class="chip on" data-f="all">すべて</button>
+  <button class="chip" data-f="お金">お金</button>
+  <button class="chip" data-f="日本">日本</button>
+  <button class="chip" data-f="くらし">くらし</button>
+  <button class="chip" data-f="テクノロジー">テクノロジー</button>
+</div>
+<div class="grid" id="grid">
+  <div class="card" data-cat="日本" data-key="富士山は国のものじゃありません 日本 富士山の8合目から上は、国の土地ではなく神社の私有地。その広さは東京ドーム約82個分、決めたのは徳川家康でした。">
+    <div class="tile" style="background:#e3f2fd"><svg width="40" height="40" viewBox="0 0 48 48"><circle cx="36" cy="11" r="6" fill="#ff7043"/><path d="M4 40 L24 12 L44 40 Z" fill="#42a5f5"/><path d="M18.5 21 L24 12 L29.5 21 L26 18.5 L24 21 L22 18.5 Z" fill="#fff"/></svg></div>
+    <div style="margin-top:8px"><span class="tag yt">YouTubeショート</span><span class="tag ig">Instagram</span><span class="tag done">投稿済み</span><span class="tag cat">日本</span></div>
     <h3>富士山は国のものじゃありません</h3>
     <p>富士山の8合目から上は、国の土地ではなく神社の私有地。その広さは東京ドーム約82個分、決めたのは徳川家康でした。</p>
-    <p>⏱ 28.9秒（1.4倍速版）</p>
+    <p>長さ：28.9秒</p>
     <a class="btn" href="fuji.html">豆知識を読む</a>
   </div>
-
-  <div class="card">
-    <div class="emoji">💴</div>
-    <span class="tag yt">YouTubeショート</span><span class="tag pre">制作済み</span>
+  <div class="card" data-cat="お金" data-key="なぜ1000円からお札なの？ お金 「1万円玉を作ればいいじゃん」への答えは、偽造が儲かりすぎるから。500円玉でさえ偽造が大問題になった実例つき。">
+    <div class="tile" style="background:#fff8e1"><svg width="40" height="40" viewBox="0 0 48 48"><circle cx="24" cy="24" r="15" fill="#ffca28" stroke="#f9a825" stroke-width="3"/><text x="24" y="31" font-size="17" font-weight="bold" text-anchor="middle" fill="#8d6e00">¥</text></svg></div>
+    <div style="margin-top:8px"><span class="tag yt">YouTubeショート</span><span class="tag ig">Instagram</span><span class="tag done">投稿済み</span><span class="tag cat">お金</span></div>
     <h3>なぜ1000円からお札なの？</h3>
     <p>「1万円玉を作ればいいじゃん」への答えは、偽造が儲かりすぎるから。500円玉でさえ偽造が大問題になった実例つき。</p>
-    <p>⏱ 37.4秒（1.4倍速版）</p>
+    <p>長さ：37.4秒</p>
     <a class="btn" href="senen.html">豆知識を読む</a>
   </div>
-
-  <div class="card">
-    <div class="emoji">🏦</div>
-    <span class="tag ig">Instagramリール</span><span class="tag done">投稿済み</span>
+  <div class="card" data-cat="日本" data-key="日銀の形は奇跡？ 日本 日本銀行の建物を上から見ると「円」の形に見えます。完成した明治29年当時の「圓」と、後の増築が生んだ奇跡の形。">
+    <div class="tile" style="background:#efebe9"><svg width="40" height="40" viewBox="0 0 48 48"><path d="M24 6 L44 18 H4 Z" fill="#8d6e63"/><rect x="9" y="22" width="5" height="14" fill="#a1887f"/><rect x="17" y="22" width="5" height="14" fill="#a1887f"/><rect x="25" y="22" width="5" height="14" fill="#a1887f"/><rect x="33" y="22" width="5" height="14" fill="#a1887f"/><rect x="5" y="38" width="38" height="4" fill="#8d6e63"/></svg></div>
+    <div style="margin-top:8px"><span class="tag yt">YouTubeショート</span><span class="tag ig">Instagram</span><span class="tag done">投稿済み</span><span class="tag cat">日本</span></div>
     <h3>日銀の形は奇跡？</h3>
     <p>日本銀行の建物を上から見ると「円」の形に見えます。完成した明治29年当時の「圓」と、後の増築が生んだ奇跡の形。</p>
-    <p>⏱ 19秒</p>
+    <p>長さ：19秒</p>
     <a class="btn" href="nichigin.html">豆知識を読む</a>
-    <a class="btn ghost" href="https://www.instagram.com/reel/DTctb1UDZAp/" target="_blank" rel="noopener">リールを見る</a>
   </div>
-
-  <div class="card">
-    <div class="emoji">🎲</div>
-    <span class="tag ig">Instagramリール</span><span class="tag pre">制作済み</span>
+  <div class="card" data-cat="くらし" data-key="サイコロの1だけ赤いのは日本だけ？ くらし サイコロの「1」だけが赤いのは日本だけの特徴。1926年、和歌山の業者が日の丸に見立てて赤く塗ったところ大ヒットしたという説があります。">
+    <div class="tile" style="background:#fce4ec"><svg width="40" height="40" viewBox="0 0 48 48"><rect x="7" y="7" width="34" height="34" rx="8" fill="#fff" stroke="#37474f" stroke-width="3"/><circle cx="24" cy="24" r="7" fill="#e53935"/></svg></div>
+    <div style="margin-top:8px"><span class="tag yt">YouTubeショート</span><span class="tag ig">Instagram</span><span class="tag done">投稿済み</span><span class="tag cat">くらし</span></div>
     <h3>サイコロの1だけ赤いのは日本だけ？</h3>
     <p>サイコロの「1」だけが赤いのは日本だけの特徴。1926年、和歌山の業者が日の丸に見立てて赤く塗ったところ大ヒットしたという説があります。</p>
-    <p>⏱ 22秒</p>
+    <p>長さ：22秒</p>
     <a class="btn" href="saikoro.html">豆知識を読む</a>
   </div>
-
-  <div class="card">
-    <div class="emoji">🤖</div>
-    <span class="tag ig">Instagramリール</span><span class="tag pre">制作済み</span>
+  <div class="card" data-cat="テクノロジー" data-key="AIに無茶振りしたら全部やってきた件 テクノロジー 「対戦ゲーム作って」→39種類完成。「予定、全部入れて」→109件入力。MetaのAI「Muse」に無茶振りした実験動画。">
+    <div class="tile" style="background:#e0f2f1"><svg width="40" height="40" viewBox="0 0 48 48"><rect x="10" y="14" width="28" height="24" rx="7" fill="#26a69a"/><line x1="24" y1="14" x2="24" y2="7" stroke="#26a69a" stroke-width="3"/><circle cx="24" cy="5" r="3" fill="#26a69a"/><circle cx="18" cy="24" r="3" fill="#fff"/><circle cx="30" cy="24" r="3" fill="#fff"/><rect x="18" y="31" width="12" height="3" rx="1.5" fill="#fff"/></svg></div>
+    <div style="margin-top:8px"><span class="tag yt">YouTubeショート</span><span class="tag ig">Instagram</span><span class="tag done">投稿済み</span><span class="tag cat">テクノロジー</span></div>
     <h3>AIに無茶振りしたら全部やってきた件</h3>
     <p>「対戦ゲーム作って」→39種類完成。「予定、全部入れて」→109件入力。MetaのAI「Muse」に無茶振りした実験動画。</p>
-    <p>⏱ 20秒</p>
-    <a class="btn" href="muse.html">内容を読む</a>
+    <p>長さ：20秒</p>
+    <a class="btn" href="muse.html">豆知識を読む</a>
   </div>
+</div>
+<p id="nores" style="display:none;color:#777">見つかりませんでした。別のキーワードで試してみてください。</p>
 
+<h2 class="sec">今日の豆知識ピックアップ</h2>
+<div class="grid">
+  <div class="card"><h3>富士山の山頂は神社の境内</h3><p>8合目から上は富士山本宮浅間大社の土地。広さは東京ドーム約82個分です。</p><a class="btn ghost" href="fuji.html">くわしく</a></div>
+  <div class="card"><h3>500円玉は世界でも有数の高額硬貨</h3><p>だからこそ偽造対策が何度も強化されてきました。2000年と2021年に大きな作り直しが入っています。</p><a class="btn ghost" href="senen.html">くわしく</a></div>
+  <div class="card"><h3>サイコロの赤い「1」は日本だけ</h3><p>日の丸に見立てて赤く塗ったのが始まり、という説が有力です。</p><a class="btn ghost" href="saikoro.html">くわしく</a></div>
 </div>
 
-<h2 class="sec">📖 ゆるふわ知恵袋について</h2>
-<div class="note">
-<p>ゆるふわ知恵袋は、「大人のための雑学図鑑」をテーマに、短い動画で豆知識を届けるアカウントです。</p>
-<p>ネタは必ず出典をたどって事実確認してから台本にしています。数字や年号は、読み間違いがないよう読み方まで指定してナレーションを作るのがこだわりです。</p>
-<p>次のネタのリクエストは、各SNSのコメントで受付中。「次は何を調べよう？」が合言葉です。</p>
+<h2 class="sec">サイトの案内</h2>
+<div class="grid">
+  <div class="card"><h3>豆知識まとめ</h3><p>動画で紹介した豆知識を、テーマ別に文章でまとめた読み物ページ。</p><a class="btn" href="mame.html">読む</a></div>
+  <div class="card"><h3>ゆるふわクイズ</h3><p>動画の内容から出題する5問クイズ。全問正解できるかな？</p><a class="btn" href="quiz.html">挑戦する</a></div>
+  <div class="card"><h3>このサイトについて</h3><p>ゆるふわ知恵袋のプロフィールと、ネタの作り方・事実確認のこだわり。</p><a class="btn" href="about.html">読む</a></div>
+  <div class="card"><h3>ネタリクエスト</h3><p>「これ調べて」の送り方と、リクエストの候補テーマ。</p><a class="btn" href="request.html">読む</a></div>
+  <div class="card"><h3>よくある質問</h3><p>どこで見られる？誤りを見つけたら？などのQ&amp;A。</p><a class="btn" href="faq.html">読む</a></div>
 </div>
 
 </div>
+<script>
+var q=document.getElementById('q'),chips=document.querySelectorAll('.chip'),cur='all';
+function filt(){
+  var t=q.value.trim(),n=0;
+  document.querySelectorAll('#grid .card').forEach(function(c){
+    var ok=(cur==='all'||c.dataset.cat===cur)&&(!t||c.dataset.key.indexOf(t)>=0);
+    c.style.display=ok?'':'none'; if(ok)n++;
+  });
+  document.getElementById('nores').style.display=n?'none':'';
+}
+q.addEventListener('input',filt);
+chips.forEach(function(b){b.addEventListener('click',function(){chips.forEach(function(x){x.classList.remove('on')});b.classList.add('on');cur=b.dataset.f;filt();});});
+</script>
 
 <footer>
+<nav><a href="index.html">トップ</a><a href="mame.html">豆知識まとめ</a><a href="quiz.html">クイズ</a><a href="about.html">このサイトについて</a><a href="request.html">ネタリクエスト</a><a href="faq.html">よくある質問</a></nav>
 <p>ゆるふわ知恵袋 ― 大人のための雑学図鑑</p>
-<p><a href="https://ad-hub.f5.si/">Ad-Hub トップへ</a></p>
 </footer>
-</body>
-</html>
+</body></html>
