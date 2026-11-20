@@ -42,6 +42,51 @@ details.menu .grp{margin:10px 12px 2px;font-size:11.5px;font-weight:bold;color:#
 <meta property="og:description" content="サイコロの「1」だけが赤いのは日本だけの特徴。1926年、和歌山の業者が日の丸に見立てて赤く塗ったところ大ヒットしたという説があります。">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://ad-hub.f5.si/yurufuwa/IMG_4679.png">
+
+<style>
+/* polish v7 */
+::selection{background:#ffcc80}
+html{scroll-behavior:smooth}
+body{background-color:#fffaf3;background-image:radial-gradient(rgba(255,152,0,.055) 1.2px, transparent 1.2px);background-size:22px 22px}
+h2.sec{border-left:none;padding-left:0;position:relative;padding-bottom:9px;letter-spacing:.02em}
+h2.sec::after{content:"";position:absolute;left:0;bottom:0;width:58px;height:4px;border-radius:2px;background:linear-gradient(90deg,#ff9800,#ff4081)}
+.btn{transition:transform .25s ease, box-shadow .25s ease;box-shadow:0 3px 10px rgba(255,152,0,.25)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(255,152,0,.35)}
+.btn.ghost{box-shadow:none}
+.card,.work,.note,.point,.script,.faq,.word,.aboutband{transition:transform .25s ease, box-shadow .25s ease}
+.card:hover,.work:hover{transform:translateY(-4px);box-shadow:0 14px 28px rgba(230,81,0,.13)}
+.hero{position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.28) 1.6px, transparent 1.6px);background-size:20px 20px;pointer-events:none}
+.hero>*{position:relative}
+.hero2{position:relative;overflow:hidden}
+.hero2::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,64,129,.10) 1.6px, transparent 1.6px);background-size:20px 20px;pointer-events:none}
+.hero2>*{position:relative}
+.chip{transition:all .2s ease}
+.chip:hover{transform:translateY(-1px)}
+.tag{letter-spacing:.04em}
+.search input{transition:border-color .2s ease, box-shadow .2s ease}
+.search input:focus{outline:none;border-color:#ff9800;box-shadow:0 0 0 4px rgba(255,152,0,.15)}
+table.info th{background:linear-gradient(90deg,#fff3e0,#ffe4ec)}
+.quiz-q button{transition:all .2s ease}
+.quiz-q button:hover{border-color:#ff9800;background:#fff3e0}
+.tl li{box-shadow:0 4px 12px rgba(230,81,0,.06)}
+.sns a{transition:transform .25s ease, box-shadow .25s ease}
+.sns a:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(230,81,0,.12)}
+.guide a{transition:all .2s ease}
+.guide a:hover{border-color:#ff9800;transform:translateY(-2px)}
+.crumbs{max-width:960px;margin:0 auto;padding:12px 16px 0;font-size:12.5px;color:#a1887f}
+.crumbs a{color:#a1887f;text-decoration:none}
+.crumbs a:hover{color:#e65100;text-decoration:underline}
+.totop{position:fixed;right:16px;bottom:16px;width:46px;height:46px;border-radius:50%;background:#ff9800;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;box-shadow:0 8px 20px rgba(230,81,0,.35);z-index:40;opacity:.92}
+.stats{background:#fff;border-bottom:2px solid #ffe0b2}
+.stats-in{max-width:960px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:20px 16px;text-align:center}
+.stats b{display:block;font-size:27px;color:#e65100;line-height:1.2}
+.stats span{font-size:12.5px;color:#888}
+@media(max-width:600px){.stats-in{grid-template-columns:repeat(2,1fr);gap:16px 8px}}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease, transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+</style>
 </head><body>
 
 <header class="sitebar">
@@ -143,4 +188,15 @@ details.menu .grp{margin:10px 12px 2px;font-size:11.5px;font-weight:bold;color:#
     </div>
     <p class="foot-copy">© 2026 ゆるふわ知恵袋</p>
   </div>
-</footer></body></html>
+</footer>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var els=document.querySelectorAll('.card,.work,.note,.point,.script,.faq,.word,.tl li,.guide a,.pick li,.aboutband,table.info,.quiz-q');
+  els.forEach(function(e){e.classList.add('reveal')});
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return;}
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}})},{threshold:.06});
+  els.forEach(function(e){io.observe(e)});
+  setTimeout(function(){els.forEach(function(e){e.classList.add('in')})},2600);
+});
+</script>
+</body></html>
