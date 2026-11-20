@@ -418,6 +418,7 @@ $("sheet-bg").onclick = closeDetail;
     if(e.pointerType !== "mouse" && !inZone) return;
     if(!inZone && e.target.closest("button, a, input, select, textarea")) return;
     active = true; dragging = false; startY = e.clientY; dy = 0;
+    if(e.pointerType === "mouse") e.preventDefault();
     try{ panel.setPointerCapture(e.pointerId); }catch(err){}
   });
   panel.addEventListener("pointermove", function(e){
