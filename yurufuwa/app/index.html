@@ -58,6 +58,10 @@ nav.tabs button:active{color:var(--accent-deep)}
 .news-item .nd{font-size:11.5px;color:var(--sub)}
 .news-item .nt{font-weight:700;font-size:15.5px;margin:2px 0 3px}
 .news-item .nb{font-size:13.5px;color:var(--sub)}
+.news-item{cursor:pointer}
+.news-item:active{background:var(--accent-soft)}
+.news-item .chev{color:var(--accent);font-weight:700;float:right;font-size:17px}
+.news-detail p{font-size:14.5px;margin:10px 0}
 *{box-sizing:border-box}
 body{margin:0;font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding-bottom:80px;-webkit-text-size-adjust:100%}
 body.large .body-txt, body.large .face p, body.large .sheet .pts{font-size:16.5px}
@@ -622,24 +626,46 @@ function switchView(id){
 }
 document.querySelectorAll("nav.tabs button").forEach(function(b){ b.onclick = function(){ switchView(b.dataset.v); }; });
 var NEWS = [
-  {id:"20261120-05", date:"2026年11月20日", title:"お知らせ機能と読み上げを追加しました", body:"ヘッダーのベルからお知らせが見られるようになりました。詳細画面では「読み上げ」ボタンで豆知識を音声で聞けます。テーマ（自動／ライト／ダーク）や達成率も追加しました。"},
-  {id:"20261120-04", date:"2026年11月20日", title:"デザインと操作感を改善しました", body:"色味と余白のバランスを調整し、詳細シートは下へ引いて閉じられるようになりました。関連する豆知識や「最近見た」も追加しています。"},
-  {id:"20261120-02", date:"2026年11月20日", title:"アプリ限定の豆知識を12件追加しました", body:"「1円玉は水に浮く」「郵便ポストは最初は黒かった」など、動画でまだ紹介していない豆知識をアプリ限定で収録しました。一覧の「アプリ限定」から探せます。"},
-  {id:"20261120-01", date:"2026年11月20日", title:"ゆるふわ知恵袋アプリを公開しました", body:"公式サイトの中にWebアプリを作りました。今日の豆知識、フラッシュカード、クイズ、お気に入りが使えます。ホーム画面に追加するとアプリのように開けます。"}
+  {id:"20261120-05", date:"2026年11月20日", title:"お知らせ機能と読み上げを追加しました", body:"ヘッダーのベルからお知らせが見られるようになりました。詳細画面では「読み上げ」ボタンで豆知識を音声で聞けます。テーマ（自動／ライト／ダーク）や達成率も追加しました。", detail:"ヘッダー右上のベルをタップすると、このお知らせ一覧が開きます。新しいお知らせがあるときは、ベルに赤い数字のバッジが付きます。\n豆知識の詳細画面には「読み上げ」ボタンを追加しました。タップするとタイトルと解説、ポイントを音声で読み上げます。もう一度押すと止まり、シートを閉じても自動で止まります。\n設定には「テーマ」を追加しました。自動（端末の設定に合わせる）／ライト／ダークから選べます。記録のところには「総合達成率」も追加しました。", act:{label:"豆知識の一覧を見る", type:"view", id:"v-list"}},
+  {id:"20261120-04", date:"2026年11月20日", title:"デザインと操作感を改善しました", body:"色味と余白のバランスを調整し、詳細シートは下へ引いて閉じられるようになりました。関連する豆知識や「最近見た」も追加しています。", detail:"色が強すぎず・弱すぎないよう、温かみのあるクリーム色と淡い桃色を基調に調整しました。\n詳細シートは、上の横棒だけでなくシート全体を下へ引いて閉じられるようになりました。少しだけ引いて離せば元に戻ります。\n詳細画面の下には「関連する豆知識」、ホームには「次に読む（未読から）」と「最近見た豆知識」を追加しました。クイズには「間違えた問題だけ」の復習モード、カードには「まだ覚えていない」の絞り込みも入っています。", act:{label:"今日の豆知識を見る", type:"today"}},
+  {id:"20261120-02", date:"2026年11月20日", title:"アプリ限定の豆知識を12件追加しました", body:"「1円玉は水に浮く」「郵便ポストは最初は黒かった」など、動画でまだ紹介していない豆知識をアプリ限定で収録しました。一覧の「アプリ限定」から探せます。", detail:"動画（YouTubeショート／Instagram）でまだ紹介していない、アプリだけの豆知識を12件追加しました。\n・1円玉は水に浮く\n・1円玉を作るのに約3円かかる\n・郵便ポストは、最初は黒かった\n・日本一短い川は、わずか13.5メートル\n・日本一長い川は信濃川、367キロ\n・東京スカイツリーの高さ634mは「ムサシ」\n・2024年の新しいお札、肖像はこの3人\n・サイコロの向かい合う面は、足すと必ず7\n・インスタントラーメンは1958年の発明\n・回転寿司は大阪生まれ\n・日本の国土の約3分の2は森林\n・エスカレーター、東京と大阪で立つ側が逆", act:{label:"アプリ限定の豆知識を見る", type:"cat", id:"アプリ限定"}},
+  {id:"20261120-01", date:"2026年11月20日", title:"ゆるふわ知恵袋アプリを公開しました", body:"公式サイトの中にWebアプリを作りました。今日の豆知識、フラッシュカード、クイズ、お気に入りが使えます。ホーム画面に追加するとアプリのように開けます。", detail:"ゆるふわ知恵袋の公式サイトの中に、Webアプリを作りました。\niPhoneでは、Safariでアプリを開いて共有ボタンから「ホーム画面に追加」すると、普通のアプリのようにアイコンから開けます。\nアプリを更新したときは、次に開いたタイミングで自動的に新しい内容に切り替わる仕組みになっています。古い表示のままになることは基本的にありません。\n記録（読んだ数・お気に入り・連続日数など）は、この端末の中にだけ保存されます。", act:{label:"今日の豆知識を見る", type:"today"}}
 ];
 function newsUnread(){ var seen = localStorage.getItem("yf_news_seen") || ""; return NEWS.filter(function(n){ return n.id > seen; }).length; }
 function updateBell(){ var u = newsUnread(); var b = $("bell-badge"); b.textContent = u; b.classList.toggle("show", u > 0); }
 function openNews(){
   stopSpeech();
-  var h = '<h3 style="margin-top:2px">お知らせ</h3>';
-  NEWS.forEach(function(n){ h += '<div class="news-item"><div class="nd">' + n.date + '</div><div class="nt">' + n.title + '</div><div class="nb">' + n.body + '</div></div>'; });
+  var h = '<h3 style="margin-top:2px">お知らせ</h3><p style="font-size:12.5px;color:var(--sub);margin:0 0 6px">タップすると詳細が見られます。</p>';
+  NEWS.forEach(function(n, i){ h += '<div class="news-item" data-news="' + i + '"><div class="nd">' + n.date + '</div><div class="nt">' + n.title + '<span class="chev">›</span></div><div class="nb">' + n.body + '</div></div>'; });
   h += '<div class="abtns"><button class="primary full" onclick="closeDetail()">閉じる</button></div>';
   $("sheet-panel").innerHTML = h;
   var panel = $("sheet-panel-wrap");
   panel.style.transform = ""; panel.style.animation = ""; panel.scrollTop = 0;
   $("sheet").classList.add("open");
+  $("sheet-panel").querySelectorAll("[data-news]").forEach(function(el){ el.onclick = function(){ openNewsDetail(+el.dataset.news); }; });
   localStorage.setItem("yf_news_seen", NEWS[0].id);
   updateBell();
+}
+function openNewsDetail(i){
+  var n = NEWS[i]; if(!n) return;
+  stopSpeech();
+  var paras = (n.detail || n.body).split("\n").map(function(t){ return t.indexOf("・") === 0 ? '<p style="margin:4px 0 4px 8px">' + t + '</p>' : '<p>' + t + '</p>'; }).join("");
+  var actBtn = n.act ? '<button class="primary full" onclick="newsAct(' + i + ')">' + n.act.label + '</button>' : "";
+  $("sheet-panel").innerHTML =
+    '<button class="tbtn" onclick="openNews()" style="padding-left:0">‹ お知らせ一覧へ</button>' +
+    '<div class="news-item" style="border-bottom:none;padding-bottom:0"><div class="nd">' + n.date + '</div><div class="nt" style="font-size:18px">' + n.title + '</div></div>' +
+    '<div class="news-detail">' + paras + '</div>' +
+    '<div class="abtns">' + actBtn + '<button class="' + (n.act ? '' : 'primary ') + 'full" onclick="closeDetail()">閉じる</button></div>';
+  var panel = $("sheet-panel-wrap");
+  panel.style.transform = ""; panel.scrollTop = 0;
+}
+function newsAct(i){
+  var n = NEWS[i]; if(!n || !n.act) return;
+  var act = n.act;
+  if(act.type === "cat"){ closeDetail(); gotoCat(act.id); }
+  else if(act.type === "view"){ closeDetail(); switchView(act.id); }
+  else if(act.type === "today"){ openDetail(todayItem().id); }
+  else if(act.type === "trivia"){ openDetail(act.id); }
 }
 $("bell").onclick = openNews;
 var speaking = false;
