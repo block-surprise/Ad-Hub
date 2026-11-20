@@ -1,0 +1,29 @@
+
+*{box-sizing:border-box}
+body{margin:0;font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:#fff8f0;color:#333;line-height:1.7}
+a{color:#e65100}
+.hero{background:linear-gradient(135deg,#ff9800,#ff4081);color:#fff;padding:56px 20px 44px;text-align:center}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.6);padding:4px 14px;border-radius:999px;font-size:13px;font-weight:bold}
+.hero h1{font-size:42px;margin:14px 0 6px;letter-spacing:.02em}
+.hero p.sub{font-size:17px;margin:0 0 8px;opacity:.95}
+.hero p.desc{max-width:640px;margin:10px auto 0;font-size:14px;opacity:.95}
+.wrap{max-width:960px;margin:0 auto;padding:24px 16px 48px}
+h2.sec{font-size:24px;border-left:8px solid #ff9800;padding-left:10px;margin:36px 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.card{background:#fff;border:2px solid #ffe0b2;border-radius:16px;padding:18px;box-shadow:0 4px 14px rgba(255,152,0,.10)}
+.card .emoji{font-size:44px}
+.card h3{margin:8px 0 6px;font-size:19px;line-height:1.4}
+.card p{font-size:13.5px;color:#555;margin:6px 0}
+.tag{display:inline-block;font-size:11px;font-weight:bold;padding:2px 9px;border-radius:999px;margin-right:6px;color:#fff}
+.tag.ig{background:#e1306c}.tag.yt{background:#ff0000}.tag.done{background:#43a047}.tag.pre{background:#fb8c00}
+.btn{display:inline-block;margin-top:10px;background:#ff9800;color:#fff;text-decoration:none;font-weight:bold;padding:9px 18px;border-radius:999px;font-size:14px}
+.btn.ghost{background:#fff;color:#e65100;border:2px solid #ff9800}
+.note{background:#fff3e0;border-radius:12px;padding:16px 18px;font-size:14px}
+.script{background:#fff;border:2px solid #ffe0b2;border-radius:12px;padding:16px 18px;font-size:15px}
+.script p{margin:6px 0}
+.point{background:#e8f5e9;border-radius:12px;padding:16px 18px;font-size:14px}
+footer{text-align:center;padding:28px 16px;color:#999;font-size:12px;border-top:1px solid #ffe0b2;background:#fff}
+.sns{display:flex;gap:12px;flex-wrap:wrap}
+.sns a{flex:1;min-width:200px;text-align:center;background:#fff;border:2px solid #ffe0b2;border-radius:14px;padding:16px;text-decoration:none;color:#333;font-weight:bold}
+.back{display:inline-block;margin:18px 0 0;font-size:14px}
+@media(max-width:600px){.hero h1{font-size:32px}}
