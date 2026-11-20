@@ -416,12 +416,13 @@ $("sheet-bg").onclick = closeDetail;
   panel.addEventListener("touchcancel", end);
 })();
 (function(){
-  var panel = $("sheet-panel-wrap"), zone = $("sheet-drag"), startY = 0, dy = 0, active = false, dragging = false;
+  var panel = $("sheet-panel-wrap"), zone = $("sheet-drag"), startY = 0, dy = 0, active = false, dragging = false, downTarget = null, downTime = 0;
   panel.addEventListener("pointerdown", function(e){
     var inZone = !!e.target.closest("#sheet-drag");
     if(e.pointerType !== "mouse" && !inZone) return;
     if(!inZone && e.target.closest("button, a, input, select, textarea")) return;
     active = true; dragging = false; startY = e.clientY; dy = 0;
+    downTarget = e.target; downTime = Date.now();
     if(e.pointerType === "mouse") e.preventDefault();
     try{ panel.setPointerCapture(e.pointerId); }catch(err){}
   });
@@ -431,12 +432,17 @@ $("sheet-bg").onclick = closeDetail;
     if(!dragging && dy > 8 && panel.scrollTop <= 0){ dragging = true; panel.style.transition = "none"; panel.style.animation = "none"; }
     if(dragging){ if(dy < 0) dy = 0; panel.style.transform = "translateY(" + dy + "px)"; }
   });
-  function end(){
+  function end(isUp){
+    var wasDragging = dragging;
     if(dragging){ panel.style.transition = "transform .25s ease"; var shouldClose = dy > 90; panel.style.transform = ""; if(shouldClose) closeDetail(); }
-    active = false; dragging = false; dy = 0;
+    if(isUp && active && !wasDragging && downTarget && (Date.now() - downTime) < 600 && Math.abs(dy) < 8){
+      var a = downTarget.closest ? downTarget.closest("[data-news],[data-detail]") : null;
+      if(a) a.click();
+    }
+    active = false; dragging = false; dy = 0; downTarget = null;
   }
-  panel.addEventListener("pointerup", end);
-  panel.addEventListener("pointercancel", end);
+  panel.addEventListener("pointerup", function(){ end(true); });
+  panel.addEventListener("pointercancel", function(){ end(false); });
 })();
 function shareTrivia(id){
   var it = byId(id); var text = "【ゆるふわ知恵袋】" + it.title + " ― " + it.short;
